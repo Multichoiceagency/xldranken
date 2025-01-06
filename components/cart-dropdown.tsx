@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { useCart } from '@/contexts/contexts_cart-context'
+import { useCart } from '@/contexts/cart-context'
 
 export function CartDropdown() {
   const [isOpen, setIsOpen] = useState(false)

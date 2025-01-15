@@ -1,49 +1,31 @@
-'use client'
+'use client';
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { Heart, ShoppingCart } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { CartPopup } from "@/components/cart-popup"
-import { useCart } from "@/lib/cart-context"
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Heart, ShoppingCart } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { CartPopup } from "@/components/cart-popup";
+import { useCart } from "@/lib/cart-context";
+import productsData from "@/data/product.json";
 
-interface ProductCardProps {
-  id: string
-  name: string
-  slug: string
-  image: string
-  price: number
-  originalPrice?: number
-  volume: string
-  category: string
-}
-
-export function ProductCard({
-  id,
-  name,
-  slug,
-  image,
-  price,
-  originalPrice,
-  volume,
-  category,
-}: ProductCardProps) {
-  const [showCartPopup, setShowCartPopup] = useState(false)
-  const { addToCart } = useCart()
+function ProductCard() {
+  const product = productsData;
+  const [showCartPopup, setShowCartPopup] = useState(false);
+  const { addToCart } = useCart();
 
   const handleAddToCart = () => {
     addToCart({
-      id,
-      name,
-      price,
-      image,
-      volume,
-      quantity: 1
-    })
-    setShowCartPopup(true)
-  }
+      id: product.id_product_mysql,
+      name: product.title,
+      price: parseFloat(product.prix_vente_groupe),
+      image: `data:image/jpeg;base64,${product.photo1_base64}`,
+      volume: product.arcleunik,
+      quantity: 1,
+    });
+    setShowCartPopup(true);
+  };
 
   return (
     <>
@@ -54,10 +36,10 @@ export function ProductCard({
         >
           <Heart className="h-5 w-5" />
         </button>
-        <Link href={`/product/${slug}`} className="relative h-[300px] w-full overflow-hidden rounded-lg">
+        <Link href={`/product/${product.productCode}`} className="relative h-[300px] w-full overflow-hidden rounded-lg">
           <Image
-            src={image}
-            alt={name}
+            src={`data:image/jpeg;base64,${product.photo1_base64}`}
+            alt={product.title}
             fill
             className="object-cover hover:scale-105 transition-transform duration-300"
             priority
@@ -66,18 +48,18 @@ export function ProductCard({
         <div className="mt-4 flex flex-col flex-grow">
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-primary">
-              €{price.toFixed(2).replace('.', ',')}
+              €{parseFloat(product.prix_vente_groupe).toFixed(2).replace('.', ',')}
             </span>
-            {originalPrice && (
+            {product.prix_en_promo > 0 && (
               <span className="text-xs text-muted-foreground line-through">
-                €{originalPrice.toFixed(2).replace('.', ',')}
+                €{product.prix_en_promo.toFixed(2).replace('.', ',')}
               </span>
             )}
           </div>
-          <Link href={`/product/${slug}`} className="block mt-2">
-            <h3 className="font-medium hover:text-primary transition-colors">{name}</h3>
+          <Link href={`/product/${product.productCode}`} className="block mt-2">
+            <h3 className="font-medium hover:text-primary transition-colors">{product.title}</h3>
           </Link>
-          <p className="text-sm text-muted-foreground">{volume}</p>
+          <p className="text-sm text-muted-foreground">{product.arcleunik}</p>
           <div className="mt-auto pt-4">
             <Button
               className="w-full bg-[#FF6B35] hover:bg-[#E85A24] text-white"
@@ -99,15 +81,16 @@ export function ProductCard({
         open={showCartPopup}
         onClose={() => setShowCartPopup(false)}
         product={{
-          id,
-          name,
-          image,
-          price,
-          volume
+          id: product.id_product_mysql,
+          name: product.title,
+          image: `data:image/jpeg;base64,${product.photo1_base64}`,
+          price: parseFloat(product.prix_vente_groupe),
+          volume: product.arcleunik,
         }}
         quantity={1}
       />
     </>
-  )
+  );
 }
 
+export default ProductCard;

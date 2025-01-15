@@ -1,35 +1,33 @@
 'use client'
+import * as React from "react";
+import useEmblaCarousel from "embla-carousel-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import ProductCard from "@/components/product-card";
+import productsData from "@/data/product.json";
 
-import * as React from "react"
-import useEmblaCarousel from 'embla-carousel-react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { ProductCard } from "./product-card"
-import { sampleProducts } from "@/data/sample-products"
-
-// Assuming `sampleProducts` contains an array of products with the correct type
-// Adjust or define the `ProductCard` props interface if needed
-const featuredProducts = sampleProducts.slice(0, 12)
+// Wrap the single product JSON into an array for carousel rendering
+const featuredProducts = [productsData];
 
 export function FeaturedProducts() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
-    loop: true, 
-    align: 'start',
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    align: "start",
     slidesToScroll: 1,
     breakpoints: {
-      '(min-width: 640px)': { slidesToScroll: 2 },
-      '(min-width: 768px)': { slidesToScroll: 3 },
-      '(min-width: 1024px)': { slidesToScroll: 4 }
-    }
-  })
+      "(min-width: 640px)": { slidesToScroll: 2 },
+      "(min-width: 768px)": { slidesToScroll: 3 },
+      "(min-width: 1024px)": { slidesToScroll: 4 },
+    },
+  });
 
   const scrollPrev = React.useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev()
-  }, [emblaApi])
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
 
   const scrollNext = React.useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext()
-  }, [emblaApi])
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
 
   return (
     <div className="container px-4 py-8">
@@ -39,12 +37,21 @@ export function FeaturedProducts() {
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
             {/* Render featured products */}
-            {featuredProducts.map((product) => (
-              <div 
-                key={product.id} 
+            {featuredProducts.map((product, index) => (
+              <div
+                key={product.id_product_mysql || index}
                 className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%] pl-4 first:pl-0"
               >
-                <ProductCard {...product} />
+                <ProductCard
+                  id={product.id_product_mysql}
+                  name={product.title}
+                  slug={product.productCode}
+                  image={`data:image/jpeg;base64,${product.photo1_base64}`}
+                  price={parseFloat(product.prix_vente_groupe)}
+                  originalPrice={product.prix_en_promo > 0 ? product.prix_en_promo : undefined}
+                  volume={product.arcleunik}
+                  category={product.fam1ID}
+                />
               </div>
             ))}
           </div>
@@ -71,5 +78,5 @@ export function FeaturedProducts() {
         </Button>
       </div>
     </div>
-  )
+  );
 }

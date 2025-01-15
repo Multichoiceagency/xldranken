@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { ProductCard } from "./product-card"
 import { sampleProducts } from "@/data/sample-products"
 
-// Select more products to feature (e.g., 12 products)
+// Assuming `sampleProducts` contains an array of products with the correct type
+// Adjust or define the `ProductCard` props interface if needed
 const featuredProducts = sampleProducts.slice(0, 12)
 
 export function FeaturedProducts() {
@@ -34,15 +35,22 @@ export function FeaturedProducts() {
     <div className="container px-4 py-8">
       <h2 className="text-2xl font-bold mb-6">AANBEVOLEN PRODUCTEN</h2>
       <div className="relative">
+        {/* Carousel wrapper */}
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
+            {/* Render featured products */}
             {featuredProducts.map((product) => (
-              <div key={product.id} className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%] pl-4 first:pl-0">
+              <div 
+                key={product.id} 
+                className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%] pl-4 first:pl-0"
+              >
                 <ProductCard {...product} />
               </div>
             ))}
           </div>
         </div>
+
+        {/* Navigation buttons */}
         <Button
           variant="outline"
           size="icon"
@@ -65,4 +73,3 @@ export function FeaturedProducts() {
     </div>
   )
 }
-

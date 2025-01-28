@@ -1,8 +1,8 @@
-'use client'
+"use client"
 
 import { useState, useEffect } from "react"
-import { useMediaQuery } from 'react-responsive'
-import { ChevronDown, Search, X } from 'lucide-react'
+import { useMediaQuery } from "react-responsive"
+import { ChevronDown, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,16 +22,35 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { ProductCard } from "./product-card"
-import { sampleProducts } from "@/data/sample-products"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import ProductCard from "@/components/product-card"
+import productsData from "@/data/product.json"
+import { ScrollArea } from "./ui/scroll-area"
 
+// Controleer of `productsData` een array is of een object
+const products: ProductProps[] = Array.isArray(productsData)
+  ? productsData
+  : productsData.products || [];
+// ProductProps interface voor producten
+interface ProductProps {
+  id_product_mysql: string
+  title: string
+  prix_vente_groupe: string
+  photo1_base64: string
+  arcleunik: string
+  productCode: string
+  prix_en_promo: number
+  category?: string
+  brand?: string
+  volume?: string
+}
+
+// FilterState interface voor filters
 interface FilterState {
-  bottleSize: string[];
-  priceRange: string;
-  alcoholPercentage: string;
-  brands: string[];
-  onlyPromotions: boolean;
+  bottleSize: string[]
+  priceRange: string
+  alcoholPercentage: string
+  brands: string[]
+  onlyPromotions: boolean
 }
 
 const bottleSizes = [
@@ -71,38 +90,64 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
   const isMobile = useMediaQuery({ maxWidth: 1024 })
   const itemsPerPage = 12
 
+  // Effect om de categorie in te stellen bij het laden
   useEffect(() => {
     if (initialCategory) {
       setCategory(initialCategory)
     }
   }, [initialCategory])
 
-  const filteredProducts = sampleProducts.filter(product => {
-    if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+  // Filtering van producten
+  const filteredProducts = products.filter((product: ProductProps) => {
+    // Zoekterm filter
+    if (searchTerm && !product.title.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false
     }
-    if (category && product.category.toLowerCase() !== category.toLowerCase()) {
+
+    // Categorie filter
+    if (category && product.category?.toLowerCase() !== category.toLowerCase()) {
       return false
     }
-    if (filters.bottleSize.length > 0 && !filters.bottleSize.includes(product.volume)) {
+
+    // Flesformaat filter
+    if (filters.bottleSize.length > 0 && !filters.bottleSize.includes(product.volume || "")) {
       return false
     }
-    if (filters.brands.length > 0 && !filters.brands.includes(product.category)) {
+
+    // Merk filter
+    if (filters.brands.length > 0 && !filters.brands.includes(product.brand || "")) {
       return false
     }
+
+    // Prijsbereik filter
+    if (filters.priceRange) {
+      const [min, max] = filters.priceRange.split("-").map(Number)
+      const productPrice = parseFloat(product.prix_vente_groupe)
+      if (productPrice < min || (max && productPrice > max)) {
+        return false
+      }
+    }
+
+    // Promotie filter
+    if (filters.onlyPromotions && product.prix_en_promo <= 0) {
+      return false
+    }
+
     return true
   })
 
+  // Bereken totale pagina's en slice producten voor de huidige pagina
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
   const currentProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
 
+  // Render de filters
   const renderFilters = () => (
-    <Accordion type="multiple" className="w-full" defaultValue={["soort", "merk", "flesformaat", "prijs", "alcohol"]}>
+    <Accordion type="multiple" className="w-full" defaultValue={["soort", "merk", "flesformaat", "prijs"]}>
       <AccordionItem value="soort">
-        <AccordionTrigger>SOORT</AccordionTrigger>
+        <AccordionTrigger>Soort</AccordionTrigger>
         <AccordionContent>
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
@@ -119,7 +164,7 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
       </AccordionItem>
 
       <AccordionItem value="merk">
-        <AccordionTrigger>MERK</AccordionTrigger>
+        <AccordionTrigger>Merk</AccordionTrigger>
         <AccordionContent>
           <div className="mb-4">
             <div className="relative">
@@ -133,16 +178,16 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
             </div>
           </div>
           <div className="space-y-2">
-            {brands.map(brand => (
+            {brands.map((brand) => (
               <Label key={brand.name} className="flex items-center gap-2">
                 <Checkbox
                   checked={filters.brands.includes(brand.name)}
                   onCheckedChange={(checked) => {
-                    setFilters(prev => ({
+                    setFilters((prev) => ({
                       ...prev,
                       brands: checked
                         ? [...prev.brands, brand.name]
-                        : prev.brands.filter(b => b !== brand.name)
+                        : prev.brands.filter((b) => b !== brand.name),
                     }))
                   }}
                 />
@@ -154,62 +199,25 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
       </AccordionItem>
 
       <AccordionItem value="flesformaat">
-        <AccordionTrigger>FLESFORMAAT</AccordionTrigger>
+        <AccordionTrigger>Flesformaat</AccordionTrigger>
         <AccordionContent>
           <div className="space-y-2">
-            {bottleSizes.map(size => (
+            {bottleSizes.map((size) => (
               <Label key={size.label} className="flex items-center gap-2">
                 <Checkbox
                   checked={filters.bottleSize.includes(size.label)}
                   onCheckedChange={(checked) => {
-                    setFilters(prev => ({
+                    setFilters((prev) => ({
                       ...prev,
                       bottleSize: checked
                         ? [...prev.bottleSize, size.label]
-                        : prev.bottleSize.filter(s => s !== size.label)
+                        : prev.bottleSize.filter((s) => s !== size.label),
                     }))
                   }}
                 />
                 {size.label} ({size.count})
               </Label>
             ))}
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-
-      <AccordionItem value="prijs">
-        <AccordionTrigger>PRIJS</AccordionTrigger>
-        <AccordionContent>
-          <RadioGroup
-            value={filters.priceRange}
-            onValueChange={(value) => setFilters(prev => ({ ...prev, priceRange: value }))}
-          >
-            {priceRanges.map(range => (
-              <div key={range.value} className="flex items-center space-x-2">
-                <RadioGroupItem value={range.value} id={range.value} />
-                <Label htmlFor={range.value}>{range.label}</Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </AccordionContent>
-      </AccordionItem>
-
-      <AccordionItem value="alcohol">
-        <AccordionTrigger>ALCOHOL-PERCENTAGE</AccordionTrigger>
-        <AccordionContent>
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <Checkbox /> 0% - 0.5%
-            </Label>
-            <Label className="flex items-center gap-2">
-              <Checkbox /> 0.5% - 3%
-            </Label>
-            <Label className="flex items-center gap-2">
-              <Checkbox /> 3% - 7%
-            </Label>
-            <Label className="flex items-center gap-2">
-              <Checkbox /> 7% en hoger
-            </Label>
           </div>
         </AccordionContent>
       </AccordionItem>
@@ -220,7 +228,7 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">
-          {category ? category.charAt(0).toUpperCase() + category.slice(1) : "ALLE PRODUCTEN"}
+          {category ? category.charAt(0).toUpperCase() + category.slice(1) : "Alle Producten"}
         </h1>
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-[180px]">
@@ -239,9 +247,7 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
       <div className="flex flex-col lg:flex-row gap-8">
         {!isMobile && (
           <div className="w-full lg:w-64 flex-shrink-0">
-            <div className="sticky top-20 space-y-6">
-              {renderFilters()}
-            </div>
+            <div className="sticky top-20 space-y-6">{renderFilters()}</div>
           </div>
         )}
 
@@ -250,47 +256,19 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
             <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
               <SheetTrigger asChild>
                 <Button variant="outline" className="w-full justify-between mb-6">
-                  ALLE FILTERS
+                  Alle Filters
                   <ChevronDown className="h-4 w-4 ml-2" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[540px]">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-lg font-semibold">Filters</h2>
-                  <Button variant="ghost" size="sm" onClick={() => setIsFilterOpen(false)}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                <ScrollArea className="h-[calc(100vh-100px)]">
-                  {renderFilters()}
-                </ScrollArea>
+                <ScrollArea className="h-[calc(100vh-100px)]">{renderFilters()}</ScrollArea>
               </SheetContent>
             </Sheet>
           )}
 
-          <div className="flex items-center gap-4 mb-6 overflow-x-auto pb-2">
-            {bottleSizes.map(size => (
-              <Button
-                key={size.label}
-                variant="outline"
-                className={filters.bottleSize.includes(size.label) ? "bg-[#FF6B35] text-white" : ""}
-                onClick={() => {
-                  setFilters(prev => ({
-                    ...prev,
-                    bottleSize: prev.bottleSize.includes(size.label)
-                      ? prev.bottleSize.filter(s => s !== size.label)
-                      : [...prev.bottleSize, size.label]
-                  }))
-                }}
-              >
-                {size.label} ({size.count})
-              </Button>
-            ))}
-          </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {currentProducts.map((product) => (
-              <ProductCard key={product.id} {...product} />
+            {currentProducts.map((product: ProductProps) => (
+              <ProductCard key={product.id_product_mysql} product={product} />
             ))}
           </div>
 
@@ -305,25 +283,8 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
               </Button>
             ))}
           </div>
-
-          <div className="mt-12 space-y-8">
-            <section>
-              <h2 className="text-xl font-bold mb-4">WAT IS BIER?</h2>
-              <p className="text-muted-foreground">
-                Bier is na water of melk de een alcoholische drank, verkrijgbaar door vergisting van moutsuiker en gebouwen uit graan, water, hop en gist. Elke hop-, gist- en graansoort heeft specifieke eigenschappen die het bier beïnvloeden. Moet bijkomende granen, meestal gerst of tarwe in de graanketel die de kleur van het bier bepaalt. Er zijn verschillende soorten bier, zoals pils, witbier, tripel en stout. Elk met hun eigen smaak en karakter.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-bold mb-4">OORSPRONG BIER</h2>
-              <p className="text-muted-foreground">
-                Waarschijnlijk al 6000 jaar voor Christus werd in Mesopotamië een vorm van bier gebrouwen. Hiermee is bier een van de oudste dranken uit de menselijke geschiedenis. Het oudste geschreven recept dat archeologen vonden is het bierrecept! Voor het gewone volk werd bier in de middeleeuwen de drank van keuze. Het was zelfs veiliger dan water. Bier werd nog steeds gebrouwen met gekookt water, waardoor het veiliger was om te drinken. Tegenwoordig is bier de meest gedronken drank ter wereld.
-              </p>
-            </section>
-          </div>
         </div>
       </div>
     </div>
   )
 }
-

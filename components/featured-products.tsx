@@ -1,57 +1,56 @@
-'use client'
-import * as React from "react";
-import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import ProductCard from "@/components/product-card";
-import productsData from "@/data/product.json";
+"use client"
+import * as React from "react"
+import useEmblaCarousel from "embla-carousel-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import ProductCard from "@/components/product-card"
+import productsData from "@/data/product.json"
 
-// Wrap the single product JSON into an array for carousel rendering
-const featuredProducts = [productsData];
+// Ensure productsData is an array
+const featuredProducts = Array.isArray(productsData) ? productsData : [productsData]
+
+// Function to duplicate products
+const duplicateProducts = (products: any[], count: number) => {
+  const duplicated = []
+  for (let i = 0; i < count; i++) {
+    duplicated.push(...products.map((product) => ({ ...product, key: `${product.id_product_mysql}-${i}` })))
+  }
+  return duplicated
+}
+
+// Duplicate the products to have at least 20 items
+const duplicatedProducts = duplicateProducts(featuredProducts, Math.ceil(20 / featuredProducts.length))
 
 export function FeaturedProducts() {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: "start",
     slidesToScroll: 1,
-    breakpoints: {
-      "(min-width: 640px)": { slidesToScroll: 2 },
-      "(min-width: 768px)": { slidesToScroll: 3 },
-      "(min-width: 1024px)": { slidesToScroll: 4 },
-    },
-  });
+    dragFree: true,
+  })
 
   const scrollPrev = React.useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
-  }, [emblaApi]);
+    if (emblaApi) emblaApi.scrollPrev()
+  }, [emblaApi])
 
   const scrollNext = React.useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
-  }, [emblaApi]);
+    if (emblaApi) emblaApi.scrollNext()
+  }, [emblaApi])
 
   return (
-    <div className="container px-4 py-8">
+    <div className="container mx-auto px-4 py-4 space-y-8">
       <h2 className="text-2xl font-bold mb-6">AANBEVOLEN PRODUCTEN</h2>
       <div className="relative">
         {/* Carousel wrapper */}
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
-            {/* Render featured products */}
-            {featuredProducts.map((product, index) => (
+            {/* Render duplicated products */}
+            {duplicatedProducts.map((product) => (
               <div
-                key={product.id_product_mysql || index}
-                className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%] pl-4 first:pl-0"
+                key={product.key}
+                className="flex-[0_0_100%] min-w-0 px-2 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%]"
               >
-                <ProductCard
-                  id={product.id_product_mysql}
-                  name={product.title}
-                  slug={product.productCode}
-                  image={`data:image/jpeg;base64,${product.photo1_base64}`}
-                  price={parseFloat(product.prix_vente_groupe)}
-                  originalPrice={product.prix_en_promo > 0 ? product.prix_en_promo : undefined}
-                  volume={product.arcleunik}
-                  category={product.fam1ID}
-                />
+                <ProductCard product={product} />
               </div>
             ))}
           </div>
@@ -78,5 +77,6 @@ export function FeaturedProducts() {
         </Button>
       </div>
     </div>
-  );
+  )
 }
+

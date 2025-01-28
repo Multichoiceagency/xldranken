@@ -8,10 +8,25 @@ import { Input } from "@/components/ui/input"
 
 export function SiteFooter() {
   return (
-    <footer className="bg-gray-100 pt-12 pb-24 md:pb-12">
+    <footer className="bg-white pt-12 pb-24 md:pb-12">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {/* Shop Column */}
+          <div>
+            <Image
+                src="/logos/logo-xlgroothandelbv.jpg"
+                alt="Shopping Awards Winner"
+                width={300}
+                height={60}
+                className="object-contain"
+              />
+            <h3 className="font-bold mb-4 mt-4">Informatie</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/mailto:info@xlgroothandelbv.nl" className="font-bold hover:text-[#FFD700]">info@xlgroothandelbv.nl</Link></li>
+              <li><Link href="/contact" className="font-bold hover:text-[#FFD700]">Turfschipper 116, 2292 JB Wateringen</Link></li>
+              <li><Link href="/tel:0615472574" className="font-bold hover:text-[#FFD700]">Klantenservice +31 6 154 725 74</Link></li>
+              <li><Link href="/blank" className="text-green-600  font-bold hover:text-[#FFD700]">Whatsapp bericht versturen</Link></li>
+            </ul>
+          </div>
           <div>
             <h3 className="font-bold mb-4">SHOP</h3>
             <ul className="space-y-2 text-sm">
@@ -74,21 +89,7 @@ export function SiteFooter() {
             {/* Awards and Certifications */}
             <div className="flex items-center gap-6">
               <Image
-                src="/placeholder.svg?height=40&width=120"
-                alt="Thuiswinkel Waarborg"
-                width={120}
-                height={40}
-                className="object-contain"
-              />
-              <Image
-                src="/placeholder.svg?height=40&width=120"
-                alt="Shopping Awards Winner"
-                width={120}
-                height={40}
-                className="object-contain"
-              />
-              <Image
-                src="/placeholder.svg?height=40&width=120"
+                src="/logos/nix18-scaled.jpg"
                 alt="Publieksprijs Winner"
                 width={120}
                 height={40}
@@ -98,20 +99,20 @@ export function SiteFooter() {
 
             {/* NIX18 Logo */}
             <div>
-              <Image
-                src="/placeholder.svg?height=40&width=80"
-                alt="NIX18"
-                width={80}
-                height={40}
+            <Image
+                src="/logos/betalen-met-ideal.jpg"
+                alt="Shopping Awards Winner"
+                width={700}
+                height={120}
                 className="object-contain"
               />
             </div>
+            
           </div>
-
           {/* Copyright and Legal */}
-          <div className="mt-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
-            <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
-              <span>© 2025 XL Dranken</span>
+          <div className="mt-6 flex flex-col md:flex-row space-between items-center text-sm text-gray-600">
+            <div className="flex flex-wrap items-center gap-2 justify-center md:justify-center">
+              <span>Gebouwd met React Native door Multichoiceagency © 2025 XL Dranken</span>
               <span>|</span>
               <Link href="/algemene-voorwaarden" className="hover:text-[#FFD700]">
                 Algemene voorwaarden
@@ -127,7 +128,7 @@ export function SiteFooter() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
     </footer>
   )
 }

@@ -24,7 +24,7 @@ const topBanners = [
 
 export function PromotionalGrid() {
   return (
-    <div className="container px-4 py-8">
+    <div className="container mx-auto px-4 py-4 space-y-8">
       <div className="flex flex-col md:flex-row gap-6">
         {topBanners.map((banner, index) => (
           <Card key={index} className={`${banner.bgColor} border-0 flex-1`}>

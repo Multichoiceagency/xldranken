@@ -18,8 +18,9 @@ export function AppDownload() {
               rel="noopener noreferrer"
               className="w-[200px] transition-transform hover:scale-105"
             >
+              
               <Image
-                src="/google-play-badge.png"
+                src="/GetItOnGooglePlay_Badge_Web_color_Dutch.png"
                 alt="Get it on Google Play"
                 width={200}
                 height={59}
@@ -33,7 +34,7 @@ export function AppDownload() {
               className="w-[200px] transition-transform hover:scale-105"
             >
               <Image
-                src="/app-store-badge.png"
+                src="/app-store-logo.png"
                 alt="Download on the App Store"
                 width={200}
                 height={59}

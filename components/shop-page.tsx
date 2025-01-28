@@ -24,13 +24,11 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import ProductCard from "@/components/product-card"
 import productsData from "@/data/product.json"
-import { ScrollArea } from "./ui/scroll-area"
 
-// Controleer of `productsData` een array is of een object
-const products: ProductProps[] = Array.isArray(productsData)
-  ? productsData
-  : productsData.products || [];
-// ProductProps interface voor producten
+// Zorg dat `productsData` een array is
+const products = Array.isArray(productsData) ? productsData : [productsData]
+
+// Voeg missende velden toe aan `ProductProps`
 interface ProductProps {
   id_product_mysql: string
   title: string
@@ -39,12 +37,11 @@ interface ProductProps {
   arcleunik: string
   productCode: string
   prix_en_promo: number
-  category?: string
-  brand?: string
-  volume?: string
+  category?: string // Voor categoriefilter
+  brand?: string // Voor merkfilter
+  volume?: string // Voor flesformaatfilter
 }
 
-// FilterState interface voor filters
 interface FilterState {
   bottleSize: string[]
   priceRange: string
@@ -53,12 +50,14 @@ interface FilterState {
   onlyPromotions: boolean
 }
 
+// Flesformaten
 const bottleSizes = [
   { label: "33 CL en meer", count: 7 },
   { label: "75 CL", count: 15 },
   { label: "25 CL", count: 166 },
 ]
 
+// Merken
 const brands = [
   { name: "Hertog Jan", count: 18 },
   { name: "Heineken", count: 14 },
@@ -67,11 +66,20 @@ const brands = [
   { name: "Leffe", count: 8 },
 ]
 
+// Prijsbereiken
 const priceRanges = [
   { label: "Tot 5 euro", value: "0-5" },
   { label: "5 tot 10 euro", value: "5-10" },
   { label: "10 tot 20 euro", value: "10-20" },
   { label: "20 euro en meer", value: "20+" },
+]
+
+// Alcoholpercentages
+const alcoholPercentages = [
+  { label: "0% - 0.5%", value: "0-0.5" },
+  { label: "0.5% - 3%", value: "0.5-3" },
+  { label: "3% - 7%", value: "3-7" },
+  { label: "7% en hoger", value: "7+" },
 ]
 
 export function ShopPage({ initialCategory }: { initialCategory?: string }) {
@@ -90,14 +98,13 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
   const isMobile = useMediaQuery({ maxWidth: 1024 })
   const itemsPerPage = 12
 
-  // Effect om de categorie in te stellen bij het laden
   useEffect(() => {
     if (initialCategory) {
       setCategory(initialCategory)
     }
   }, [initialCategory])
 
-  // Filtering van producten
+  // Filter de producten
   const filteredProducts = products.filter((product: ProductProps) => {
     // Zoekterm filter
     if (searchTerm && !product.title.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -119,7 +126,7 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
       return false
     }
 
-    // Prijsbereik filter
+    // Prijsfilter
     if (filters.priceRange) {
       const [min, max] = filters.priceRange.split("-").map(Number)
       const productPrice = parseFloat(product.prix_vente_groupe)
@@ -128,7 +135,16 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
       }
     }
 
-    // Promotie filter
+    // Alcoholpercentage filter
+    if (filters.alcoholPercentage) {
+      const [min, max] = filters.alcoholPercentage.split("-").map(Number)
+      const alcoholContent = parseFloat(product.arcleunik) // Gebruik alcoholpercentage hier
+      if (alcoholContent < min || (max && alcoholContent > max)) {
+        return false
+      }
+    }
+
+    // Alleen promoties filter
     if (filters.onlyPromotions && product.prix_en_promo <= 0) {
       return false
     }
@@ -136,18 +152,16 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
     return true
   })
 
-  // Bereken totale pagina's en slice producten voor de huidige pagina
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
   const currentProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
 
-  // Render de filters
   const renderFilters = () => (
-    <Accordion type="multiple" className="w-full" defaultValue={["soort", "merk", "flesformaat", "prijs"]}>
+    <Accordion type="multiple" className="w-full" defaultValue={["soort", "merk", "flesformaat", "prijs", "alcohol"]}>
       <AccordionItem value="soort">
-        <AccordionTrigger>Soort</AccordionTrigger>
+        <AccordionTrigger>SOORT</AccordionTrigger>
         <AccordionContent>
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
@@ -164,7 +178,7 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
       </AccordionItem>
 
       <AccordionItem value="merk">
-        <AccordionTrigger>Merk</AccordionTrigger>
+        <AccordionTrigger>MERK</AccordionTrigger>
         <AccordionContent>
           <div className="mb-4">
             <div className="relative">
@@ -199,7 +213,7 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
       </AccordionItem>
 
       <AccordionItem value="flesformaat">
-        <AccordionTrigger>Flesformaat</AccordionTrigger>
+        <AccordionTrigger>FLESFORMAAT</AccordionTrigger>
         <AccordionContent>
           <div className="space-y-2">
             {bottleSizes.map((size) => (
@@ -221,6 +235,40 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
           </div>
         </AccordionContent>
       </AccordionItem>
+
+      <AccordionItem value="prijs">
+        <AccordionTrigger>PRIJS</AccordionTrigger>
+        <AccordionContent>
+          <RadioGroup
+            value={filters.priceRange}
+            onValueChange={(value) => setFilters((prev) => ({ ...prev, priceRange: value }))}
+          >
+            {priceRanges.map((range) => (
+              <div key={range.value} className="flex items-center space-x-2">
+                <RadioGroupItem value={range.value} id={range.value} />
+                <Label htmlFor={range.value}>{range.label}</Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </AccordionContent>
+      </AccordionItem>
+
+      <AccordionItem value="alcohol">
+        <AccordionTrigger>ALCOHOLPERCENTAGE</AccordionTrigger>
+        <AccordionContent>
+          <RadioGroup
+            value={filters.alcoholPercentage}
+            onValueChange={(value) => setFilters((prev) => ({ ...prev, alcoholPercentage: value }))}
+          >
+            {alcoholPercentages.map((range) => (
+              <div key={range.value} className="flex items-center space-x-2">
+                <RadioGroupItem value={range.value} id={range.value} />
+                <Label htmlFor={range.value}>{range.label}</Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   )
 
@@ -228,7 +276,7 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">
-          {category ? category.charAt(0).toUpperCase() + category.slice(1) : "Alle Producten"}
+          {category ? category.charAt(0).toUpperCase() + category.slice(1) : "ALLE PRODUCTEN"}
         </h1>
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-[180px]">
@@ -252,23 +300,20 @@ export function ShopPage({ initialCategory }: { initialCategory?: string }) {
         )}
 
         <div className="flex-1">
-          {isMobile && (
-            <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="w-full justify-between mb-6">
-                  Alle Filters
-                  <ChevronDown className="h-4 w-4 ml-2" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] sm:w-[540px]">
-                <ScrollArea className="h-[calc(100vh-100px)]">{renderFilters()}</ScrollArea>
-              </SheetContent>
-            </Sheet>
-          )}
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {currentProducts.map((product: ProductProps) => (
-              <ProductCard key={product.id_product_mysql} product={product} />
+              <ProductCard
+                key={product.id_product_mysql}
+                product={{
+                  id_product_mysql: product.id_product_mysql,
+                  title: product.title,
+                  prix_vente_groupe: product.prix_vente_groupe,
+                  photo1_base64: product.photo1_base64,
+                  arcleunik: product.arcleunik,
+                  productCode: product.productCode,
+                  prix_en_promo: product.prix_en_promo,
+                }}
+              />
             ))}
           </div>
 

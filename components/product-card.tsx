@@ -3,27 +3,23 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, ShoppingCart } from "lucide-react"
+import { ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 import { CartPopup } from "@/components/cart-popup"
 import { useCart } from "@/lib/cart-context"
+import { useProducts } from "@/context/ProductContext" // ✅ Import ProductContext
 
-interface ProductCardProps {
-  product: {
-    id_product_mysql: string
-    title: string
-    prix_vente_groupe: string
-    photo1_base64: string
-    arcleunik: string
-    productCode: string
-    prix_en_promo: number
-  }
-}
-
-function ProductCard({ product }: ProductCardProps) {
+function ProductCard({ productId }: { productId: string }) {
   const [showCartPopup, setShowCartPopup] = useState(false)
   const { addToCart } = useCart()
+  const { products, loading, error } = useProducts()
+
+  // ✅ Find the product in the context
+  const product = products.find((p) => p.id_product_mysql === productId)
+
+  if (loading) return <p>Loading...</p>
+  if (error) return <p className="text-red-500">Error loading product</p>
+  if (!product) return <p className="text-gray-500">Product not found</p>
 
   const handleAddToCart = () => {
     addToCart({
@@ -40,8 +36,9 @@ function ProductCard({ product }: ProductCardProps) {
   return (
     <>
       <div className="group relative flex flex-col bg-white p-4 rounded-lg border hover:shadow-lg transition-shadow">
+        {/* ✅ Product page link */}
         <Link
-          href={`/product/${product.productCode}`}
+          href={`/product/${product.id_product_mysql}`}
           className="relative h-[280px] w-full overflow-hidden rounded-lg mb-4"
         >
           <Image
@@ -53,7 +50,7 @@ function ProductCard({ product }: ProductCardProps) {
           />
         </Link>
         <div className="flex flex-col flex-grow space-y-2">
-          <Link href={`/product/${product.productCode}`} className="block">
+          <Link href={`/product/${product.id_product_mysql}`} className="block">
             <h3 className="font-medium text-gray-900 group-hover:text-[#C6A66C] transition-colors">{product.title}</h3>
           </Link>
           <div className="flex items-baseline gap-2">
@@ -70,7 +67,8 @@ function ProductCard({ product }: ProductCardProps) {
                 className="w-16 px-3 py-2 text-center border-0 rounded-md focus:outline-none"
               />
             </div>
-            <Button className="flex-1 bg-[#FFA500] hover:bg-[#FF8C00] text-white" onClick={handleAddToCart}>
+            <Button className="flex-1 bg-[#FFA500] hover:bg-[#FF8C00] text-white flex items-center gap-2" onClick={handleAddToCart}>
+              <ShoppingCart size={18} />
               Bekijk product
             </Button>
           </div>
@@ -95,4 +93,3 @@ function ProductCard({ product }: ProductCardProps) {
 }
 
 export default ProductCard
-

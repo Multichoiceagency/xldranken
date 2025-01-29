@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react"
-import { ProductCard } from "./product-card"
+import { ProductCard } from "@/components/product-card"
 import { sampleProducts } from "@/data/sample-products"
 import { Button } from "@/components/ui/button"
 import {

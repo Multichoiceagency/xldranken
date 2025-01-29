@@ -6,6 +6,7 @@ import { SiteFooter } from '@/components/site-footer'
 import { BottomNav } from '@/components/bottom-nav'
 import { CartProvider } from '@/lib/cart-context'
 import { WhatsAppButton } from '@/components/whatsapp-button'
+import { ProductProvider } from "@/context/ProductContext"
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+      <ProductProvider>
         <CartProvider>
           <SiteHeader />
           <main className="min-h-screen pb-16 md:pb-0">
@@ -31,6 +33,7 @@ export default function RootLayout({
           <BottomNav />
           <WhatsAppButton />
         </CartProvider>
+        </ProductProvider>
       </body>
     </html>
   )

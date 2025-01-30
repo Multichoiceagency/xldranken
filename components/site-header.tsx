@@ -1,120 +1,122 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSearch, faHeart, faClock, faTruck, faStore, faUser } from '@fortawesome/free-solid-svg-icons'
+import Image from "next/image"
+import { Search, Info, ShoppingCart, Menu, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { SearchOverlay } from "./search-overlay"
-import { useAuth } from "@/lib/auth"
-import { useCart } from "@/lib/cart-context"
-import { SideCartDrawer } from "./side-cart-drawer"
-import { Menu } from 'lucide-react'
-import { MobileMenu } from "./mobile-menu"
+import type React from "react" // Added import for React
 
 export function SiteHeader() {
-  const { isLoggedIn, username } = useAuth()
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const { getCartTotal } = useCart()
-  const { totalPrice } = getCartTotal()
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showAlert, setShowAlert] = useState(true)
+
 
   return (
-    <header className="w-full sticky top-0 z-50 bg-background">
-      {/* Top Banner - Always visible on desktop, hidden on mobile */}
-      <div className="w-full bg-primary/10 py-2 hidden md:block">
-        <div className="container mx-auto flex items-center justify-between text-sm px-4">
-          <div className="flex items-center gap-1">
-            <FontAwesomeIcon icon={faClock} className="h-4 w-4 text-primary" />
-            <span>Bestel voor 22:00 vandaag, morgen in huis</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <FontAwesomeIcon icon={faTruck} className="h-4 w-4 text-primary" />
-            <span>Gratis bezorging vanaf € 55,-</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <FontAwesomeIcon icon={faStore} className="h-4 w-4 text-primary" />
-            <span>Gratis ophalen in een XL Dranken winkel</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Header */}
-      <div className="border-b">
-        <div className="container mx-auto flex h-16 items-center gap-4 px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl md:text-2xl font-bold text-primary">XL Dranken</span>
-            <span className="text-xs text-muted-foreground hidden md:inline">SINDS 1884</span>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/assortiment" className="font-medium">
-              ASSORTIMENT
+    <header className="w-full bg-[#ffff] sticky top-0 z-50">
+      {/* Main Navigation */}
+      <div className="w-full text-black">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center h-16 gap-4">
+            {/* Logo */}
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logos/logo-xlgroothandelbv.jpg"
+                alt="Makro Logo"
+                width={250}
+                height={40}
+                className="object-contain"
+                priority
+              />
             </Link>
-            <Link href="/acties" className="font-medium">
-              <span className="text-primary">ACTIES</span>
-            </Link>
-          </nav>
 
-          <div className="flex-1 flex items-center gap-4">
-            <Button
-              variant="ghost"
-              className="flex-1 justify-start text-muted-foreground hidden md:flex"
-              onClick={() => setIsSearchOpen(true)}
-            >
-              <FontAwesomeIcon icon={faSearch} className="h-4 w-4 mr-2" />
-              Waar ben je naar op zoek?
-            </Button>
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-6 ml-8">
+              <NavLink href="/webshop" icon={<ShoppingCart className="h-4 w-4" />}>
+                Webshop
+              </NavLink>
+              <NavLink href="/assortiment" icon={<Menu className="h-4 w-4" />}>
+                Assortiment & acties
+              </NavLink>
+              <NavLink href="/horeca" icon={<ShoppingCart className="h-4 w-4" />}>
+                Horeca Bezorgservice
+              </NavLink>
+              <NavLink href="/info" icon={<Info className="h-4 w-4" />}>
+                Informatie & services
+              </NavLink>
+            </nav>
 
-            <div className="flex items-center gap-4 ml-auto">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                onClick={() => setIsMobileMenuOpen(true)}
-              >
-                <Menu className="h-6 w-6" />
+            {/* Login Button */}
+            <div className="ml-auto">
+              <Button variant="default" className="bg-[#E2B505] hover:bg-[#48392A]/90 text-white">
+                Registreren/Inloggen
               </Button>
-              {isLoggedIn ? (
-                <div className="hidden md:flex items-center gap-1">
-                  <span className="text-sm">Welkom</span>
-                  <Link href="/account" className="text-sm font-medium">
-                    {username}
-                  </Link>
-                </div>
-              ) : (
-                <Link href="/login" className="hidden md:block text-sm">
-                  Inloggen
-                </Link>
-              )}
-              <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
-                <Link href="/wishlist">
-                  <FontAwesomeIcon icon={faHeart} className="h-5 w-5" />
-                </Link>
-              </Button>
-              <Button variant="ghost" size="icon" asChild className="hidden md:inline-flex">
-                <Link href="/account">
-                  <FontAwesomeIcon icon={faUser} className="h-5 w-5" />
-                </Link>
-              </Button>
-              <SideCartDrawer />
-              <div className="hidden md:flex items-center">
-                <span className="text-sm font-medium">€ {totalPrice.toFixed(2)}</span>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {isSearchOpen && (
-        <SearchOverlay 
-          isOpen={isSearchOpen}
-          onClose={() => setIsSearchOpen(false)}
-        />
+      {/* Search Bar */}
+      <div className="w-full bg-[#E8F0FE]">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Input
+                type="search"
+                placeholder="Zoeken"
+                className="w-full pl-10 pr-4 py-2 rounded-md"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Alert Bar */}
+      {showAlert && (
+        <div className="w-full bg-[#E2B505] text-white py-2">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between">
+              <Link href="/">
+              <div className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                <span>Aanbieding vanaf 23/01/2025 Sydney Dranken</span>
+              </div>
+              </Link>
+              <button
+                onClick={() => setShowAlert(false)}
+                className="p-1 hover:bg-white/10 rounded-full transition-colors"
+                aria-label="Sluiten"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </div>
       )}
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </header>
+  )
+}
+
+function NavLink({
+  href,
+  icon,
+  children,
+}: {
+  href: string
+  icon: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+<Link
+  href={href}
+  className="flex items-center gap-2 px-3 py-2 rounded-[10px] border-[2px] border-[#E2B505] hover:bg-[#E2B505] hover:text-white transition-colors"
+>      {icon}
+      <span>{children}</span>
+    </Link>
   )
 }
 

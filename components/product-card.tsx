@@ -3,29 +3,32 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, Truck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CartPopup } from "@/components/cart-popup"
 import { useCart } from "@/lib/cart-context"
-import { useProducts } from "@/context/ProductContext" // ✅ Import ProductContext
+import type { Product } from "@/types/product"
 
-function ProductCard({ productId }: { productId: string }) {
+function createSlug(title: string): string {
+  return encodeURIComponent(
+    title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-"),
+  )
+}
+
+function ProductCard({ product }: { product: Product }) {
   const [showCartPopup, setShowCartPopup] = useState(false)
   const { addToCart } = useCart()
-  const { products, loading, error } = useProducts()
 
-  // ✅ Find the product in the context
-  const product = products.find((p) => p.id_product_mysql === productId)
-
-  if (loading) return <p>Loading...</p>
-  if (error) return <p className="text-red-500">Error loading product</p>
   if (!product) return <p className="text-gray-500">Product not found</p>
 
   const handleAddToCart = () => {
     addToCart({
       id: product.id_product_mysql,
       name: product.title,
-      price: Number.parseFloat(product.prix_vente_groupe),
+      price: product.prix_en_promo != null ? Number(product.prix_en_promo) : Number(product.prix_vente_groupe),
       image: `data:image/jpeg;base64,${product.photo1_base64}`,
       volume: product.arcleunik,
       quantity: 1,
@@ -33,46 +36,66 @@ function ProductCard({ productId }: { productId: string }) {
     setShowCartPopup(true)
   }
 
+  // Calculate prices
+  const regularPrice = Number(product.prix_vente_groupe)
+  const promoPrice = product.prix_en_promo != null ? Number(product.prix_en_promo) : null
+  const currentPrice = Number(product.prix_vente_groupe)
+  const discountPercentage = promoPrice != null ? Math.round(((regularPrice - promoPrice) / regularPrice) * 100) : 0
+
   return (
     <>
-      <div className="group relative flex flex-col bg-white p-4 rounded-lg border hover:shadow-lg transition-shadow">
-        {/* ✅ Product page link */}
-        <Link
-          href={`/product/${product.id_product_mysql}`}
-          className="relative h-[280px] w-full overflow-hidden rounded-lg mb-4"
-        >
+      <div className="group relative flex flex-col bg-white rounded-lg border hover:shadow-lg transition-all duration-300">
+        {/* Discount Badge */}
+        {discountPercentage > 0 && (
+          <div className="absolute top-2 right-2 bg-[#E31931] text-white text-sm font-medium px-2 py-1 rounded">
+            -{discountPercentage}%
+          </div>
+        )}
+
+        {/* Product Image */}
+        <Link href={`/product/${createSlug(product.title)}`} className="relative h-[200px] w-full overflow-hidden p-4">
           <Image
             src={`data:image/jpeg;base64,${product.photo1_base64}`}
             alt={product.title}
             fill
-            className="object-contain group-hover:scale-95 transition-transform duration-300"
-            priority
+            className="object-contain group-hover:scale-105 transition-transform duration-300"
+            unoptimized
           />
         </Link>
-        <div className="flex flex-col flex-grow space-y-2">
-          <Link href={`/product/${product.id_product_mysql}`} className="block">
-            <h3 className="font-medium text-gray-900 group-hover:text-[#C6A66C] transition-colors">{product.title}</h3>
+
+        {/* Product Details */}
+        <div className="flex flex-col p-4 pt-0">
+          <Link href={`/product/${createSlug(product.id_product_mysql)}`}>
+            <h3 className="font-medium text-[#002B7F] hover:underline min-h-[2.5rem] line-clamp-2">{product.title}</h3>
           </Link>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold">
-              €{Number.parseFloat(product.prix_vente_groupe).toFixed(2).replace(".", ",")}
-            </span>
+
+          {/* Delivery Status */}
+          <div className="flex items-center gap-2 my-2">
+            <Truck className="w-4 h-4 text-[#008A00]" />
+            <span className="text-[#008A00] text-sm">Bezorgdatum</span>
           </div>
-          <div className="flex items-center justify-between gap-4 mt-auto pt-4">
-            <div className="flex items-center border rounded-md">
-              <input
-                type="number"
-                defaultValue={1}
-                min={1}
-                className="w-16 px-3 py-2 text-center border-0 rounded-md focus:outline-none"
-              />
+
+          {/* Pricing */}
+          <div className="space-y-1">
+            {product.prix_en_promo != null && (
+              <div className="text-gray-500 line-through text-sm">€ {regularPrice.toFixed(2).replace(".", ",")}</div>
+            )}
+            <div className="flex items-baseline gap-2">
+              <span className="text-[#E31931] text-2xl font-bold">€ {currentPrice.toFixed(2).replace(".", ",")}</span>
             </div>
-            <Button className="flex-1 bg-[#FFA500] hover:bg-[#FF8C00] text-white flex items-center gap-2" onClick={handleAddToCart}>
-              <ShoppingCart size={18} />
-              Bekijk product
+            <div className="text-gray-600 text-sm">Excl. btw</div>
+          </div>
+
+          {/* Add to Cart Button */}
+          <div className="mt-4">
+            <Button
+              className="w-full bg-[#E2B505] hover:bg-[#E2B505]/90 text-white transition-all duration-300 hover:shadow-md"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              In winkelmand
             </Button>
           </div>
-          <p className="text-sm text-gray-600 mt-2">Levering binnen 1 werkdag</p>
         </div>
       </div>
 
@@ -83,7 +106,7 @@ function ProductCard({ productId }: { productId: string }) {
           id: product.id_product_mysql,
           name: product.title,
           image: `data:image/jpeg;base64,${product.photo1_base64}`,
-          price: Number.parseFloat(product.prix_vente_groupe),
+          price: Number(product.prix_vente_groupe),
           volume: product.arcleunik,
         }}
         quantity={1}
@@ -93,3 +116,4 @@ function ProductCard({ productId }: { productId: string }) {
 }
 
 export default ProductCard
+

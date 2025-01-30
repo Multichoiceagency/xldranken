@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fortawesome/free-brands-svg-icons": "latest",
+    "@fortawesome/free-solid-svg-icons": "latest",
+    "@fortawesome/react-fontawesome": "latest",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",
@@ -42,6 +45,7 @@
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
+    "embla-carousel-autoplay": "latest",
     "embla-carousel-react": "latest",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
@@ -52,18 +56,15 @@
     "react-dom": "^18",
     "react-hook-form": "^7.54.1",
     "react-resizable-panels": "^2.1.7",
+    "react-responsive": "latest",
     "recharts": "2.15.0",
+    "sharp": "latest",
     "sonner": "^1.7.1",
+    "swr": "^2.3.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
-    "zod": "^3.24.1",
-    "sharp": "latest",
-    "react-responsive": "latest",
-    "@fortawesome/react-fontawesome": "latest",
-    "@fortawesome/free-brands-svg-icons": "latest",
-    "embla-carousel-autoplay": "latest",
-    "@fortawesome/free-solid-svg-icons": "latest"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^22",

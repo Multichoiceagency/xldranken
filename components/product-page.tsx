@@ -1,73 +1,66 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useCallback } from "react";
-import { useMediaQuery } from "react-responsive";
-import Image from "next/image";
-import Link from "next/link";
-import { ChevronLeft, ChevronRight, Plus, Minus, Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import useEmblaCarousel from "embla-carousel-react";
-import { Input } from "@/components/ui/input";
-import { CartPopup } from "@/components/cart-popup";
-import { useCart } from "@/lib/cart-context";
-import ProductCard from "@/components/product-card";
+import { useState, useCallback } from "react"
+import { useMediaQuery } from "react-responsive"
+import Image from "next/image"
+import Link from "next/link"
+import { ChevronLeft, ChevronRight, Plus, Minus, Clock } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import useEmblaCarousel from "embla-carousel-react"
+import { Input } from "@/components/ui/input"
+import { CartPopup } from "@/components/cart-popup"
+import { useCart } from "@/lib/cart-context"
+import ProductCard from "@/components/product-card"
 
-// Define the product structure
+// Update this interface to match your API response
 interface ProductProps {
-  id_product_mysql: string;
-  title: string;
-  prix_vente_groupe: string;
-  photo1_base64: string;
-  arcleunik: string;
-  productCode: string;
-  prix_en_promo: number;
+  id_product_mysql: string
+  title: string
+  prix_vente_groupe: string
+  photo1_base64: string
+  arcleunik: string
+  productCode: string
+  prix_en_promo: string | null
+  // Add any other fields that your API returns
 }
 
-// Props for the ProductPage component
 interface ProductPageProps {
-  product: ProductProps;
-  relatedProducts: ProductProps[];
+  product: ProductProps
+  relatedProducts: ProductProps[]
 }
 
 export function ProductPage({ product, relatedProducts }: ProductPageProps) {
-  const [quantity, setQuantity] = useState(1);
-  const [showCartPopup, setShowCartPopup] = useState(false);
-  const [recentlyViewed, setRecentlyViewed] = useState<ProductProps[]>([]);
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start", dragFree: true });
-  const isMobile = useMediaQuery({ maxWidth: 767 });
-  const { addToCart } = useCart();
+  const [quantity, setQuantity] = useState(1)
+  const [showCartPopup, setShowCartPopup] = useState(false)
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start", dragFree: true })
+  const isMobile = useMediaQuery({ maxWidth: 767 })
+  const { addToCart } = useCart()
 
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
 
   const handleAddToCart = () => {
     addToCart({
       id: product.id_product_mysql,
       name: product.title,
-      price: parseFloat(product.prix_vente_groupe),
+      price: product.prix_en_promo
+        ? Number.parseFloat(product.prix_en_promo)
+        : Number.parseFloat(product.prix_vente_groupe),
       image: `data:image/jpeg;base64,${product.photo1_base64}`,
       volume: product.arcleunik,
       quantity,
-    });
-    setShowCartPopup(true);
-  };
+    })
+    setShowCartPopup(true)
+  }
 
-  useEffect(() => {
-    const viewed = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
-    if (!viewed.includes(product.productCode)) {
-      const newViewed = [product.productCode, ...viewed.slice(0, 3)];
-      localStorage.setItem("recentlyViewed", JSON.stringify(newViewed));
-      setRecentlyViewed(relatedProducts.filter((p) => newViewed.includes(p.productCode)));
-    } else {
-      setRecentlyViewed(relatedProducts.filter((p) => viewed.includes(p.productCode)));
-    }
-  }, [product, relatedProducts]);
+  const currentPrice = product.prix_en_promo
+    ? Number.parseFloat(product.prix_en_promo)
+    : Number.parseFloat(product.prix_vente_groupe)
+  const regularPrice = Number.parseFloat(product.prix_vente_groupe)
+  const discountPercentage = product.prix_en_promo
+    ? Math.round(((regularPrice - Number.parseFloat(product.prix_en_promo)) / regularPrice) * 100)
+    : 0
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -95,9 +88,16 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
         {/* Product Info */}
         <div className="md:sticky md:top-20 self-start bg-gray-50 p-4 md:p-6 rounded-lg">
           <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
-          <div className="text-4xl font-bold mb-6">
-            €{parseFloat(product.prix_vente_groupe).toFixed(2).replace(".", ",")}
-          </div>
+          <div className="text-4xl font-bold mb-6">€{currentPrice.toFixed(2).replace(".", ",")}</div>
+
+          {discountPercentage > 0 && (
+            <div className="mb-4">
+              <span className="bg-[#E31931] text-white text-sm font-medium px-2 py-1 rounded">
+                -{discountPercentage}%
+              </span>
+              <span className="ml-2 text-gray-500 line-through">€{regularPrice.toFixed(2).replace(".", ",")}</span>
+            </div>
+          )}
 
           <Accordion type="single" collapsible className="w-full mb-6">
             <AccordionItem value="description">
@@ -130,7 +130,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
                 type="number"
                 min="1"
                 value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) => setQuantity(Math.max(1, Number.parseInt(e.target.value) || 1))}
                 className="h-11 w-16 text-center"
               />
               <Button
@@ -159,37 +159,43 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
       </div>
 
       {/* Related Products */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">GERELATEERDE PRODUCTEN</h2>
-        <div className="relative" ref={emblaRef}>
-          <div className="flex">
-            {relatedProducts.map((relatedProduct) => (
-              <div
-                key={relatedProduct.id_product_mysql}
-                className="flex-[0_0_100%] min-w-0 px-2 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%]"
-              >
-                <ProductCard product={relatedProduct} />
-              </div>
-            ))}
+      {relatedProducts && relatedProducts.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6">GERELATEERDE PRODUCTEN</h2>
+          <div className="relative" ref={emblaRef}>
+            <div className="flex">
+              {relatedProducts.map((relatedProduct) => (
+                <div
+                  key={relatedProduct.id_product_mysql}
+                  className="flex-[0_0_100%] min-w-0 px-2 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%]"
+                >
+                  <ProductCard product={relatedProduct} />
+                </div>
+              ))}
+            </div>
+            {relatedProducts.length > 1 && (
+              <>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2"
+                  onClick={scrollPrev}
+                >
+                  <ChevronLeft />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2"
+                  onClick={scrollNext}
+                >
+                  <ChevronRight />
+                </Button>
+              </>
+            )}
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2"
-            onClick={scrollPrev}
-          >
-            <ChevronLeft />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2"
-            onClick={scrollNext}
-          >
-            <ChevronRight />
-          </Button>
         </div>
-      </div>
+      )}
 
       <CartPopup
         open={showCartPopup}
@@ -198,11 +204,12 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
           id: product.id_product_mysql,
           name: product.title,
           image: `data:image/jpeg;base64,${product.photo1_base64}`,
-          price: parseFloat(product.prix_vente_groupe),
+          price: currentPrice,
           volume: product.arcleunik,
         }}
         quantity={quantity}
       />
     </div>
-  );
+  )
 }
+

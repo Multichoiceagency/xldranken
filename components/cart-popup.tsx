@@ -121,7 +121,7 @@ export function CartPopup({ open, onClose, product, quantity }: CartPopupProps) 
                   </div>
                 </div>
                 <Button variant="outline" className="bg-[#FF6B35] hover:bg-[#E85A24] text-white">
-                  VOEG TOE
+                  VOEG OOK TOE
                 </Button>
               </div>
             </div>

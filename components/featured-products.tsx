@@ -4,24 +4,43 @@ import useEmblaCarousel from "embla-carousel-react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import ProductCard from "@/components/product-card"
-import productsData from "@/data/product.json"
+import { Product } from "@/types/product" // ✅ Import Product interface
 
-// Ensure productsData is an array
-const featuredProducts = Array.isArray(productsData) ? productsData : [productsData]
 
-// Function to duplicate products
-const duplicateProducts = (products: any[], count: number) => {
-  const duplicated = []
-  for (let i = 0; i < count; i++) {
-    duplicated.push(...products.map((product) => ({ ...product, key: `${product.id_product_mysql}-${i}` })))
-  }
-  return duplicated
-}
+export function FeaturedProducts({ fam2ID = "6" }: { fam2ID?: string }) {
+  const [products, setProducts] = React.useState<Product[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
-// Duplicate the products to have at least 20 items
-const duplicatedProducts = duplicateProducts(featuredProducts, Math.ceil(20 / featuredProducts.length))
+  React.useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        console.log(`Fetching products from: /api/proxy?fam2ID=${fam2ID}`) // Debug log
 
-export function FeaturedProducts() {
+        const response = await fetch(`/api/proxy?fam2ID=${fam2ID}`)
+        if (!response.ok) throw new Error("Failed to fetch products")
+
+        const data = await response.json()
+        console.log("API Response:", data) // Debug log
+
+        // ✅ Extract products from data.result.product instead of data.products
+        const productsArray = data?.result?.product || []
+        
+        if (!Array.isArray(productsArray) || productsArray.length === 0) {
+          console.warn(`No products found for fam2ID: ${fam2ID}`)
+        }
+
+        setProducts(productsArray) // ✅ Ensure products exist
+      } catch (err) {
+        setError((err as Error).message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [fam2ID]) // ✅ Refetch when fam2ID changes
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: "start",
@@ -37,17 +56,18 @@ export function FeaturedProducts() {
     if (emblaApi) emblaApi.scrollNext()
   }, [emblaApi])
 
+
   return (
     <div className="container mx-auto px-4 py-4 space-y-8">
-      <h2 className="text-2xl font-bold mb-6">AANBEVOLEN PRODUCTEN</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">AANBEVOLEN PRODUCTEN</h2>
       <div className="relative">
         {/* Carousel wrapper */}
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
-            {/* Render duplicated products */}
-            {duplicatedProducts.map((product) => (
+            {/* ✅ Render API-fetched products */}
+            {products.map((product) => (
               <div
-                key={product.key}
+                key={product.id_product_mysql}
                 className="flex-[0_0_100%] min-w-0 px-2 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%]"
               >
                 <ProductCard product={product} />
@@ -60,23 +80,22 @@ export function FeaturedProducts() {
         <Button
           variant="outline"
           size="icon"
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 bg-white shadow-md"
           onClick={scrollPrev}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
           <span className="sr-only">Previous product</span>
         </Button>
         <Button
           variant="outline"
           size="icon"
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 bg-white shadow-md"
           onClick={scrollNext}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-5 w-5" />
           <span className="sr-only">Next product</span>
         </Button>
       </div>
     </div>
   )
 }
-

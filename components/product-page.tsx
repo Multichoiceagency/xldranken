@@ -1,44 +1,28 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import { useMediaQuery } from "react-responsive"
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight, Plus, Minus, Clock } from "lucide-react"
+import { Plus, Minus, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import useEmblaCarousel from "embla-carousel-react"
 import { Input } from "@/components/ui/input"
 import { CartPopup } from "@/components/cart-popup"
 import { useCart } from "@/lib/cart-context"
-import ProductCard from "@/components/product-card"
-
-// Update this interface to match your API response
-interface ProductProps {
-  id_product_mysql: string
-  title: string
-  prix_vente_groupe: string
-  photo1_base64: string
-  arcleunik: string
-  productCode: string
-  prix_en_promo: string | null
-  // Add any other fields that your API returns
-}
+import type { ProductProps } from "@/types/product"
 
 interface ProductPageProps {
   product: ProductProps
-  relatedProducts: ProductProps[]
 }
 
-export function ProductPage({ product, relatedProducts }: ProductPageProps) {
+export function ProductPage({ product }: ProductPageProps) {
   const [quantity, setQuantity] = useState(1)
   const [showCartPopup, setShowCartPopup] = useState(false)
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "start", dragFree: true })
-  const isMobile = useMediaQuery({ maxWidth: 767 })
   const { addToCart } = useCart()
 
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
+  if (!product) {
+    return <div>Product not found. Please check the product ID and try again.</div>
+  }
 
   const handleAddToCart = () => {
     addToCart({
@@ -64,7 +48,6 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumb */}
       <div className="text-sm mb-4">
         <Link href="/" className="text-muted-foreground hover:text-[#FF6B35]">
           Home
@@ -73,9 +56,7 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
         <span className="text-foreground">{product.title}</span>
       </div>
 
-      {/* Product Overview */}
       <div className="grid md:grid-cols-2 gap-8 mb-12">
-        {/* Product Image */}
         <div className="relative aspect-square md:aspect-[3/4] rounded-lg overflow-hidden">
           <Image
             src={`data:image/jpeg;base64,${product.photo1_base64}`}
@@ -85,7 +66,6 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
           />
         </div>
 
-        {/* Product Info */}
         <div className="md:sticky md:top-20 self-start bg-gray-50 p-4 md:p-6 rounded-lg">
           <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
           <div className="text-4xl font-bold mb-6">€{currentPrice.toFixed(2).replace(".", ",")}</div>
@@ -157,45 +137,6 @@ export function ProductPage({ product, relatedProducts }: ProductPageProps) {
           </div>
         </div>
       </div>
-
-      {/* Related Products */}
-      {relatedProducts && relatedProducts.length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">GERELATEERDE PRODUCTEN</h2>
-          <div className="relative" ref={emblaRef}>
-            <div className="flex">
-              {relatedProducts.map((relatedProduct) => (
-                <div
-                  key={relatedProduct.id_product_mysql}
-                  className="flex-[0_0_100%] min-w-0 px-2 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] lg:flex-[0_0_25%]"
-                >
-                  <ProductCard product={relatedProduct} />
-                </div>
-              ))}
-            </div>
-            {relatedProducts.length > 1 && (
-              <>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2"
-                  onClick={scrollPrev}
-                >
-                  <ChevronLeft />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2"
-                  onClick={scrollNext}
-                >
-                  <ChevronRight />
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
 
       <CartPopup
         open={showCartPopup}

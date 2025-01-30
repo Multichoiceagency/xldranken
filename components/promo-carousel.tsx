@@ -62,7 +62,7 @@ export function PromoGrid() {
           {/* Large image on the left */}
           <div className="relative h-[600px] md:h-full overflow-hidden rounded-lg transition-all duration-300 hover:shadow-2xl transform hover:-translate-y-2 hover:rotate-1 group">
             <Image
-              src={promos[0].image || "/placeholder.svg"}
+              src= "/winkel/winkel1.jpeg"
               alt={promos[0].description}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -96,7 +96,7 @@ export function PromoGrid() {
                 className="relative h-[290px] overflow-hidden rounded-lg transition-all duration-300 hover:shadow-2xl transform hover:-translate-y-2 hover:rotate-1 group"
               >
                 <Image
-                  src={promo.image || "/placeholder.svg"}
+                  src={promo.image || "/winkel/winkel2.jpeg"}
                   alt={promo.description}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-105"

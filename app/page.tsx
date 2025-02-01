@@ -12,11 +12,6 @@ import { PromoGrid } from "@/components/promo-carousel";
 export default function Home() {
   return (
     <div>
-      <Head>
-        <title>Home - Your Store</title>
-        <meta name="description" content="Discover the best deals and products on our store." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
           <PromoGrid />
           <PromotionalGrid />
           <ShopByCategory />

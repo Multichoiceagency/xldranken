@@ -1,33 +1,37 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Book, Smartphone, Store, HandshakeIcon } from "lucide-react"
 
 const promos = [
   {
-    title: "PRAKTISCH EN GEZELLIG",
-    description: "Wine Lover's Paradise",
-    discount: "20%",
+    title: "Welkom bij XL Dranken – Uw Specialist in Dranken",
+    description: "Ontdek een breed assortiment aan alcoholische dranken, frisdranken en exclusieve merken.",
+    discount: "20% KORTING",
     image:
       "https://images.pexels.com/photos/66636/pexels-photo-66636.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
     buttonText: "Nu bestellen",
+    href: "#",
   },
   {
-    title: "DE GOEDKOOPSTE BRANDSTOFPRIJZEN IN DE REGIO",
-    description: "Gin & Tonic Extravaganza",
-    discount: "15%",
+    title: "Bekijk nu de aanbieding van deze maand",
+    description: "Aanbieding vanaf 23/01/2025 Sydney Dranken",
+    discount: "KORTINGEN TOT WEL 20%",
     image:
       "https://images.pexels.com/photos/616836/pexels-photo-616836.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
     buttonText: "Meer informatie",
+    href: "#",
   },
   {
-    title: "ONTDEK ONZE EIGEN MERKEN",
-    description: "Rum Carnival",
-    discount: "25%",
+    title: "Ontdek Onze Eigen Merken – Exclusieve Rumselectie",
+    description: "Geniet van een exotische reis met onze ambachtelijke rumcollectie.",
+    discount: "25% KORTING",
     image:
       "https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
     buttonText: "Bekijken",
+    href: "#",
   },
 ]
 
@@ -59,10 +63,10 @@ export function PromoGrid() {
     <div className="space-y-8">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Large image on the left */}
+          {/* Grote afbeelding links */}
           <div className="relative h-[600px] md:h-full overflow-hidden rounded-lg transition-all duration-300 hover:shadow-2xl transform hover:-translate-y-2 hover:rotate-1 group">
             <Image
-              src= "/winkel/winkel1.jpeg"
+              src="/winkel/winkel1.jpeg"
               alt={promos[0].description}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -79,16 +83,18 @@ export function PromoGrid() {
                   {promos[0].description}
                 </p>
                 <p className="text-2xl font-bold text-white mb-4 transform transition-transform duration-300 group-hover:translate-x-1">
-                  {promos[0].discount} OFF
+                  {promos[0].discount}
                 </p>
-                <Button className="bg-[#E2B505] hover:bg-[#E2B505]/90 transform hover:scale-105 transition-all duration-300 hover:shadow-lg active:scale-95 hover:-translate-y-1 hover:rotate-1">
-                  {promos[0].buttonText}
-                </Button>
+                <Link href={promos[0].href}>
+                  <Button className="bg-[#E2B505] hover:bg-[#E2B505]/90 transform hover:scale-105 transition-all duration-300 hover:shadow-lg active:scale-95 hover:-translate-y-1 hover:rotate-1">
+                    {promos[0].buttonText}
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
 
-          {/* Two smaller images on the right, stacked vertically */}
+          {/* Twee kleinere afbeeldingen rechts, verticaal gestapeld */}
           <div className="space-y-6">
             {promos.slice(1).map((promo, index) => (
               <div
@@ -109,9 +115,11 @@ export function PromoGrid() {
                     <p className="text-white mb-4 transform transition-transform duration-300 group-hover:translate-x-1">
                       {promo.description}
                     </p>
-                    <Button className="bg-[#E2B505] hover:bg-[#E2B505]/90 transform hover:scale-105 transition-all duration-300 hover:shadow-lg active:scale-95 hover:-translate-y-1 hover:rotate-1">
-                      {promo.buttonText}
-                    </Button>
+                    <Link href={promo.href}>
+                      <Button className="bg-[#E2B505] hover:bg-[#E2B505]/90 transform hover:scale-105 transition-all duration-300 hover:shadow-lg active:scale-95 hover:-translate-y-1 hover:rotate-1">
+                        {promo.buttonText}
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -120,12 +128,12 @@ export function PromoGrid() {
         </div>
       </div>
 
-      {/* Navigation Cards */}
+      {/* Navigatiekaarten */}
       <div className="bg-[#E8F0FE]">
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {navCards.map((card, index) => (
-              <a
+              <Link
                 key={index}
                 href={card.href}
                 className="group bg-white rounded-lg p-6 flex flex-col items-center text-center transition-all duration-300 hover:shadow-2xl transform hover:-translate-y-2 hover:rotate-1"
@@ -134,7 +142,7 @@ export function PromoGrid() {
                 <span className="text-[#E2B505] font-medium transition-transform duration-300 group-hover:translate-y-1">
                   {card.title}
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -142,4 +150,3 @@ export function PromoGrid() {
     </div>
   )
 }
-

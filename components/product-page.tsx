@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Plus, Minus, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input"
 import { CartPopup } from "@/components/cart-popup"
 import { useCart } from "@/lib/cart-context"
 import type { ProductProps } from "@/types/product"
+import { Spinner } from "@/components/Spinner"
+
 
 interface ProductPageProps {
   productId: string
@@ -22,14 +24,26 @@ export function ProductPage({ productId }: ProductPageProps) {
   const [quantity, setQuantity] = useState(1)
   const [showCartPopup, setShowCartPopup] = useState(false)
   const { addToCart } = useCart()
+  const router = useRouter()
 
   useEffect(() => {
     const fetchProduct = async () => {
+      console.log("🛠️ Ophalen product met ID:", productId) // Debugging log
+
+      if (!productId) {
+        console.error("❌ Geen product-ID beschikbaar in de component.")
+        setError("Geen product-ID opgegeven.")
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
         setError(null)
 
-        const res = await fetch(`/api/products/${productId}`)
+        console.log(`🔗 API request naar: /api/proxy?id=${productId}`) // Debugging log
+
+        const res = await fetch(`/api/proxy?id=${productId}`)
         if (!res.ok) throw new Error("Product niet gevonden")
 
         const data = await res.json()
@@ -46,15 +60,34 @@ export function ProductPage({ productId }: ProductPageProps) {
     fetchProduct()
   }, [productId])
 
-  if (loading) return <div className="text-center py-8">Product wordt geladen...</div>
-  if (error) return <div className="text-center py-8 text-red-500">Fout: {error}</div>
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spinner />
+      </div>
+    )
+  if (error) return <div className="text-center py-8 text-red-500">❌ {error}</div>
   if (!product) return <div className="text-center py-8">Geen product gevonden.</div>
 
+  const prixVente = Number.parseFloat(String(product?.prix_vente_groupe || "0")) // ✅ Zorgt voor string
+  const prixPromo = product?.prix_en_promo && Number(product.prix_en_promo) > 0
+    ? Number.parseFloat(String(product.prix_en_promo)) // ✅ Converteert veilig naar string
+    : null
+  
+  const currentPrice = prixPromo ?? prixVente
+  const regularPrice = prixVente
+  
+  const discountPercentage = prixPromo
+    ? Math.round(((regularPrice - prixPromo) / regularPrice) * 100)
+    : 0
+
   const handleAddToCart = () => {
+    if (!product) return // ✅ Voorkomt crash als product nog niet geladen is
+
     addToCart({
       id: product.id_product_mysql,
       name: product.title,
-      price: Number.parseFloat(product.prix_vente_groupe),
+      price: currentPrice,
       image: `data:image/jpeg;base64,${product.photo1_base64}`,
       volume: product.arcleunik,
       quantity,
@@ -62,22 +95,12 @@ export function ProductPage({ productId }: ProductPageProps) {
     setShowCartPopup(true)
   }
 
-  const currentPrice = product.prix_en_promo
-    ? Number.parseFloat(product.prix_en_promo)
-    : Number.parseFloat(product.prix_vente_groupe)
-  const regularPrice = Number.parseFloat(product.prix_vente_groupe)
-  const discountPercentage = product.prix_en_promo
-    ? Math.round(((regularPrice - Number.parseFloat(product.prix_en_promo)) / regularPrice) * 100)
-    : 0
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-sm mb-4">
-        <Link href="/" className="text-muted-foreground hover:text-[#FF6B35]">
-          Home
-        </Link>
-        <span className="mx-2 text-muted-foreground">/</span>
-        <span className="text-foreground">{product.title}</span>
+        <button onClick={() => router.back()} className="text-muted-foreground hover:text-[#FF6B35]">
+          ⬅ Terug
+        </button>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 mb-12">
@@ -108,12 +131,8 @@ export function ProductPage({ productId }: ProductPageProps) {
               <AccordionTrigger>PRODUCTINFORMATIE</AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-2">
-                  <p>
-                    <strong>Code:</strong> {product.productCode}
-                  </p>
-                  <p>
-                    <strong>Volume:</strong> {product.arcleunik}
-                  </p>
+                  <p><strong>Code:</strong> {product.productCode}</p>
+                  <p><strong>Volume:</strong> {product.arcleunik}</p>
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -121,36 +140,15 @@ export function ProductPage({ productId }: ProductPageProps) {
 
           <div className="flex items-center gap-4 mb-6">
             <div className="flex items-center border rounded-md">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-11 w-11"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              >
+              <Button type="button" variant="ghost" size="icon" className="h-11 w-11" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
                 <Minus />
               </Button>
-              <Input
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, Number.parseInt(e.target.value) || 1))}
-                className="h-11 w-16 text-center"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-11 w-11"
-                onClick={() => setQuantity((q) => q + 1)}
-              >
+              <Input type="number" min="1" value={quantity} onChange={(e) => setQuantity(Math.max(1, Number.parseInt(e.target.value) || 1))} className="h-11 w-16 text-center" />
+              <Button type="button" variant="ghost" size="icon" className="h-11 w-11" onClick={() => setQuantity((q) => q + 1)}>
                 <Plus />
               </Button>
             </div>
-            <Button
-              className="flex-1 bg-[#FF6B35] hover:bg-[#E85A24] text-white text-lg py-6"
-              onClick={handleAddToCart}
-            >
+            <Button className="flex-1 bg-[#FF6B35] hover:bg-[#E85A24] text-white text-lg py-6" onClick={handleAddToCart}>
               IN WINKELMAND
             </Button>
           </div>

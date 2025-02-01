@@ -1,6 +1,7 @@
 import { ShopPage } from "@/components/shop-page"
 
-export default function Shop({ searchParams }: { searchParams: { assortiment?: string } }) {
+export default async function Shop(props: { searchParams: Promise<{ assortiment?: string }> }) {
+  const searchParams = await props.searchParams;
   return <ShopPage initialCategory={searchParams.assortiment} />
 }
 

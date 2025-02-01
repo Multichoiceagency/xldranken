@@ -16,7 +16,7 @@ function ProductCard({ product }: { product: ProductProps }) {
     addToCart({
       id: product.id_product_mysql,
       name: product.title,
-      price: product.prix_en_promo != null ? Number(product.prix_en_promo) : Number(product.prix_vente_groupe),
+      price: product.prix_vente_groupe != null ? Number(product.prix_en_promo) : Number(product.prix_vente_groupe),
       image: `data:image/jpeg;base64,${product.photo1_base64}`,
       volume: product.arcleunik,
       quantity: 1,
@@ -26,7 +26,7 @@ function ProductCard({ product }: { product: ProductProps }) {
   // Calculate prices
   const regularPrice = Number(product.prix_vente_groupe)
   const promoPrice = product.prix_en_promo != null ? Number(product.prix_en_promo) : null
-  const currentPrice = product.prix_en_promo != null ? Number(product.prix_en_promo) : Number(product.prix_vente_groupe)
+  const currentPrice = product.prix_vente_groupe != null ? Number(product.prix_en_promo) : Number(product.prix_vente_groupe)
   const discountPercentage = promoPrice != null ? Math.round(((regularPrice - promoPrice) / regularPrice) * 100) : 0
 
   return (
@@ -66,7 +66,7 @@ function ProductCard({ product }: { product: ProductProps }) {
 
         {/* Pricing */}
         <div className="space-y-1">
-          {product.prix_en_promo != null && (
+          {product.prix_vente_groupe != null && (
             <div className="text-gray-500 line-through text-sm">€ {regularPrice.toFixed(2).replace(".", ",")}</div>
           )}
           <div className="flex items-baseline gap-2">

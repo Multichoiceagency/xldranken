@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Plus, Minus, Clock } from "lucide-react"
@@ -12,25 +12,49 @@ import { useCart } from "@/lib/cart-context"
 import type { ProductProps } from "@/types/product"
 
 interface ProductPageProps {
-  product: ProductProps
+  productId: string
 }
 
-export function ProductPage({ product }: ProductPageProps) {
+export function ProductPage({ productId }: ProductPageProps) {
+  const [product, setProduct] = useState<ProductProps | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [showCartPopup, setShowCartPopup] = useState(false)
   const { addToCart } = useCart()
 
-  if (!product) {
-    return <div>Product not found. Please check the product ID and try again.</div>
-  }
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const res = await fetch(`/api/products/${productId}`)
+        if (!res.ok) throw new Error("Product niet gevonden")
+
+        const data = await res.json()
+        if (!data?.product) throw new Error("Geen productdata ontvangen")
+
+        setProduct(data.product)
+      } catch (err) {
+        setError((err as Error).message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProduct()
+  }, [productId])
+
+  if (loading) return <div className="text-center py-8">Product wordt geladen...</div>
+  if (error) return <div className="text-center py-8 text-red-500">Fout: {error}</div>
+  if (!product) return <div className="text-center py-8">Geen product gevonden.</div>
 
   const handleAddToCart = () => {
     addToCart({
       id: product.id_product_mysql,
       name: product.title,
-      price: product.prix_en_promo
-        ? Number.parseFloat(product.prix_en_promo)
-        : Number.parseFloat(product.prix_vente_groupe),
+      price: Number.parseFloat(product.prix_vente_groupe),
       image: `data:image/jpeg;base64,${product.photo1_base64}`,
       volume: product.arcleunik,
       quantity,
@@ -153,4 +177,3 @@ export function ProductPage({ product }: ProductPageProps) {
     </div>
   )
 }
-

@@ -14,7 +14,7 @@ export function SiteHeader() {
 
 
   return (
-    <header className="w-full bg-[#ffff] sticky top-0 z-50">
+    <header className="w-full bg-[#ffff] sticky top-0 justify-center z-50">
       {/* Main Navigation */}
       <div className="w-full text-black">
         <div className="container mx-auto px-4">

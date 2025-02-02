@@ -30,8 +30,8 @@ export function FeaturedProductsCarousel({ products }: FeaturedProductsCarouselP
   if (products.length === 0) return <div className="text-center">No products found</div>
 
   return (
-    <div className="container mx-auto py-16 space-y-8">
-      <h2 className="text-2xl font-bold mb-6 text-left">AANBEVOLEN PRODUCTEN</h2>
+    <div className="container mx-auto px-4 py-4 space-y-8">
+      <h2 className="text-2xl font-bold mb-6 text-center">AANBEVOLEN PRODUCTEN</h2>
       <div className="relative">
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">

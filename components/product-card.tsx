@@ -16,29 +16,20 @@ function ProductCard({ product }: { product: ProductProps }) {
     addToCart({
       id: product.id_product_mysql,
       name: product.title,
-      price: product.prix_vente_groupe != null ? Number(product.prix_en_promo) : Number(product.prix_vente_groupe),
+      price: product.prix_en_promo != null ? Number(product.prix_en_promo) : Number(product.prix_vente_groupe),
       image: `data:image/jpeg;base64,${product.photo1_base64}`,
       volume: product.arcleunik,
       quantity: 1,
     })
   }
 
-  // Calculate prices
-  const regularPrice = Number(product.prix_vente_groupe)
-  const promoPrice = product.prix_en_promo != null ? Number(product.prix_en_promo) : null
-  const currentPrice = product.prix_vente_groupe != null ? Number(product.prix_en_promo) : Number(product.prix_vente_groupe)
-  const discountPercentage = promoPrice != null ? Math.round(((regularPrice - promoPrice) / regularPrice) * 100) : 0
+  // Define prices
+  const regularPrice = Number(product.prix_vente_groupe) // Reguliere prijs
+  const promoPrice = product.prix_en_promo != null ? Number(product.prix_en_promo) : null // Promotieprijs
 
   return (
     <div className="group relative flex flex-col bg-white rounded-lg border hover:shadow-lg transition-all duration-300">
-      {/* Discount Badge */}
-      {discountPercentage > 0 && (
-        <div className="absolute top-2 right-2 bg-[#E31931] text-white text-sm font-medium px-2 py-1 rounded">
-          -{discountPercentage}%
-        </div>
-      )}
-
-      {/* Product Image and Link */}
+      {/* Product Image */}
       <Link
         href={`/product/${encodeURIComponent(product.id_product_mysql)}`}
         className="relative h-[200px] w-full overflow-hidden p-4"
@@ -64,16 +55,33 @@ function ProductCard({ product }: { product: ProductProps }) {
           <span className="text-[#008A00] text-sm">Bezorgdatum</span>
         </div>
 
-        {/* Pricing */}
-        <div className="space-y-1">
-          {product.prix_vente_groupe != null && (
-            <div className="text-gray-500 line-through text-sm">€ {regularPrice.toFixed(2).replace(".", ",")}</div>
-          )}
-          <div className="flex items-baseline gap-2">
-            <span className="text-[#E31931] text-2xl font-bold">€ {currentPrice.toFixed(2).replace(".", ",")}</span>
-          </div>
-          <div className="text-gray-600 text-sm">Excl. btw</div>
+{/* Pricing */}
+<div className="space-y-1">
+  {regularPrice > 0 || promoPrice ? (
+    promoPrice ? (
+      <>
+        {/* Regular Price (strikethrough) */}
+        <div className="text-gray-500 line-through text-sm">
+          € {regularPrice.toFixed(2).replace(".", ",")}
         </div>
+        {/* Promo Price */}
+        <div className="text-[#E31931] text-2xl font-bold">
+          € {promoPrice.toFixed(2).replace(".", ",")}
+        </div>
+      </>
+    ) : (
+      // Only Regular Price
+      <div className="text-[#E31931] text-2xl font-bold">
+        € {regularPrice.toFixed(2).replace(".", ",")}
+      </div>
+    )
+  ) : (
+    // Fallback als prijzen ontbreken
+    <div className="text-gray-500 text-sm">Prijs niet beschikbaar</div>
+  )}
+</div>
+
+
 
         {/* Add to Cart Button */}
         <div className="mt-4">
@@ -91,4 +99,3 @@ function ProductCard({ product }: { product: ProductProps }) {
 }
 
 export default ProductCard
-

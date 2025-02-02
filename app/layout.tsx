@@ -27,8 +27,8 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         
         {/* Icons voor verschillende platforms */}
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/web-app-manifest-192x192.png" />
+        <link rel="icon" href="icons/favicon.ico" />
+        <link rel="apple-touch-icon" href="icons/web-app-manifest-192x192.png" />
         
         {/* Theme kleur voor browsers */}
         <meta name="theme-color" content="#ffffff" />
@@ -39,11 +39,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="XL Dranken" />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} overflow-x-hidden`}>
         <ProductProvider>
           <CartProvider>
             <SiteHeader />
-            <main className="min-h-screen pb-16 md:pb-0">{children}</main>
+            <main className="min-h-screen w-screen pb-16 md:pb-0">{children}</main>
             <SiteFooter />
             <BottomNav />
             <WhatsAppButton />

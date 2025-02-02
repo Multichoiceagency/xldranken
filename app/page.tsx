@@ -11,12 +11,12 @@ import { PromoGrid } from "@/components/promo-carousel";
 
 export default function Home() {
   return (
-    <div>
+    <div className="overflow-x-hidden">
           <PromoGrid />
           <PromotionalGrid />
           <ShopByCategory />
           <WeeklyOffersBanner />
-          <FeaturedProducts fam2ID="4" />
+          <FeaturedProducts fam2ID="23" />
           <ProductList />
           <AboutUsSection />
           <AppDownload />

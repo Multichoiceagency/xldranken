@@ -16,7 +16,6 @@ export default function Home() {
           <FeaturedProducts fam2ID="5" />
           <ShopByCategory />
           <FeaturedProducts fam2ID="4" />
-
           <AboutUsSection />
           <AppDownload />
         </div>

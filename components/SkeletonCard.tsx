@@ -1,12 +1,23 @@
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+
 export function SkeletonCard() {
-    return (
-      <div className="animate-pulse border rounded-lg overflow-hidden shadow-sm bg-gray-200">
-        <div className="h-48 bg-gray-300"></div>
-        <div className="p-4 space-y-2">
-          <div className="h-4 bg-gray-400 rounded w-3/4"></div>
-          <div className="h-3 bg-gray-400 rounded w-1/2"></div>
+  return (
+    <Card className="flex flex-col">
+      <CardContent className="p-4">
+        <Skeleton className="h-[200px] w-full rounded-lg" />
+        <div className="space-y-2 mt-4">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
         </div>
-      </div>
-    )
-  }
-  
+      </CardContent>
+      <CardFooter className="flex-grow flex flex-col justify-end p-4">
+        <div className="space-y-2 w-full">
+          <Skeleton className="h-5 w-1/3" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+      </CardFooter>
+    </Card>
+  )
+}
+

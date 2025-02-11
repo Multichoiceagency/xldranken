@@ -3,13 +3,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 
 interface CartItem {
-  id: string
-  name: string
-  price: number
-  image: string
-  volume: string
-  quantity: number
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  volume: string;
+  productCode: string; // ✅ Dit veld toegevoegd
+  quantity: number;
 }
+
 
 interface CartContextType {
   cart: CartItem[]

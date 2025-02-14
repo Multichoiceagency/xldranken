@@ -6,8 +6,8 @@ import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import Hero from "@/components/Hero";
 
-export default async function WijnPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
-  const categoryId = "23";
+export default async function CocktailsPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
+  const categoryId = "5";
   const currentPage = Number(searchParams.page) || 1;
   const productsPerPage = Number(searchParams.limit) || 24;
   const gridView = searchParams.view === "grid2" ? "grid2" : "grid4"; // Default: 4-column grid
@@ -32,13 +32,13 @@ export default async function WijnPage({ searchParams }: { searchParams: { [key:
     });
 
     params.set(key, value.toString()); // ✅ Update the specific parameter
-    return `/wijn?${params.toString()}`;
+    return `/cocktails?${params.toString()}`;
   };
 
   return (
     <div>
       {/* Hero Section */}
-      <Hero title="Wijn Assortiment" description="Bekijk meer dan 100 diverse wijn soorten" />
+      <Hero title="Cocktails Assortiment" description="Bekijk meer dan 100 diverse cocktails soorten" />
 
       {/* Product Section */}
       <div className="container mx-auto px-8 py-8">

@@ -2,7 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 
 const categories = [
-  { name: "Wijn", image: "https://images.pexels.com/photos/66636/pexels-photo-66636.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", slug: "wijn" },
+  { name: "Wijn", image: "https://images.pexels.com/photos/66636/pexels-photo-66636.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", slug: "/wijn" },
   { name: "Bier", image: "https://images.pexels.com/photos/1089930/pexels-photo-1089930.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", slug: "bier" },
   { name: "Sterke Drank", image: "https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", slug: "sterke-drank" },
   { name: "Whisky", image: "https://images.pexels.com/photos/5947019/pexels-photo-5947019.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", slug: "whisky" },

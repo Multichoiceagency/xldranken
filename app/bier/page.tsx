@@ -1,3 +1,5 @@
+"use client";
+
 import { getProductsByFam2ID } from "@/lib/api";
 import ProductCard from "@/components/product-card";
 import type { ProductProps } from "@/types/product";
@@ -6,8 +8,8 @@ import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import Hero from "@/components/Hero";
 
-export default async function WijnPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
-  const categoryId = "23";
+export default async function BierPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
+  const categoryId = "4";
   const currentPage = Number(searchParams.page) || 1;
   const productsPerPage = Number(searchParams.limit) || 24;
   const gridView = searchParams.view === "grid2" ? "grid2" : "grid4"; // Default: 4-column grid
@@ -24,24 +26,23 @@ export default async function WijnPage({ searchParams }: { searchParams: { [key:
   const createURL = (key: string, value: string | number) => {
     const params = new URLSearchParams();
 
-    // ✅ Convert `searchParams` safely into URLSearchParams
     Object.entries(searchParams || {}).forEach(([paramKey, paramValue]) => {
       if (paramValue !== undefined && paramValue !== null) {
         params.set(paramKey, paramValue.toString());
       }
     });
 
-    params.set(key, value.toString()); // ✅ Update the specific parameter
-    return `/wijn?${params.toString()}`;
+    params.set(key, value.toString());
+    return `/bier?${params.toString()}`;
   };
 
   return (
     <div>
       {/* Hero Section */}
-      <Hero title="Wijn Assortiment" description="Bekijk meer dan 100 diverse wijn soorten" />
+      <Hero title="Bier Assortiment" description="Bekijk meer dan 100 diverse biersoorten" />
 
       {/* Product Section */}
-      <div className="container mx-auto px-8 py-8">
+      <div className="container mx-auto px-4 sm:px-8 py-8">
         {/* Show per page & Grid View Controls */}
         <div className="flex items-center justify-between border-b pb-4 mb-6">
           <div className="flex items-center space-x-2 text-sm">
@@ -74,8 +75,8 @@ export default async function WijnPage({ searchParams }: { searchParams: { [key:
           </div>
         </div>
 
-        {/* Product Grid */}
-        <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-6" : "grid-cols-4"}`}>
+        {/* Product Grid - Mobile: 1 per row, Small/Medium: 2 per row */}
+        <div className={`grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 ${gridView === "grid2" ? "lg:grid-cols-2" : "lg:grid-cols-4"}`}>
           {paginatedProducts.map((product) => (
             <ProductCard key={product.id_product_mysql} product={product} />
           ))}

@@ -14,7 +14,6 @@ export default async function FrisdrankenPage({ searchParams }: { searchParams: 
 
   // Fetch products on the server
   const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId);
-  console.log(allProducts)
 
   // Pagination logic
   const startIndex = (currentPage - 1) * productsPerPage;
@@ -47,7 +46,7 @@ export default async function FrisdrankenPage({ searchParams }: { searchParams: 
         <div className="flex items-center justify-between border-b pb-4 mb-6">
           <div className="flex items-center space-x-2 text-sm">
             <span className="font-medium">Aantal producten per pagina:</span>
-            {[9, 12, 18, 24].map((num) => (
+            {[8, 12, 20, 28].map((num) => (
               <Link
                 key={num}
                 href={createURL("limit", num)}
@@ -76,7 +75,7 @@ export default async function FrisdrankenPage({ searchParams }: { searchParams: 
         </div>
 
         {/* Product Grid */}
-        <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-6" : "grid-cols-4"}`}>
+        <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-2" : "grid-cols-4"}`}>
           {paginatedProducts.map((product) => (
             <ProductCard key={product.id_product_mysql} product={product} />
           ))}

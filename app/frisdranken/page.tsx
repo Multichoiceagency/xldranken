@@ -7,7 +7,7 @@ import Link from "next/link";
 import Hero from "@/components/Hero";
 
 export default async function FrisdrankenPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
-  const categoryId = "5";
+  const categoryId = "6";
   const currentPage = Number(searchParams.page) || 1;
   const productsPerPage = Number(searchParams.limit) || 24;
   const gridView = searchParams.view === "grid2" ? "grid2" : "grid4"; // Default: 4-column grid
@@ -46,7 +46,7 @@ export default async function FrisdrankenPage({ searchParams }: { searchParams: 
         <div className="flex items-center justify-between border-b pb-4 mb-6">
           <div className="flex items-center space-x-2 text-sm">
             <span className="font-medium">Aantal producten per pagina:</span>
-            {[9, 12, 18, 24].map((num) => (
+            {[8, 12, 20, 28].map((num) => (
               <Link
                 key={num}
                 href={createURL("limit", num)}
@@ -75,7 +75,7 @@ export default async function FrisdrankenPage({ searchParams }: { searchParams: 
         </div>
 
         {/* Product Grid */}
-        <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-6" : "grid-cols-4"}`}>
+        <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-2" : "grid-cols-4"}`}>
           {paginatedProducts.map((product) => (
             <ProductCard key={product.id_product_mysql} product={product} />
           ))}

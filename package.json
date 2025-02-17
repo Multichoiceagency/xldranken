@@ -8,8 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-brands-svg-icons": "latest",
-    "@fortawesome/free-solid-svg-icons": "latest",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "latest",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "^1.2.2",
@@ -51,6 +52,7 @@
     "next": "^15.1.6",
     "next-pwa": "^5.6.0",
     "next-themes": "^0.4.4",
+    "or": "^0.2.0",
     "react": "^19.0.0",
     "react-day-picker": "8.10.1",
     "react-dom": "^19.0.0",

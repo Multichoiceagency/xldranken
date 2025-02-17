@@ -47,7 +47,7 @@ export default async function BierPage({ searchParams }: { searchParams: { [key:
         <div className="flex items-center justify-between border-b pb-4 mb-6">
           <div className="flex items-center space-x-2 text-sm">
             <span className="font-medium">Aantal producten per pagina:</span>
-            {[9, 12, 18, 24].map((num) => (
+            {[8, 12, 20, 28].map((num) => (
               <Link
                 key={num}
                 href={createURL("limit", num)}

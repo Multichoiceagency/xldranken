@@ -10,7 +10,7 @@ export async function getProductsByFam2ID(fam2ID: string): Promise<ProductProps[
       fam2ID: fam2ID,
     })
 
-    const response = await fetch(`${API_URL}?${params.toString()}`, {
+    const response = await fetch(`${API_URL}/product/list/?${params.toString()}`, {
       headers: {
         "Content-Type": "application/json",
       },

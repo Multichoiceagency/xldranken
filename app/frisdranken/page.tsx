@@ -7,13 +7,14 @@ import Link from "next/link";
 import Hero from "@/components/Hero";
 
 export default async function FrisdrankenPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
-  const categoryId = "5";
+  const categoryId = "6";
   const currentPage = Number(searchParams.page) || 1;
   const productsPerPage = Number(searchParams.limit) || 24;
   const gridView = searchParams.view === "grid2" ? "grid2" : "grid4"; // Default: 4-column grid
 
   // Fetch products on the server
   const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId);
+  console.log(allProducts)
 
   // Pagination logic
   const startIndex = (currentPage - 1) * productsPerPage;

@@ -11,14 +11,14 @@ const topBanners = [
     description: "Jouw favoriete smaken met veel voordeel",
     discount: "25%",
     bgColor: "bg-[#D84315]",
-    image: "https://images.pexels.com/photos/1283219/pexels-photo-1283219.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image: "/winkel/winkel3.jpeg",
   },
   {
     title: "GENIET VAN EEN Procentje minder",
     description: "Alle alcoholvrije dranken met korting!",
     discount: "25%",
     bgColor: "bg-[#4A69BD]",
-    image: "https://images.pexels.com/photos/5947019/pexels-photo-5947019.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    image: "/winkel/winkel2.jpeg",
   },
 ]
 

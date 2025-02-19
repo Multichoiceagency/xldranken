@@ -1,3 +1,5 @@
+'use client';
+
 import { FeaturedProductsCarousel } from "@/components/featured-products-carousel"
 import { getProductsByFam2ID } from "@/lib/api"
 

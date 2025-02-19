@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
-const API_URL = "https://api.megawin.be/product/list/"
-const API_KEY = "YIwYR3LZbNXllabpGviSnXBHvtqfPAIN"
+const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
+const API_KEY = process.env.API_KEY as string;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)

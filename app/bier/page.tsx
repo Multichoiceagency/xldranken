@@ -1,5 +1,3 @@
-"use client";
-
 import { getProductsByFam2ID } from "@/lib/api";
 import ProductCard from "@/components/product-card";
 import type { ProductProps } from "@/types/product";
@@ -7,26 +5,35 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import Hero from "@/components/Hero";
+import { ProductProvider } from "@/context/ProductContext"; // Zorg dat het importpad klopt
 
-export default async function BierPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
-  const categoryId = "4";
-  const currentPage = Number(searchParams.page) || 1;
-  const productsPerPage = Number(searchParams.limit) || 24;
-  const gridView = searchParams.view === "grid2" ? "grid2" : "grid4"; // Default: 4-column grid
+export default async function BierPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | undefined };
+}) {
+  // Wacht op searchParams zodat deze veilig gebruikt kan worden
+  const sp = await Promise.resolve(searchParams);
 
-  // Fetch products on the server
+  const categoryId = "5";
+  const currentPage = Number(sp.page) || 1;
+  const productsPerPage = Number(sp.limit) || -1;
+  const gridView = sp.view === "grid2" ? "grid2" : "grid4";
+
+  // Haal producten op de server op
   const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId);
 
-  // Pagination logic
+  // Paginering
   const startIndex = (currentPage - 1) * productsPerPage;
   const paginatedProducts = allProducts.slice(startIndex, startIndex + productsPerPage);
   const totalPages = Math.ceil(allProducts.length / productsPerPage);
 
-  // ✅ Correct `URLSearchParams` handling
+  // Correcte URLSearchParams-afhandeling
   const createURL = (key: string, value: string | number) => {
     const params = new URLSearchParams();
 
-    Object.entries(searchParams || {}).forEach(([paramKey, paramValue]) => {
+    // Gebruik de opgeloste searchParams (sp) om een kopie te maken
+    Object.entries(sp || {}).forEach(([paramKey, paramValue]) => {
       if (paramValue !== undefined && paramValue !== null) {
         params.set(paramKey, paramValue.toString());
       }
@@ -37,68 +44,76 @@ export default async function BierPage({ searchParams }: { searchParams: { [key:
   };
 
   return (
-    <div>
-      {/* Hero Section */}
-      <Hero title="Bier Assortiment" description="Bekijk meer dan 100 diverse biersoorten" />
+    <ProductProvider>
+      <div>
+        {/* Hero Section */}
+        <Hero title="Bier soorten" description="Ruim assortiment aan bier, pools bier." />
 
-      {/* Product Section */}
-      <div className="container mx-auto px-4 sm:px-8 py-8">
-        {/* Show per page & Grid View Controls */}
-        <div className="flex items-center justify-between border-b pb-4 mb-6">
-          <div className="flex items-center space-x-2 text-sm">
-            <span className="font-medium">Aantal producten per pagina:</span>
-            {[8, 12, 20, 28].map((num) => (
+        {/* Product Section */}
+        <div className="container mx-auto px-8 py-8">
+          {/* Show per page & Grid View Controls */}
+          <div className="flex items-center justify-between border-b pb-4 mb-6">
+            <div className="flex items-center space-x-2 text-sm">
+              <span className="font-medium">Aantal producten per pagina:</span>
+              {[8, 12, 20, 28].map((num) => (
+                <Link
+                  key={num}
+                  href={createURL("limit", num)}
+                  className={`px-2 ${productsPerPage === num ? "font-bold text-black" : "text-gray-500"}`}
+                >
+                  {num}
+                </Link>
+              ))}
+            </div>
+
+            {/* Grid View Toggle */}
+            <div className="flex space-x-2">
               <Link
-                key={num}
-                href={createURL("limit", num)}
-                className={`px-2 ${productsPerPage === num ? "font-bold text-black" : "text-gray-500"}`}
+                href={createURL("view", "grid2")}
+                className={`p-2 rounded ${gridView === "grid2" ? "bg-gray-300" : "bg-gray-100"}`}
               >
-                {num}
+                <FontAwesomeIcon icon={faThLarge} />
               </Link>
+              <Link
+                href={createURL("view", "grid4")}
+                className={`p-2 rounded ${gridView === "grid4" ? "bg-gray-300" : "bg-gray-100"}`}
+              >
+                <FontAwesomeIcon icon={faTh} />
+              </Link>
+            </div>
+          </div>
+
+          {/* Product Grid */}
+          <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-2" : "grid-cols-4"}`}>
+            {paginatedProducts.map((product) => (
+              <ProductCard key={product.id_product_mysql} product={product} />
             ))}
           </div>
 
-          {/* Grid View Toggle */}
-          <div className="flex space-x-2">
-            <Link
-              href={createURL("view", "grid2")}
-              className={`p-2 rounded ${gridView === "grid2" ? "bg-gray-300" : "bg-gray-100"}`}
-            >
-              <FontAwesomeIcon icon={faThLarge} />
-            </Link>
-            <Link
-              href={createURL("view", "grid4")}
-              className={`p-2 rounded ${gridView === "grid4" ? "bg-gray-300" : "bg-gray-100"}`}
-            >
-              <FontAwesomeIcon icon={faTh} />
-            </Link>
+          {/* Pagination */}
+          <div className="flex justify-center items-center gap-4 mt-8">
+            {currentPage > 1 && (
+              <Link
+                href={createURL("page", currentPage - 1)}
+                className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded"
+              >
+                Vorige
+              </Link>
+            )}
+            <span className="font-medium">
+              Pagina {currentPage} van {totalPages}
+            </span>
+            {currentPage < totalPages && (
+              <Link
+                href={createURL("page", currentPage + 1)}
+                className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded"
+              >
+                Volgende
+              </Link>
+            )}
           </div>
         </div>
-
-        {/* Product Grid - Mobile: 1 per row, Small/Medium: 2 per row */}
-        <div className={`grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 ${gridView === "grid2" ? "lg:grid-cols-2" : "lg:grid-cols-4"}`}>
-          {paginatedProducts.map((product) => (
-            <ProductCard key={product.id_product_mysql} product={product} />
-          ))}
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-center items-center gap-4 mt-8">
-          {currentPage > 1 && (
-            <Link href={createURL("page", currentPage - 1)} className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded">
-              Vorige
-            </Link>
-          )}
-          <span className="font-medium">
-            Pagina {currentPage} van {totalPages}
-          </span>
-          {currentPage < totalPages && (
-            <Link href={createURL("page", currentPage + 1)} className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded">
-              Volgende
-            </Link>
-          )}
-        </div>
       </div>
-    </div>
+    </ProductProvider>
   );
 }

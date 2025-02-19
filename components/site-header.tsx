@@ -38,7 +38,7 @@ export function SiteHeader() {
               <NavLink href="/bier">BIER</NavLink>
               <NavLink href="/cocktails">COCKTAILS</NavLink>
               <NavLink href="/frisdranken">FRISDRANKEN</NavLink>
-              <NavLink href="/horeca">MIX DRANKEN</NavLink>
+              <NavLink href="/mix-dranken">MIX DRANKEN</NavLink>
               <NavLink href="/assortiment">ASSORTIMENT</NavLink>
               <NavLink href="/acties">Acties</NavLink>
             </nav>

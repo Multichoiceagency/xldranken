@@ -6,11 +6,18 @@ import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import Hero from "@/components/Hero";
 
-export default async function AlcoholPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
+export default async function AlcoholPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | undefined };
+}) {
+  // Zet searchParams om in een plain object zodat we er veilig mee kunnen werken
+  const sp = { ...searchParams };
+
   const categoryId = "10";
-  const currentPage = Number(searchParams.page) || 1;
-  const productsPerPage = Number(searchParams.limit) || 24;
-  const gridView = searchParams.view === "grid2" ? "grid2" : "grid4"; // Default: 4-column grid
+  const currentPage = Number(sp.page) || 1;
+  const productsPerPage = Number(sp.limit) || 24;
+  const gridView = sp.view === "grid2" ? "grid2" : "grid4"; // Default: 4-column grid
 
   // Fetch products on the server
   const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId);
@@ -20,18 +27,18 @@ export default async function AlcoholPage({ searchParams }: { searchParams: { [k
   const paginatedProducts = allProducts.slice(startIndex, startIndex + productsPerPage);
   const totalPages = Math.ceil(allProducts.length / productsPerPage);
 
-  // ✅ Correct `URLSearchParams` handling
+  // Correct URLSearchParams handling
   const createURL = (key: string, value: string | number) => {
     const params = new URLSearchParams();
 
-    // ✅ Convert `searchParams` safely into URLSearchParams
-    Object.entries(searchParams || {}).forEach(([paramKey, paramValue]) => {
+    // Gebruik de plain object sp in plaats van searchParams
+    Object.entries(sp).forEach(([paramKey, paramValue]) => {
       if (paramValue !== undefined && paramValue !== null) {
         params.set(paramKey, paramValue.toString());
       }
     });
 
-    params.set(key, value.toString()); // ✅ Update the specific parameter
+    params.set(key, value.toString());
     return `/alcohol?${params.toString()}`;
   };
 
@@ -84,7 +91,10 @@ export default async function AlcoholPage({ searchParams }: { searchParams: { [k
         {/* Pagination */}
         <div className="flex justify-center items-center gap-4 mt-8">
           {currentPage > 1 && (
-            <Link href={createURL("page", currentPage - 1)} className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded">
+            <Link
+              href={createURL("page", currentPage - 1)}
+              className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded"
+            >
               Vorige
             </Link>
           )}
@@ -92,7 +102,10 @@ export default async function AlcoholPage({ searchParams }: { searchParams: { [k
             Pagina {currentPage} van {totalPages}
           </span>
           {currentPage < totalPages && (
-            <Link href={createURL("page", currentPage + 1)} className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded">
+            <Link
+              href={createURL("page", currentPage + 1)}
+              className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded"
+            >
               Volgende
             </Link>
           )}

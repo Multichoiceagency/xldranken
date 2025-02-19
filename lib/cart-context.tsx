@@ -18,8 +18,10 @@ interface CartContextType {
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
-  isInCart: (id: string) => boolean; // ✅ New function to check if item is in cart
+  isInCart: (id: string) => boolean;
   getCartTotal: () => { totalItems: number; totalPrice: number };
+  notification: string | null;                          // ✅ Nieuw veld
+  setNotification: React.Dispatch<React.SetStateAction<string | null>>; // ✅ Setter
 }
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -32,8 +34,34 @@ export const useCart = () => {
   return context;
 };
 
+// ✅ Kleine component voor de floating notificatie
+function CartNotification() {
+  const { notification, setNotification } = useCart();
+
+  useEffect(() => {
+    if (!notification) return;
+    // Verberg de notificatie na 3 seconden
+    const timer = setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+
+    // Opruimen bij unmount of bij nieuwe notificatie
+    return () => clearTimeout(timer);
+  }, [notification, setNotification]);
+
+  // Als er geen notificatie is, renderen we niets
+  if (!notification) return null;
+
+  return (
+    <div className="fixed top-5 right-5 z-50 bg-green-500 text-white py-2 px-4 rounded shadow-md">
+      {notification}
+    </div>
+  );
+}
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [notification, setNotification] = useState<string | null>(null);
 
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
@@ -50,14 +78,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCart((currentCart) => {
       const existingItem = currentCart.find((cartItem) => cartItem.id === item.id);
       if (existingItem) {
+        // Als het item al in de cart zit, verhoog alleen de quantity
         return currentCart.map((cartItem) =>
           cartItem.id === item.id
             ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
             : cartItem
         );
       }
+      // Anders nieuw item toevoegen
       return [...currentCart, item];
     });
+
+    // ✅ Stuur een notificatie dat het product is toegevoegd
+    setNotification(`Artikel "${item.name}" succesvol toegevoegd!`);
   };
 
   const removeFromCart = (id: string) => {
@@ -93,9 +126,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, isInCart, getCartTotal }}
+      value={{
+        cart,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        isInCart,
+        getCartTotal,
+        notification,     // ✅
+        setNotification,  // ✅
+      }}
     >
       {children}
+      {/* ✅ Plaats de notificatiecomponent buiten {children}, zodat deze overal zichtbaar is */}
+      <CartNotification />
     </CartContext.Provider>
   );
 };

@@ -13,7 +13,7 @@ const promos = [
     image:
       "https://images.pexels.com/photos/66636/pexels-photo-66636.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
     buttonText: "Nu bestellen",
-    href: "#",
+    href: "/assortiment",
   },
   {
     title: "Bekijk nu de aanbieding van deze maand",
@@ -22,7 +22,7 @@ const promos = [
     image:
       "https://images.pexels.com/photos/616836/pexels-photo-616836.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
     buttonText: "Meer informatie",
-    href: "#",
+    href: "/assortiment",
   },
   {
     title: "Ontdek Onze Eigen Merken – Exclusieve Rumselectie",
@@ -31,7 +31,7 @@ const promos = [
     image:
       "https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
     buttonText: "Bekijken",
-    href: "#",
+    href: "/assortiment",
   },
 ]
 
@@ -66,7 +66,7 @@ export function PromoGrid() {
           {/* Grote afbeelding links */}
           <div className="relative h-[600px] md:h-full overflow-hidden rounded-lg transition-all duration-300 hover:shadow-2xl transform hover:-translate-y-2 hover:rotate-1 group">
             <Image
-              src="/winkel/winkel1.jpeg"
+              src="/winkel/winkel1.png"
               alt={promos[0].description}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"

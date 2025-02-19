@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const API_URL = "https://api.megawin.be/product/list/";
+const API_URL = process.env.NEXT_PUBLIC_API_URL as string;
 const API_KEY = process.env.API_KEY as string;
 
 async function fetchWithTimeout(url: string, options = {}, timeout = 8000) {

@@ -43,26 +43,24 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   return (
     <div className="group relative flex flex-col bg-white rounded-lg border hover:shadow-lg transition-all duration-300">
       {/* Productafbeelding */}
-      <Link
-        href={`/product/${encodeURIComponent(product.id_product_mysql)}`}
+      <div
         className="relative h-[200px] w-full overflow-hidden p-4"
       >
         <Image
           src={imageSrc}
           alt={product.title}
+          style={{padding: "10px"}}
           fill
           className="object-contain group-hover:scale-105 transition-transform duration-300"
           unoptimized
         />
-      </Link>
+      </div>
 
       {/* Productdetails */}
-      <div className="flex flex-col p-4 pt-0">
-        <Link href={`/product/${encodeURIComponent(product.id_product_mysql)}`}>
+      <div className="flex flex-col p-4 pt-0" style={{paddingTop: "15px"}}>
           <h3 className="font-medium text-[#002B7F] hover:underline min-h-[2.5rem] line-clamp-2">
             {product.title}
           </h3>
-        </Link>
 
         {/* Prijsweergave */}
         <div className="space-y-1">

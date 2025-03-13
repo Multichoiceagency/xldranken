@@ -3,6 +3,8 @@
 import { FeaturedProductsCarousel } from "@/components/featured-products-carousel"
 import { getProductsByFam2ID } from "@/lib/api"
 
+console.log('Loading products')
+
 export async function FeaturedProducts({ fam2ID = "" }: { fam2ID?: string }) {
   const products = await getProductsByFam2ID(fam2ID)
 

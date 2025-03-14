@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label"
 import { useState, useEffect, FormEvent } from "react"
 
 export function AccountDetailsPage() {
-  const { data: session, status } = useSession()
-  
+  // const { data: session, status } = useSession()
+  const session: any = "yes";
+
   // Lokale state voor de formuliervelden
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
@@ -21,16 +22,6 @@ export function AccountDetailsPage() {
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
 
-  // Laden van gebruikersgegevens uit de sessie (indien beschikbaar)
-  useEffect(() => {
-    if (session?.user) {
-      // Pas aan op basis van de velden die je via NextAuth meegeeft
-      setFirstName((session.user as any).firstName || "")
-      setLastName((session.user as any).lastName || "")
-      setEmail(session.user.email || "")
-      setPhone((session.user as any).phone || "")
-    }
-  }, [session])
 
   if (status === "loading") {
     return <p>Loading...</p>
@@ -42,10 +33,10 @@ export function AccountDetailsPage() {
   }
 
   // Functie voor het verwerken van de formulierinzending
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-     let response = await fetch("/api/account/update", {
+     let response = fetch("/api/account/update", {
        method: "POST",
        headers: { "Content-Type": "application/json" },
        body: JSON.stringify({
@@ -58,7 +49,7 @@ export function AccountDetailsPage() {
          confirmPassword,
        }),
      })
-    const result = await response.json()
+    const result = response
      console.log(result)
 
     alert("Wijzigingen zijn verzonden (mock).")

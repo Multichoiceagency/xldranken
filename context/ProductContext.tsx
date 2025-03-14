@@ -25,24 +25,6 @@ export const ProductProvider = ({ children }: { children: React.ReactNode }) => 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        // Fetch from Next.js API Route instead of external API
-        const response = await fetch("/api/proxy")
-        if (!response.ok) throw new Error("Failed to fetch products")
-        const data = await response.json()
-        setProducts(data.products || []) // Ensure products exist in API response
-      } catch (err) {
-        setError((err as Error).message)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProducts()
-  }, [])
-
   return (
     <ProductContext.Provider value={{ products, loading, error }}>
       {children}

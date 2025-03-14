@@ -28,42 +28,7 @@ export function ProductPage({ productId }: ProductPageProps) {
   const router = useRouter();
 
   // Product ophalen (met fallback naar nocategory)
-  useEffect(() => {
-    const fetchProduct = async () => {
-      if (!productId) {
-        setError("Geen product-ID opgegeven.");
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        // Probeer eerst met nocategory=true
-        let res = await fetch(`/api/proxy?id=${productId}&nocategory=true`);
-        if (!res.ok) {
-          throw new Error(`API Error ${res.status}: ${res.statusText}`);
-        }
-        let data = await res.json();
-        // Als er geen product is, probeer zonder nocategory
-        if (!data?.product) {
-          res = await fetch(`/api/proxy?id=${productId}`);
-          if (!res.ok) {
-            throw new Error(`API Error ${res.status}: ${res.statusText}`);
-          }
-          data = await res.json();
-          if (!data?.product) {
-            throw new Error("Geen productdata ontvangen");
-          }
-        }
-        setProduct(data.product);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchProduct();
-  }, [productId]);
 
   // Loading & Error States
   if (loading) {

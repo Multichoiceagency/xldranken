@@ -51,7 +51,7 @@ export default async function Home() {
       title="MEEST VERKOCHTE ALCOHOL SOORTEN"
       subtitle="Bekijk alle alcohol soorten meer dan 100 diverse artikelen uit voorraad leverbaar!"
       products={wineProducts.slice(0, 10)}
-      viewAllLink="/wijnen"
+      viewAllLink="/cocktails"
       backgroundColor="white"
       titleColor="#D0C298"
       subtitleColor="black"
@@ -61,7 +61,7 @@ export default async function Home() {
       title="Food & Non Food"
       subtitle="Food en Non-Food producten voor restaurants en Cafe Bar's"
       products={NonFood.slice(0, 10)}
-      viewAllLink="/wijnen"
+      viewAllLink="/shop"
       backgroundColor="#0F3059"
       titleColor="#D0C298"
       subtitleColor="white"

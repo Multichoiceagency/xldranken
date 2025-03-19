@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 
 export function SiteFooter() {
   return (
-    <footer className="bg-white pt-12 pb-24 md:pb-12">
+    <footer className="bg-indigo-950 text-white pt-12 pb-24 md:pb-12">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div>
@@ -21,35 +21,35 @@ export function SiteFooter() {
               />
             <h3 className="font-bold mb-4 mt-4">Informatie</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/mailto:info@xlgroothandelbv.nl" className="font-bold hover:text-[#FFD700]">info@xlgroothandelbv.nl</Link></li>
-              <li><Link href="/contact" className="font-bold hover:text-[#FFD700]">Turfschipper 116, 2292 JB Wateringen</Link></li>
-              <li><Link href="/tel:0615472574" className="font-bold hover:text-[#FFD700]">Klantenservice +31 6 154 725 74</Link></li>
-              <li><Link href="/blank" className="text-green-600  font-bold hover:text-[#FFD700]">Whatsapp bericht versturen</Link></li>
+              <li><Link href="/mailto:info@xlgroothandelbv.nl" className="font-bold hover:text-[#d0c298]">info@xlgroothandelbv.nl</Link></li>
+              <li><Link href="/contact" className="font-bold hover:text-[#d0c298]">Turfschipper 116, 2292 JB Wateringen</Link></li>
+              <li><Link href="/tel:0615472574" className="font-bold hover:text-[#d0c298]">Klantenservice +31 6 154 725 74</Link></li>
+              <li><Link href="/blank" className="text-green-600  font-bold hover:text-[#d0c298]">Whatsapp bericht versturen</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-bold mb-4">SHOP</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/wijn" className="hover:text-[#FFD700]">Wijn</Link></li>
-              <li><Link href="/mousserend" className="hover:text-[#FFD700]">Mousserend</Link></li>
-              <li><Link href="/whisky" className="hover:text-[#FFD700]">Whisky</Link></li>
-              <li><Link href="/mixen" className="hover:text-[#FFD700]">Mixen</Link></li>
-              <li><Link href="/likeuren" className="hover:text-[#FFD700]">Likeuren</Link></li>
-              <li><Link href="/jenever-bitter-vieux" className="hover:text-[#FFD700]">Jenever, Bitter & Vieux</Link></li>
-              <li><Link href="/cognac" className="hover:text-[#FFD700]">Cognac</Link></li>
+            <ul className="space-y-2 text-md font-medium">
+              <li><Link href="/shop" className="hover:text-[#d0c298]">Gehele assortiment</Link></li>
+              <li><Link href="/alcohol" className="hover:text-[#d0c298]">Alcohol</Link></li>
+              <li><Link href="/bier" className="hover:text-[#d0c298]">Bier</Link></li>
+              <li><Link href="/cocktails" className="hover:text-[#d0c298]">Cocktails</Link></li>
+              <li><Link href="/frisdranken" className="hover:text-[#d0c298]">Frisdranken</Link></li>
+              <li><Link href="/mix-dranken" className="hover:text-[#d0c298]">Mix dranken</Link></li>
+              <li><Link href="/cognac" className="hover:text-[green] font-bold">ACTIES</Link></li>
             </ul>
           </div>
 
           {/* Discover Column */}
           <div>
-            <h3 className="font-bold mb-4">ONTDEK</h3>
+            <h3 className="font-bold mb-4">QUICK LINKS</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/port-en-sherry" className="hover:text-[#FFD700]">Port en sherry</Link></li>
-              <li><Link href="/bier" className="hover:text-[#FFD700]">Bier</Link></li>
-              <li><Link href="/alcoholvrij" className="hover:text-[#FFD700]">Alcoholvrij</Link></li>
-              <li><Link href="/cadeau" className="hover:text-[#FFD700]">Cadeau</Link></li>
-              <li><Link href="/acties" className="hover:text-[#FFD700]">Acties</Link></li>
-              <li><Link href="/kelderopruiming" className="hover:text-[#FFD700]">Kelderopruiming</Link></li>
+              <li><Link href="/port-en-sherry" className="hover:text-[#d0c298]">Wenslijst</Link></li>
+              <li><Link href="/bier" className="hover:text-[#d0c298]">Winkelmand</Link></li>
+              <li><Link href="/alcoholvrij" className="hover:text-[#d0c298]">Mijn account</Link></li>
+              <li><Link href="/cadeau" className="hover:text-[#d0c298]">Mijn bestellingen</Link></li>
+              <li><Link href="/acties" className="hover:text-[#d0c298]">Bestellijst</Link></li>
+              <li><Link href="/kelderopruiming" className="hover:text-[#d0c298]">Kelderopruiming</Link></li>
             </ul>
           </div>
 
@@ -57,14 +57,13 @@ export function SiteFooter() {
           <div>
             <h3 className="font-bold mb-4">SERVICE</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/meest-gestelde-vragen" className="hover:text-[#FFD700]">Meest gestelde vragen</Link></li>
-              <li><Link href="/online-drank-bestellen" className="hover:text-[#FFD700]">Online drank bestellen</Link></li>
-              <li><Link href="/zakelijk" className="hover:text-[#FFD700]">Zakelijk</Link></li>
-              <li><Link href="/winkels" className="hover:text-[#FFD700]">Winkels</Link></li>
-              <li><Link href="/contact" className="hover:text-[#FFD700]">Contact</Link></li>
-              <li><Link href="/smaakgarantie" className="hover:text-[#FFD700]">Smaakgarantie</Link></li>
-              <li><Link href="/mijn-account" className="hover:text-[#FFD700]">Mijn account</Link></li>
-              <li><Link href="/folder" className="hover:text-[#FFD700]">Folder</Link></li>
+              <li><Link href="/veelgestelde-vragen" className="hover:text-[#d0c298]">Veel gestelde vragen</Link></li>
+              <li><Link href="/online-drank-bestellen" className="hover:text-[#d0c298]">Online drank bestellen</Link></li>
+              <li><Link href="/zakelijk" className="hover:text-[#d0c298]">Zakelijk</Link></li>
+              <li><Link href="/winkels" className="hover:text-[#d0c298]">Winkels</Link></li>
+              <li><Link href="/contact" className="hover:text-[#d0c298]">Contact</Link></li>
+              <li><Link href="/mijn-account" className="hover:text-[#d0c298]">Mijn account</Link></li>
+              <li><Link href="/folder" className="hover:text-[#d0c298]">Folder</Link></li>
             </ul>
           </div>
 
@@ -72,13 +71,13 @@ export function SiteFooter() {
           <div>
             <h3 className="font-bold mb-4">XL DRANKEN</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/over-ons" className="hover:text-[#FFD700]">Over XL Dranken</Link></li>
-              <li><Link href="/vacatures" className="hover:text-[#FFD700]">Vacatures</Link></li>
-              <li><Link href="/premium" className="hover:text-[#FFD700]">Mijn XL Dranken Premium</Link></li>
-              <li><Link href="/kwetsbaarheid" className="hover:text-[#FFD700]">Kwetsbaarheid melden</Link></li>
-              <li><Link href="/verantwoord-alcoholgebruik" className="hover:text-[#FFD700]">Verantwoord alcoholgebruik</Link></li>
-              <li><Link href="/duurzaamheid" className="hover:text-[#FFD700]">Duurzaamheid en XL Dranken</Link></li>
-              <li><Link href="/pers" className="hover:text-[#FFD700]">Pers</Link></li>
+              <li><Link href="/over-ons" className="hover:text-[#d0c298]">Over XL Dranken</Link></li>
+              <li><Link href="/vacatures" className="hover:text-[#d0c298]">Vacatures</Link></li>
+              <li><Link href="/premium" className="hover:text-[#d0c298]">Mijn XL Dranken Premium</Link></li>
+              <li><Link href="/kwetsbaarheid" className="hover:text-[#d0c298]">Kwetsbaarheid melden</Link></li>
+              <li><Link href="/verantwoord-alcoholgebruik" className="hover:text-[#d0c298]">Verantwoord alcoholgebruik</Link></li>
+              <li><Link href="/duurzaamheid" className="hover:text-[#d0c298]">Duurzaamheid en XL Dranken</Link></li>
+              <li><Link href="/pers" className="hover:text-[#d0c298]">Pers</Link></li>
             </ul>
           </div>
         </div>
@@ -110,19 +109,19 @@ export function SiteFooter() {
             
           </div>
           {/* Copyright and Legal */}
-          <div className="mt-6 flex flex-col md:flex-row space-between items-center text-sm text-gray-600">
+          <div className="mt-6 flex flex-col md:flex-row space-between justify-center items-center text-sm text-white">
             <div className="flex flex-wrap items-center gap-2 justify-center md:justify-center">
-              <span>Gebouwd met React Native door Multichoiceagency © 2025 XL Dranken</span>
+              <span>Gebouwd met NextJS door Multichoiceagency en YX Digital © 2025 XL Dranken</span>
               <span>|</span>
-              <Link href="/algemene-voorwaarden" className="hover:text-[#FFD700]">
+              <Link href="/algemene-voorwaarden" className="hover:text-[#d0c298]">
                 Algemene voorwaarden
               </Link>
               <span>-</span>
-              <Link href="/privacybeleid" className="hover:text-[#FFD700]">
+              <Link href="/privacybeleid" className="hover:text-[#d0c298]">
                 Privacybeleid
               </Link>
               <span>-</span>
-              <Link href="/cookiebeleid" className="hover:text-[#FFD700]">
+              <Link href="/cookiebeleid" className="hover:text-[#d0c298]">
                 Cookiebeleid
               </Link>
             </div>

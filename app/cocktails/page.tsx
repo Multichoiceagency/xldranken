@@ -1,103 +1,45 @@
-import { getProductsByFam2ID } from "@/lib/api";
-import ProductCard from "@/components/product-card";
-import type { ProductProps } from "@/types/product";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
-import Hero from "@/components/Hero";
+import { getProductsByFam2ID } from "@/lib/api"
+import ProductCard from "@/components/product-card"
+import type { ProductProps } from "@/types/product"
+import Hero from "@/components/Hero"
+import { Suspense } from "react"
+import { Spinner } from "@/components/ui/spinner"
+import CocktailsPageClient from "./cocktails-page-client"
 
-export default async function CocktailsPage({ searchParams }: { searchParams: { [key: string]: string | undefined } }) {
-  const categoryId = "5";
-  const currentPage = Number(searchParams.page) || 1;
-  const productsPerPage = Number(searchParams.limit) || 24;
-  const gridView = searchParams.view === "grid2" ? "grid2" : "grid4"; // Default: 4-column grid
+export default function CocktailsPage() {
+  const categoryId = "1"
 
-  // Fetch products on the server
-  const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId);
+  // Fetch products on the server - use async/await in a separate function
+  const ProductGrid = async () => {
+    const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId)
 
-  // Pagination logic
-  const startIndex = (currentPage - 1) * productsPerPage;
-  const paginatedProducts = allProducts.slice(startIndex, startIndex + productsPerPage);
-  const totalPages = Math.ceil(allProducts.length / productsPerPage);
-
-  // ✅ Correct `URLSearchParams` handling
-  const createURL = (key: string, value: string | number) => {
-    const params = new URLSearchParams();
-
-    // ✅ Convert `searchParams` safely into URLSearchParams
-    Object.entries(searchParams || {}).forEach(([paramKey, paramValue]) => {
-      if (paramValue !== undefined && paramValue !== null) {
-        params.set(paramKey, paramValue.toString());
-      }
-    });
-
-    params.set(key, value.toString()); // ✅ Update the specific parameter
-    return `/cocktails?${params.toString()}`;
-  };
+    return (
+      <CocktailsPageClient initialProducts={allProducts} />
+    )
+  }
 
   return (
     <div>
       {/* Hero Section */}
-      <Hero title="Cocktails Assortiment" description="Bekijk meer dan 100 diverse cocktails soorten" />
+      <Hero title="Cocktails" description="Bekijk meer dan 100 diverse cocktail soorten" />
 
       {/* Product Section */}
       <div className="container mx-auto px-8 py-8">
-        {/* Show per page & Grid View Controls */}
-        <div className="flex items-center justify-between border-b pb-4 mb-6">
-          <div className="flex items-center space-x-2 text-sm">
-            <span className="font-medium">Aantal producten per pagina:</span>
-            {[8, 12, 20, 28].map((num) => (
-              <Link
-                key={num}
-                href={createURL("limit", num)}
-                className={`px-2 ${productsPerPage === num ? "font-bold text-black" : "text-gray-500"}`}
-              >
-                {num}
-              </Link>
-            ))}
-          </div>
-
-          {/* Grid View Toggle */}
-          <div className="flex space-x-2">
-            <Link
-              href={createURL("view", "grid2")}
-              className={`p-2 rounded ${gridView === "grid2" ? "bg-gray-300" : "bg-gray-100"}`}
-            >
-              <FontAwesomeIcon icon={faThLarge} />
-            </Link>
-            <Link
-              href={createURL("view", "grid4")}
-              className={`p-2 rounded ${gridView === "grid4" ? "bg-gray-300" : "bg-gray-100"}`}
-            >
-              <FontAwesomeIcon icon={faTh} />
-            </Link>
-          </div>
-        </div>
-
         {/* Product Grid */}
-        <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-2" : "grid-cols-4"}`}>
-          {paginatedProducts.map((product) => (
-            <ProductCard key={product.id_product_mysql} product={product} />
-          ))}
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-center items-center gap-4 mt-8">
-          {currentPage > 1 && (
-            <Link href={createURL("page", currentPage - 1)} className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded">
-              Vorige
-            </Link>
-          )}
-          <span className="font-medium">
-            Pagina {currentPage} van {totalPages}
-          </span>
-          {currentPage < totalPages && (
-            <Link href={createURL("page", currentPage + 1)} className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded">
-              Volgende
-            </Link>
-          )}
-        </div>
+        <Suspense
+          fallback={
+            <div className="min-h-screen flex flex-col items-center justify-center">
+            <div className="text-center">
+              <Spinner size="large" className="text-[#E2B505] mb-4" />
+              <h2 className="text-xl font-semibold mt-4">Producten worden geladen...</h2>
+              <p className="text-gray-500 mt-2">Even geduld alstublieft</p>
+            </div>
+          </div>
+          }
+        >
+          <ProductGrid />
+        </Suspense>
       </div>
     </div>
-  );
+  )
 }

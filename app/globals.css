@@ -65,7 +65,15 @@
     --ring: 212.7 26.8% 83.9%;
   }
 }
+/* Removed these custom classes */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
 
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
  
 @layer base {
   * {

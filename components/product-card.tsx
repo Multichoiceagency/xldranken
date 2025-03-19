@@ -1,99 +1,177 @@
-"use client";
+"use client"
 
-import Image from "next/image";
-import { ShoppingCart } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useCart } from "@/lib/cart-context";
-import type { ProductProps } from "@/types/product";
+import { useState } from "react"
+import Image from "next/image"
+import { ShoppingCart, Check, Plus, Minus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useCart } from "@/lib/cart-context"
+import { useToast } from "@/hooks/use-toast"
+import type { ProductProps } from "@/types/product"
 
-export default function ProductCard ({ product }: { product: ProductProps }) {
-  const { addToCart } = useCart();
+export default function ProductCard({ product }: { product: ProductProps }) {
+  const { addToCart, isInCart, cart, updateQuantity } = useCart()
+  const { toast } = useToast()
+  const [isAnimating, setIsAnimating] = useState(false)
 
-  if (!product) return <p className="text-gray-500">Product not found</p>;
+  if (!product) return <p className="text-gray-500">Product not found</p>
 
-  // Bouw de juiste image URL op: als de base64-string al een prefix heeft, gebruik die,
-  // anders voeg de 'data:image/jpeg;base64,' prefix toe. Gebruik een fallback als geen afbeelding beschikbaar is.
+  // Build the correct image URL
   const imageSrc = product.photo1_base64
     ? product.photo1_base64.startsWith("data:image")
       ? product.photo1_base64
       : `data:image/jpeg;base64,${product.photo1_base64}`
-    : "/placeholder.svg";
+    : "/placeholder.svg"
+
+  // Format price
+  const regularPrice = Number(product.prix_vente_groupe)
+  const productInCart = isInCart(product.id_product_mysql)
+
+  // Get current quantity if product is in cart
+  const currentQuantity = productInCart ? cart.find((item) => item.id === product.id_product_mysql)?.quantity || 0 : 0
 
   const handleAddToCart = () => {
+    // Set animation state
+    setIsAnimating(true)
+
+    // Create cart item
     addToCart({
       id: product.id_product_mysql,
       name: product.title,
-      price:
-        product.prix_en_promo !== null
-          ? Number(product.prix_en_promo)
-          : Number(product.prix_vente_groupe),
+      price: regularPrice,
       image: imageSrc,
       volume: product.arcleunik,
-      productCode: product.productCode,
+      productCode: product.productCode || "",
       quantity: 1,
-    });
-  };
+    })
 
-  // Formatteren van prijzen
-  const regularPrice = Number(product.prix_vente_groupe);
-  const promoPrice =
-    product.prix_en_promo !== null ? Number(product.prix_en_promo) : null;
+    // Show toast notification
+    toast({
+      title: "Product toegevoegd",
+      description: `${product.title} is toegevoegd aan je winkelwagen`,
+    })
+
+    // Reset animation state after animation completes
+    setTimeout(() => {
+      setIsAnimating(false)
+    }, 1000)
+  }
+
+  const handleIncreaseQuantity = () => {
+    updateQuantity(product.id_product_mysql, currentQuantity + 1)
+
+    toast({
+      title: "Hoeveelheid bijgewerkt",
+      description: `${product.title}: ${currentQuantity + 1} stuks in winkelwagen`,
+    })
+  }
+
+  const handleDecreaseQuantity = () => {
+    if (currentQuantity > 1) {
+      updateQuantity(product.id_product_mysql, currentQuantity - 1)
+
+      toast({
+        title: "Hoeveelheid bijgewerkt",
+        description: `${product.title}: ${currentQuantity - 1} stuks in winkelwagen`,
+      })
+    }
+  }
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-lg border hover:shadow-lg transition-all duration-300">
-      {/* Productafbeelding */}
-      <div
-        className="relative h-[200px] w-full overflow-hidden p-4"
-      >
+    <div
+      className={`group relative flex flex-col bg-white rounded-lg border transition-all duration-300 h-full ${
+        isAnimating ? "shadow-lg scale-[1.02]" : "hover:shadow-lg"
+      }`}
+    >
+      {/* Product image */}
+      <div className="relative h-[200px] w-full overflow-hidden p-4">
         <Image
-          src={imageSrc}
+          src={imageSrc || "/placeholder.svg"}
           alt={product.title}
-          style={{padding: "10px"}}
+          style={{ padding: "10px" }}
           fill
-          className="object-contain group-hover:scale-105 transition-transform duration-300"
+          className={`object-contain transition-transform duration-500 ${
+            isAnimating ? "scale-110" : "group-hover:scale-105"
+          }`}
           unoptimized
         />
+
+        {/* Animation overlay when adding to cart */}
+        {isAnimating && (
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 animate-pulse">
+            <div className="bg-green-500 text-white rounded-full p-2 animate-bounce">
+              <Check className="w-6 h-6" />
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Productdetails */}
-      <div className="flex flex-col p-4 pt-0" style={{paddingTop: "15px"}}>
-          <h3 className="font-medium text-[#002B7F] hover:underline min-h-[2.5rem] line-clamp-2">
-            {product.title}
-          </h3>
+      {/* Product details */}
+      <div className="flex flex-col p-4 pt-0" style={{ paddingTop: "15px" }}>
+        <h3 className="font-medium text-[#002B7F] hover:underline min-h-[2.5rem] line-clamp-2">{product.title}</h3>
 
-        {/* Prijsweergave */}
+        {/* Price display */}
         <div className="space-y-1">
-          {regularPrice > 0 || promoPrice ? (
-            promoPrice ? (
-              <>
-                <div className="text-gray-500 line-through text-sm">
-                  € {regularPrice.toFixed(2).replace(".", ",")}
-                </div>
-                <div className="text-[#E31931] text-2xl font-bold">
-                  € {promoPrice.toFixed(2).replace(".", ",")}
-                </div>
-              </>
-            ) : (
-              <div className="text-[#E31931] text-2xl font-bold">
-                € {regularPrice.toFixed(2).replace(".", ",")}
-              </div>
-            )
+          {regularPrice > 0 ? (
+            <div className="text-[#E31931] text-2xl font-bold">€ {regularPrice.toFixed(2).replace(".", ",")}</div>
           ) : (
             <div className="text-gray-500 text-sm">Prijs niet beschikbaar</div>
           )}
         </div>
 
-        {/* Winkelwagenknop */}
+        {/* Add to cart button or quantity controls */}
         <div className="mt-4">
-          <Button
-            className="w-full bg-[#E2B505] hover:bg-[#E2B505]/90 text-white transition-all duration-300 hover:shadow-md"
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            In winkelmand
-          </Button>
+          {isAnimating ? (
+            <Button className="w-full bg-green-500 scale-105 shadow-md text-white transition-all duration-300" disabled>
+              <Check className="w-4 h-4 mr-2 animate-bounce" />
+              Toegevoegd!
+            </Button>
+          ) : productInCart ? (
+            <div className="flex items-center space-x-2">
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white transition-all duration-300 hover:shadow-md"
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                <span className="whitespace-nowrap">In winkelmand</span>
+              </Button>
+
+              <div className="flex items-center border rounded-md">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900"
+                  onClick={handleDecreaseQuantity}
+                  disabled={currentQuantity <= 1}
+                >
+                  <Minus className="h-3 w-3" />
+                  <span className="sr-only">Verminderen</span>
+                </Button>
+
+                <span className="w-8 text-center text-sm font-medium">{currentQuantity}</span>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900"
+                  onClick={handleIncreaseQuantity}
+                >
+                  <Plus className="h-3 w-3" />
+                  <span className="sr-only">Vermeerderen</span>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button
+              className="w-full bg-[#E2B505] hover:bg-[#E2B505]/90 text-white transition-all duration-300 hover:shadow-md"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              In winkelmand
+            </Button>
+          )}
         </div>
       </div>
     </div>
-  );
+  )
 }
+

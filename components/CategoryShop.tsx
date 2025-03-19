@@ -19,29 +19,6 @@ export default function CategoryShop({ categoryId }: CategoryShopProps) {
   const [error, setError] = useState<string | null>(null);
   const { addToCart } = useCart();
 
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        setLoading(true);
-        // Haal producten op voor de opgegeven categorie via je API-proxy
-        const res = await fetch(`/api/proxy?fam2ID=${categoryId}`);
-        if (!res.ok) {
-          throw new Error("Failed to fetch products");
-        }
-        const data = await res.json();
-        if (!data?.result?.product || !Array.isArray(data.result.product)) {
-          throw new Error("No products found");
-        }
-        setProducts(data.result.product);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchProducts();
-  }, [categoryId]);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">

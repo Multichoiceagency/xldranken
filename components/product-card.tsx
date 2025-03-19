@@ -1,13 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 import type { ProductProps } from "@/types/product";
 
-export default function ProductCard({ product }: { product: ProductProps }) {
+export default function ProductCard ({ product }: { product: ProductProps }) {
   const { addToCart } = useCart();
 
   if (!product) return <p className="text-gray-500">Product not found</p>;

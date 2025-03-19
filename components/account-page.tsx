@@ -5,10 +5,7 @@ import {
   ClipboardList,
   MessageCircle,
   Tag,
-  List,
   Package,
-  Users,
-  Download,
   MapPin,
   User,
   Heart,
@@ -28,10 +25,7 @@ const menuItems: MenuItem[] = [
   { icon: <ClipboardList className="w-8 h-8 text-gray-400" />, title: "Bestellingen", href: "/account/bestellingen" },
   { icon: <MessageCircle className="w-8 h-8 text-gray-400" />, title: "Gesprekken", href: "/account/gesprekken" },
   { icon: <Tag className="w-8 h-8 text-gray-400" />, title: "Aanbiedingen", href: "/account/aanbiedingen" },
-  { icon: <List className="w-8 h-8 text-gray-400" />, title: "Bestellijsten", href: "/account/bestellijsten" },
   { icon: <Package className="w-8 h-8 text-gray-400" />, title: "Bulkbestelling", href: "/account/bulkbestelling" },
-  { icon: <Users className="w-8 h-8 text-gray-400" />, title: "Subaccounts", href: "/account/subaccounts" },
-  { icon: <Download className="w-8 h-8 text-gray-400" />, title: "Downloads", href: "/account/downloads" },
   { icon: <MapPin className="w-8 h-8 text-gray-400" />, title: "Adressen", href: "/account/adressen" },
   { icon: <User className="w-8 h-8 text-gray-400" />, title: "Accountgegevens", href: "/account/gegevens" },
   { icon: <Heart className="w-8 h-8 text-gray-400" />, title: "Wishlist", href: "/account/wishlist" },
@@ -39,9 +33,11 @@ const menuItems: MenuItem[] = [
 ]
 
 export function AccountPage() {
-  const { data: session, status } = useSession()
+  // const { data: session, status } = useSession()
   const searchParams = useSearchParams()
   const loginStatus = searchParams.get("login")
+
+  const session: any = "yes"
 
   if (status === "loading") {
     return <p>Loading...</p>

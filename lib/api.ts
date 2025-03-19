@@ -1,20 +1,36 @@
 import type { ProductProps } from "@/types/product"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL as string
-const API_KEY = process.env.API_KEY as string
+// Get environment variables
+const API_URL = process.env.NEXT_PUBLIC_API_URL
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY
 
 export async function getProductsByFam2ID(fam2ID: string): Promise<ProductProps[]> {
   try {
-    const params = new URLSearchParams({
+    // Validate environment variables before making the request
+    if (!API_URL) {
+      console.error("NEXT_PUBLIC_API_URL is not defined")
+      return []
+    }
+
+    if (!API_KEY) {
+      console.error("NEXT_PUBLIC_API_KEY is not defined")
+      return []
+    }
+
+    // Create the URL - note that the API_URL already includes "/product/list/"
+    // so we need to make sure we're not duplicating that path
+    const baseUrl = API_URL.endsWith("/") ? API_URL : `${API_URL}/`
+
+    const queryParams = new URLSearchParams({
       apikey: API_KEY,
       fam2ID: fam2ID,
     })
 
-    const response = await fetch(`${API_URL}/product/list/?${params.toString()}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    // Remove the "/product/list/" from the URL if it's already included in API_URL
+    const url = `${baseUrl}?${queryParams}`
+    console.log("Fetching from URL:", url) // Debug log to see the constructed URL
+
+    const response = await fetch(url)
 
     if (!response.ok) {
       throw new Error(`API Error: ${response.status} ${response.statusText}`)
@@ -22,45 +38,11 @@ export async function getProductsByFam2ID(fam2ID: string): Promise<ProductProps[
 
     const data = await response.json()
 
-    if (!data?.result?.product || !Array.isArray(data.result.product)) {
-      console.warn(`No products found for fam2ID: ${fam2ID}`)
-      return []
-    }
-
-    return data.result.product
+    // Ensure products is always an array
+    return Array.isArray(data.result?.product) ? data.result.product : []
   } catch (error) {
     console.error("Error fetching products:", error)
     return []
-  }
-}
-
-export async function getProductById(id: string): Promise<ProductProps | null> {
-  try {
-    const params = new URLSearchParams({
-      apikey: API_KEY,
-      id_product: id,
-    })
-
-    const response = await fetch(`${API_URL}?${params.toString()}`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-
-    if (!data?.result?.product || !Array.isArray(data.result.product) || data.result.product.length === 0) {
-      return null
-    }
-
-    return data.result.product[0]
-  } catch (error) {
-    console.error("Error fetching product:", error)
-    return null
   }
 }
 

@@ -1,46 +1,56 @@
-import { getProductsByFam2ID } from "@/lib/api";
-import ProductCard from "@/components/product-card";
-import type { ProductProps } from "@/types/product";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
-import Hero from "@/components/Hero";
+import { getProductsByFam2ID } from "@/lib/api"
+import ProductCard from "@/components/product-card"
+import type { ProductProps } from "@/types/product"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons"
+import Link from "next/link"
+import Hero from "@/components/Hero"
+import { Suspense } from "react"
+import { Spinner } from "@/components/ui/spinner"
 
 export default async function AlcoholPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: { [key: string]: string | undefined }
 }) {
-  // Zet searchParams om in een plain object zodat we er veilig mee kunnen werken
-  const sp = { ...searchParams };
+  // Explicitly type the sp variable to match searchParams
+  const sp: { [key: string]: string | undefined } = {}
 
-  const categoryId = "10";
-  const currentPage = Number(sp.page) || 1;
-  const productsPerPage = Number(sp.limit) || 24;
-  const gridView = sp.view === "grid2" ? "grid2" : "grid4"; // Default: 4-column grid
+  // Safely copy searchParams to sp with null check
+  if (searchParams) {
+    // Use Object.entries instead of Object.keys for better type safety
+    Object.entries(searchParams).forEach(([key, value]) => {
+      sp[key] = value
+    })
+  }
+
+  const categoryId = "5"
+  const currentPage = Number(sp.page) || 1
+  const productsPerPage = Number(sp.limit) || 24
+  const gridView = sp.view === "grid2" ? "grid2" : "grid4" // Default: 4-column grid
 
   // Fetch products on the server
-  const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId);
+  const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId)
 
   // Pagination logic
-  const startIndex = (currentPage - 1) * productsPerPage;
-  const paginatedProducts = allProducts.slice(startIndex, startIndex + productsPerPage);
-  const totalPages = Math.ceil(allProducts.length / productsPerPage);
+  const startIndex = (currentPage - 1) * productsPerPage
+  const paginatedProducts = allProducts.slice(startIndex, startIndex + productsPerPage)
+  const totalPages = Math.ceil(allProducts.length / productsPerPage)
 
   // Correct URLSearchParams handling
   const createURL = (key: string, value: string | number) => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams()
 
-    // Gebruik de plain object sp in plaats van searchParams
+    // Use the sp object instead of searchParams
     Object.entries(sp).forEach(([paramKey, paramValue]) => {
       if (paramValue !== undefined && paramValue !== null) {
-        params.set(paramKey, paramValue.toString());
+        params.set(paramKey, paramValue.toString())
       }
-    });
+    })
 
-    params.set(key, value.toString());
-    return `/alcohol?${params.toString()}`;
-  };
+    params.set(key, value.toString())
+    return `/alcohol?${params.toString()}`
+  }
 
   return (
     <div>
@@ -82,11 +92,25 @@ export default async function AlcoholPage({
         </div>
 
         {/* Product Grid */}
-        <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-2" : "grid-cols-4"}`}>
-          {paginatedProducts.map((product) => (
-            <ProductCard key={product.id_product_mysql} product={product} />
-          ))}
-        </div>
+        <Suspense
+          fallback={
+            <div className="flex justify-center items-center py-20">
+              <Spinner size="large" className="text-[#E2B505]" />
+            </div>
+          }
+        >
+          <div
+            className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}
+          >
+            {paginatedProducts.length > 0 ? (
+              paginatedProducts.map((product) => <ProductCard key={product.id_product_mysql} product={product} />)
+            ) : (
+              <div className="col-span-full text-center py-10">
+                <p className="text-lg font-medium">Geen producten gevonden</p>
+              </div>
+            )}
+          </div>
+        </Suspense>
 
         {/* Pagination */}
         <div className="flex justify-center items-center gap-4 mt-8">
@@ -112,5 +136,6 @@ export default async function AlcoholPage({
         </div>
       </div>
     </div>
-  );
+  )
 }
+

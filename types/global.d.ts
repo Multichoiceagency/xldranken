@@ -2,6 +2,7 @@
 interface Window {
   OneSignalDeferred?: ((OneSignal: any) => void)[]
   OneSignal?: {
+    User: any
     // Common methods for subdomain approach
     init: (options: any) => Promise<any>
     isPushNotificationsEnabled?: () => Promise<boolean>

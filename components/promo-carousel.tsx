@@ -20,7 +20,7 @@ const promos = [
     description: "Aanbieding vanaf 23/01/2025 Sydney Dranken",
     discount: "KORTINGEN TOT WEL 20%",
     image:
-      "https://images.pexels.com/photos/616836/pexels-photo-616836.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
+      "/winkel/winkel2.jpeg",
     buttonText: "Meer informatie",
     href: "/assortiment",
   },
@@ -29,7 +29,7 @@ const promos = [
     description: "Geniet van een exotische reis met onze ambachtelijke rumcollectie.",
     discount: "25% KORTING",
     image:
-      "https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
+      "/winkel/winkel3.jpeg",
     buttonText: "Bekijken",
     href: "/assortiment",
   },

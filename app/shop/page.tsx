@@ -9,7 +9,7 @@ export default function ProductsPage() {
   const ProductGrid = async () => {
     // Fetch products from multiple categories
     // You can add more category IDs or modify this to fetch all products
-    const categoryIds = ["10", "20", "30", "40"] // Example category IDs
+    const categoryIds = ["23", "6", "2", "7" , "12" , "18" , "4" , "5"] // Example category IDs
 
     let allProducts: ProductProps[] = []
 

@@ -1,4 +1,3 @@
-import { PromotionalGrid } from "@/components/promotional-grid";
 import { AboutUsSection } from "@/components/about-us-section";
 import { AppDownload } from "@/components/app-download";
 import { ShopByCategory } from "@/components/shop-by-category";
@@ -16,7 +15,6 @@ export default async function Home() {
   return (
     <div className="overflow-x-hidden">
       <PromoGrid />
-      <PromotionalGrid />
       <FeaturedProductsCarousel
       title="MEEST VERKOCHTE BIER SOORTEN"
       subtitle="Ontdek onze selectie van populaire dranken"
@@ -31,11 +29,11 @@ export default async function Home() {
       title="LOVKA DRINKS"
       subtitle="Premium vodka met een flamboyante smaak"
       products={LovkaProducts.slice(0, 10)}
-      viewAllLink="/wijnen"
+      viewAllLink="/cocktails"
       backgroundColor="white"
       titleColor="#D0C298"
       subtitleColor="black"
-      linkColor="white"
+      linkColor="black"
       />
       <FeaturedProductsCarousel
       title="FRISDRANKEN"
@@ -48,14 +46,14 @@ export default async function Home() {
       linkColor="#D0C298"
       />
       <FeaturedProductsCarousel
-      title="MEEST VERKOCHTE ALCOHOL SOORTEN"
-      subtitle="Bekijk alle alcohol soorten meer dan 100 diverse artikelen uit voorraad leverbaar!"
+      title="MEEST VERKOCHTE BIER SOORTEN"
+      subtitle="Uitgebreid assortiment aan pools bier en andere bier soorten"
       products={wineProducts.slice(0, 10)}
-      viewAllLink="/cocktails"
+      viewAllLink="/bier"
       backgroundColor="white"
       titleColor="#D0C298"
       subtitleColor="black"
-      linkColor="white"
+      linkColor="black"
       />
       <FeaturedProductsCarousel
       title="Food & Non Food"

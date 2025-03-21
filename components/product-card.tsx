@@ -1,7 +1,10 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { ShoppingCart, Check, Plus, Minus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/lib/cart-context"
@@ -12,6 +15,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const { addToCart, isInCart, cart, updateQuantity } = useCart()
   const { toast } = useToast()
   const [isAnimating, setIsAnimating] = useState(false)
+  const router = useRouter()
 
   if (!product) return <p className="text-gray-500">Product not found</p>
 
@@ -29,7 +33,10 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   // Get current quantity if product is in cart
   const currentQuantity = productInCart ? cart.find((item) => item.id === product.id_product_mysql)?.quantity || 0 : 0
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    // Prevent navigation when clicking the add to cart button
+    e.stopPropagation()
+
     // Set animation state
     setIsAnimating(true)
 
@@ -56,7 +63,8 @@ export default function ProductCard({ product }: { product: ProductProps }) {
     }, 1000)
   }
 
-  const handleIncreaseQuantity = () => {
+  const handleIncreaseQuantity = (e: React.MouseEvent) => {
+    e.stopPropagation()
     updateQuantity(product.id_product_mysql, currentQuantity + 1)
 
     toast({
@@ -65,7 +73,8 @@ export default function ProductCard({ product }: { product: ProductProps }) {
     })
   }
 
-  const handleDecreaseQuantity = () => {
+  const handleDecreaseQuantity = (e: React.MouseEvent) => {
+    e.stopPropagation()
     if (currentQuantity > 1) {
       updateQuantity(product.id_product_mysql, currentQuantity - 1)
 
@@ -76,9 +85,15 @@ export default function ProductCard({ product }: { product: ProductProps }) {
     }
   }
 
+  const navigateToProductPage = () => {
+    // Use the product ID for navigation
+    router.push(`/product/${product.id_product_mysql}`)
+  }
+
   return (
     <div
-      className={`group relative flex flex-col bg-white rounded-lg border transition-all duration-300 h-full ${
+      onClick={navigateToProductPage}
+      className={`group relative flex flex-col bg-white rounded-lg border transition-all duration-300 h-full cursor-pointer ${
         isAnimating ? "shadow-lg scale-[1.02]" : "hover:shadow-lg"
       }`}
     >
@@ -119,7 +134,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
         </div>
 
         {/* Add to cart button or quantity controls */}
-        <div className="mt-4">
+        <div className="mt-4" onClick={(e) => e.stopPropagation()}>
           {isAnimating ? (
             <Button className="w-full bg-green-500 scale-105 shadow-md text-white transition-all duration-300" disabled>
               <Check className="w-4 h-4 mr-2 animate-bounce" />

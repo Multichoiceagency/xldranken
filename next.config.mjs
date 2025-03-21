@@ -1,10 +1,3 @@
-let userConfig = undefined
-try {
-  userConfig = await import('./v0-user-next.config')
-} catch (e) {
-  // ignore error
-}
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -17,6 +10,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
     domains: ['example.com'], // Add your image domains here
+    formats: ['image/avif', 'image/webp'], // ✅ Enable AVIF and WebP
   },
   experimental: {
     webpackBuildWorker: true,
@@ -62,28 +56,6 @@ const nextConfig = {
       },
     ];
   },
-}
-
-mergeConfig(nextConfig, userConfig)
-
-function mergeConfig(nextConfig, userConfig) {
-  if (!userConfig) {
-    return
-  }
-
-  for (const key in userConfig) {
-    if (
-      typeof nextConfig[key] === 'object' &&
-      !Array.isArray(nextConfig[key])
-    ) {
-      nextConfig[key] = {
-        ...nextConfig[key],
-        ...userConfig[key],
-      }
-    } else {
-      nextConfig[key] = userConfig[key]
-    }
-  }
 }
 
 export default nextConfig

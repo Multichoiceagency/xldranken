@@ -1,10 +1,43 @@
-import { Suspense } from "react";
-import { AccountPage } from "@/components/account-page"; // Move the logic to a Client Component
+import { getServerSession } from "next-auth/next"
+import { redirect } from "next/navigation"
+import { authOptions } from "../api/auth/[...nextauth]/route"
+import AccountDetails from "./account-details"
+import { getCustomerById, getCustomerByEmail } from "@/lib/api"
 
-export default function Account() {
+export default async function AccountPage() {
+  const session = await getServerSession(authOptions)
+
+  if (!session) {
+    redirect("/login")
+  }
+
+  // Get customer data using the best available identifier
+  let customerData
+
+  try {
+    // First try to get customer by clcleunik if available
+    if (session.user.clcleunik) {
+      customerData = await getCustomerById(String(session.user.clcleunik))
+    }
+    // Fallback to email if clcleunik is not available
+    else if (session.user.email) {
+      customerData = await getCustomerByEmail(String(session.user.email))
+    }
+    // If neither is available, redirect to login
+    else {
+      console.error("No valid identifier found in session")
+      redirect("/login")
+    }
+  } catch (error) {
+    console.error("Error fetching customer data:", error)
+    redirect("/login")
+  }
+
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <AccountPage />
-    </Suspense>
-  );
+    <div className="container mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-6 text-[#0F3059]">Mijn Account</h1>
+      <AccountDetails customerData={customerData} />
+    </div>
+  )
 }
+

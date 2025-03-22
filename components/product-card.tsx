@@ -93,7 +93,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   return (
     <div
       onClick={navigateToProductPage}
-      className={`group relative flex flex-col bg-white rounded-lg border transition-all duration-300 h-full cursor-pointer ${
+      className={`group relative flex flex-col bg-white rounded-lg border transition-all duration-500 h-full cursor-pointer ${
         isAnimating ? "shadow-lg scale-[1.02]" : "hover:shadow-lg"
       }`}
     >
@@ -122,7 +122,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
       {/* Product details */}
       <div className="flex flex-col p-4 pt-0" style={{ paddingTop: "15px" }}>
-        <h3 className="font-medium text-[#002B7F] hover:underline min-h-[2.5rem] line-clamp-2">{product.title}</h3>
+        <h3 className="font-bold text-[#002B7F] hover:underline min-h-[2.5rem] line-clamp-2">{product.title}</h3>
 
         {/* Price display */}
         <div className="space-y-1">
@@ -147,7 +147,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
-                <span className="whitespace-nowrap">In winkelmand</span>
+                <span className="whitespace-nowrap ">In winkelmand</span>
               </Button>
 
               <div className="flex items-center border rounded-md">
@@ -177,7 +177,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
             </div>
           ) : (
             <Button
-              className="w-full bg-[#E2B505] hover:bg-[#E2B505]/90 text-white transition-all duration-300 hover:shadow-md"
+              className="w-full bg-[#002B7F] hover:bg-green-700/90 text-white transition-all duration-300 hover:shadow-md"
               onClick={handleAddToCart}
             >
               <ShoppingCart className="w-4 h-4 mr-2" />

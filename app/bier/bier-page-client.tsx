@@ -78,7 +78,7 @@ export default function BierPageClient({ initialProducts }: BierPageClientProps)
       {/* Product Grid */}
       <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}>
         {paginatedProducts.length > 0 ? (
-          paginatedProducts.map((product) => <ProductCard key={product.id_product_mysql} product={product} />)
+          paginatedProducts.map((product) => <ProductCard key={product.arcleunik} product={product} />)
         ) : (
           <div className="col-span-full text-center py-10">
             <p className="text-lg font-medium">Geen producten gevonden</p>

@@ -6,7 +6,7 @@ import { Spinner } from "@/components/ui/spinner"
 import BierPageClient from "./bier-page-client"
 
 export default function BierPage() {
-  const categoryId = "1"
+  const categoryId = "5"
 
   // Fetch products on the server - use async/await in a separate function
   const ProductGrid = async () => {

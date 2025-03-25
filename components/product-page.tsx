@@ -5,7 +5,6 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Plus, Minus, AlertCircle, Heart, StoreIcon, Truck } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useCart } from "@/lib/cart-context"
 import type { ProductProps } from "@/types/product"
 import { Spinner } from "./Spinner"
@@ -29,33 +28,23 @@ export function ProductPage({ productId }: ProductPageProps) {
         setLoading(false)
         return
       }
+
       try {
         setLoading(true)
-        const res = await fetch(`/api/proxy?id=${productId}`)
+        const res = await fetch(`https://api.megawin.be/product/list/?apikey=YIwYR3LZbNXllabpGviSnXBHvtqfPAIN&megatech_ARCLEUNIK=${productId}`)
 
         if (!res.ok) {
-          let errorData
-          try {
-            const errorText = await res.text()
-            try {
-              errorData = JSON.parse(errorText)
-            } catch {
-              errorData = { error: errorText }
-            }
-          } catch {
-            errorData = { error: res.statusText }
-          }
-
-          throw new Error(`Product niet gevonden: ${errorData?.error || res.statusText}`)
+          const errorText = await res.text()
+          throw new Error(`Product niet gevonden: ${errorText}`)
         }
 
         const data = await res.json()
 
-        if (!data?.product) {
+        if (!data || !data.result.product[0] || data.result.product.length === 0) {
           throw new Error("Geen productdata ontvangen")
         }
 
-        setProduct(data.product)
+        setProduct(data.result.product[0]) // Assuming API returns an array
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -77,7 +66,7 @@ export function ProductPage({ productId }: ProductPageProps) {
     )
   }
 
-  if (error) {
+  if (error || !product) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-sm mb-4">
@@ -90,26 +79,7 @@ export function ProductPage({ productId }: ProductPageProps) {
             <AlertCircle className="text-red-500 h-12 w-12" />
           </div>
           <h2 className="text-2xl font-bold mb-2">Product niet gevonden</h2>
-          <p className="text-gray-600 mb-4">Het product met ID "{productId}" kon niet worden gevonden.</p>
-          <Button className="bg-[#0F3059] hover:bg-[#0A2547] mr-4" onClick={() => router.push("/")}>
-            Terug naar de homepage
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  if (!product) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-sm mb-4">
-          <button onClick={() => router.back()} className="text-muted-foreground hover:text-[#0F3059]">
-            ⬅ Terug
-          </button>
-        </div>
-        <div className="text-center py-8">
-          <h2 className="text-2xl font-bold mb-2">Geen product gevonden</h2>
-          <p className="text-gray-600 mb-4">Het product met ID "{productId}" kon niet worden gevonden.</p>
+          <p className="text-gray-600 mb-4">Het product met ID "{product}" kon niet worden gevonden.</p>
           <Button className="bg-[#0F3059] hover:bg-[#0A2547]" onClick={() => router.push("/")}>
             Terug naar de homepage
           </Button>
@@ -121,8 +91,8 @@ export function ProductPage({ productId }: ProductPageProps) {
   const imageSrc = product.photo1_base64?.startsWith("data:image")
     ? product.photo1_base64
     : product.photo1_base64
-      ? `data:image/jpeg;base64,${product.photo1_base64}`
-      : "/placeholder.jpg"
+    ? `data:image/jpeg;base64,${product.photo1_base64}`
+    : "/placeholder.jpg"
 
   const prixVente = Number(product.prix_vente_groupe || 0)
   const prixPromo = product.prix_en_promo ? Number(product.prix_en_promo) : null
@@ -161,10 +131,6 @@ export function ProductPage({ productId }: ProductPageProps) {
             <div className="text-xl hover:text-green-700 font-bold text-red-600">
               € {currentPrice.toFixed(2).replace(".", ",")}
             </div>
-          </div>
-
-          <div className="bg-blue-50 p-3 rounded-md mb-4">
-            <p className="text-sm">De definitieve BTW wordt weergegeven op de "controleer je bestelling" pagina.</p>
           </div>
 
           <div className="flex items-center space-x-2 mb-3">
@@ -211,45 +177,6 @@ export function ProductPage({ productId }: ProductPageProps) {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="mb-8">
-        <Accordion type="single" collapsible className="w-full border rounded-md">
-          <AccordionItem value="details" className="border-b">
-            <AccordionTrigger className="px-4 py-3 text-[#0F3059] hover:text-[#0F3059]/80 font-medium">
-              Productgegevens
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
-              <div className="space-y-2">
-                <p>
-                  <strong>Product ID:</strong> {product.id_product_mysql}
-                </p>
-                <p>
-                  <strong>Productcode:</strong> {product.productCode || "N/A"}
-                </p>
-                <p>
-                  <strong>Volume:</strong> {product.arcleunik || "N/A"}
-                </p>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="description" className="border-b">
-            <AccordionTrigger className="px-4 py-3 text-[#0F3059] hover:text-[#0F3059]/80 font-medium">
-              Productbeschrijving
-            </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
-              <p>Gedetailleerde productbeschrijving hier...</p>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
-
-      <div className="bg-blue-900 text-white p-4 rounded-md mb-8">
-        <h2 className="text-lg font-bold uppercase mb-2">Korting op onze bestsellers</h2>
-        <p className="text-sm mb-2">
-          Pak nu je voordeel op onze catering bestsellers. Extra korting op professionele apparatuur en meubelen - alleen t/m 6 april!
-        </p>
-        <Button className="bg-blue-700 hover:bg-blue-800 text-white text-sm">Bekijk nu</Button>
       </div>
     </div>
   )

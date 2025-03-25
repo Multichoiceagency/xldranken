@@ -23,6 +23,7 @@ export default async function Orders() {
   }
 
   // Fetch the order data
+  // @ts-ignore
   const orderData: Order[] = await getCustomerOrder(session.user.clcleunik);
 
   return (

@@ -87,7 +87,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
   const navigateToProductPage = () => {
     // Use the product ID for navigation
-    router.push(`/product/${product.id_product_mysql}`)
+    router.push(`/product/${product.arcleunik}`)
   }
 
   return (

@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 import AccountDetails from "./account-details"
-import { getCustomerById, getCustomerByEmail } from "@/lib/api"
+import { getCustomerById } from "@/lib/api"
 
 export default async function AccountPage() {
   const session = await getServerSession(authOptions)
@@ -18,10 +18,6 @@ export default async function AccountPage() {
     // First try to get customer by clcleunik if available
     if (session.user.clcleunik) {
       customerData = await getCustomerById(String(session.user.clcleunik))
-    }
-    // Fallback to email if clcleunik is not available
-    else if (session.user.email) {
-      customerData = await getCustomerByEmail(String(session.user.email))
     }
     // If neither is available, redirect to login
     else {

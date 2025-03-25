@@ -10,7 +10,7 @@ export default async function Home() {
   const wineProducts = await getProductsByFam2ID("4").catch(() => []);
   const softDrinkProducts = await getProductsByFam2ID("7").catch(() => []);
   const LovkaProducts = await getProductsByFam2ID("5").catch(() => []);
-  const NonFood = await getProductsByFam2ID("6").catch(() => []);
+  const NonFood = await getProductsByFam2ID("22").catch(() => []);
   
   return (
     <div className="overflow-x-hidden">

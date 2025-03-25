@@ -2,6 +2,8 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 
+export const dynamic = "force-dynamic";
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({

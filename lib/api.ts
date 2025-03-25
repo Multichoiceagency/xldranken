@@ -61,62 +61,13 @@ export async function getProductsByFam2ID(fam2ID: string): Promise<ProductProps[
   }
 }
 
-export async function getCustomerByEmail(email: string) {
-  try {
-    // Use customer API URL for customer endpoints
-    const url = constructApiUrl("", { email }, true)
-    console.log("Fetching customer by email from URL:", url) // Debug log
-
-    const response = await fetch(url)
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-
-    if (data.success !== "true" || !data.result.customer || data.result.customer.length === 0) {
-      throw new Error("Customer not found")
-    }
-
-    return data.result.customer[0]
-  } catch (error) {
-    console.error("Error fetching customer:", error)
-    // Return a default structure to prevent UI errors
-    return {
-      clcleunik: "",
-      customerNumber: "",
-      groupePrice: "",
-      login: "",
-      password: "",
-      lastName: "",
-      firstName: "",
-      address: "",
-      zipcode: "",
-      city: "",
-      country: "",
-      phone: "",
-      cellphone: "",
-      email: "",
-      denomination: "",
-      tvaNumber: "",
-      addedDate: "",
-      addHour: "",
-      language: "",
-      showPrice: "",
-      webRemise: "",
-      megawinapp_login: "",
-    }
-  }
-}
-
 export async function getCustomerById(id: string) {
   try {
     // Ensure id is a string
     const customerId = String(id)
 
     // Use customer API URL for customer endpoints
-    const url = constructApiUrl("", { id_client: customerId }, true)
+    const url = constructApiUrl("", { clcleunik: customerId }, true)
     console.log("Fetching customer by ID from URL:", url) // Debug log
 
     const response = await fetch(url)
@@ -237,3 +188,50 @@ export async function cleanTestData(id: string) {
   }
 }
 
+export async function getCustomerOrder(id: string) {
+  try {
+
+    // Use customer API URL for customer endpoints
+    const url = `${process.env.NEXT_PUBLIC_CUSTOMER_ORDERS_API_URL}&clcleunik=${id}&apikey=${API_KEY}`
+    console.log("Fetching customer orders from URL:", url) // Debug log
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    console.log(data.result.order)
+
+
+    return data.result.order
+  } catch (error) {
+    console.error("Error fetching customer orders:", error)
+    throw error
+  }
+}
+
+export async function getCustomerOrderDetails(guid: string) {
+    try {
+
+    // Use customer API URL for customer endpoints
+    const url = `${process.env.NEXT_PUBLIC_CUSTOMER_ORDER_DETAILS_API_URL}apikey=${API_KEY}&guid=${guid}`
+    console.log("Fetching order details from URL:", url) // Debug log
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    console.log(data.result.order)
+
+
+    return data.result.order
+  } catch (error) {
+    console.error("Error fetching order details:", error)
+    throw error
+  }
+}

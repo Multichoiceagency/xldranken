@@ -6,7 +6,7 @@ import { Spinner } from "@/components/ui/spinner"
 import FrisdrankenPageClient from "./frisdranken-page-client"
 
 export default function FrisdrankenPage() {
-  const categoryId = "1"
+  const categoryId = "6"
 
   // Fetch products on the server - use async/await in a separate function
   const ProductGrid = async () => {

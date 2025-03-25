@@ -1,61 +1,52 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { getToken } from "next-auth/jwt"
+import { NextResponse, type NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl
+  const { pathname } = req.nextUrl;
+  const res = NextResponse.next();
 
-  // Create the response first so we can modify headers
-  const res = NextResponse.next()
-
-  // Add CORS headers for API routes
+  // Set CORS headers for API requests
   if (pathname.startsWith("/api/")) {
-    res.headers.append("Access-Control-Allow-Origin", "*")
-    res.headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-    res.headers.append("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization")
+    res.headers.append("Access-Control-Allow-Origin", "*");
+    res.headers.append("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.headers.append("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization");
   }
 
-  // Handle OPTIONS request for CORS preflight
+  // Handle OPTIONS request (CORS preflight)
   if (req.method === "OPTIONS") {
-    return res
+    return res;
   }
 
-  // Check if the path is protected
-  const isProtectedPath = ["/account", "/customers"].some((path) => pathname.startsWith(path))
+  // Define protected and auth routes
+  const isProtectedPath = ["/account", "/customers"].some((path) => pathname.startsWith(path));
+  const isAuthPath = ["/login", "/register"].includes(pathname);
 
-  // Check if the path is auth-related
-  const isAuthPath = ["/login", "/register"].some((path) => pathname === path)
-
-  // Only check authentication for protected or auth paths
+  // Only check authentication for protected/auth routes
   if (isProtectedPath || isAuthPath) {
-    // Get the token
-    const token = await getToken({
-      req,
-      secret: process.env.NEXTAUTH_SECRET,
-    })
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
     // Redirect to login if accessing protected route without token
     if (isProtectedPath && !token) {
-      const url = new URL("/login", req.url)
-      url.searchParams.set("callbackUrl", encodeURI(pathname))
-      return NextResponse.redirect(url)
+      const loginUrl = new URL("/login", req.url);
+      loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname); // Preserve callback URL
+      return NextResponse.redirect(loginUrl);
     }
 
-    // Redirect to account if accessing auth path with token
+
     if (isAuthPath && token) {
-      return NextResponse.redirect(new URL("/account", req.url))
+      return NextResponse.redirect(new URL("/account", req.url));
     }
   }
 
-  return res
+  return res;
 }
 
 export const config = {
   matcher: [
-    "/api/:path*", // Apply to API routes for CORS
-    "/account/:path*", // Protected routes
-    "/customers/:path*", // Protected routes
-    "/login", // Auth routes
-    "/register", // Auth routes
+    "/api/:path*",
+    "/account/:path*",
+    "/customers/:path*",
+    "/login",
+    "/register",
   ],
-}
-
+};

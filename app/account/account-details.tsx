@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { signOut } from "next-auth/react"
-import { Trash2, Edit, Save } from "lucide-react"
+import { Trash2, Edit, Save, LogOut } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import LogoutPage from "../logout/page"
 
 interface CustomerData {
   clcleunik: string
@@ -322,9 +323,9 @@ export default function AccountDetails({ customerData }: { customerData: Custome
           <p className="mb-4 text-gray-600">
             Deleting your account will remove all of your information from our database. This cannot be undone.
           </p>
-          <Button variant="destructive" onClick={handleDeleteAccount}>
+          <Button variant="default" onClick={LogoutPage}>
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete Account
+            Uitloggen
           </Button>
         </CardContent>
       </Card>

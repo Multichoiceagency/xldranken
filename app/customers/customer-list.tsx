@@ -17,6 +17,7 @@ interface Customer {
   country: string
   addedDate: string
   isTestUser: boolean
+  password: string
 }
 
 export default function CustomerList() {
@@ -157,6 +158,7 @@ export default function CustomerList() {
               <TableHead>Customer #</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Wachtwoord</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>

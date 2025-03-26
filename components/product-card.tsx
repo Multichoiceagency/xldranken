@@ -28,10 +28,10 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
   // Format price
   const regularPrice = Number(product.prix_vente_groupe)
-  const productInCart = isInCart(product.id_product_mysql)
+  const productInCart = isInCart(product.arcleunik)
 
   // Get current quantity if product is in cart
-  const currentQuantity = productInCart ? cart.find((item) => item.id === product.id_product_mysql)?.quantity || 0 : 0
+  const currentQuantity = productInCart ? cart.find((item) => item.id === product.arcleunik)?.quantity || 0 : 0
 
   const handleAddToCart = (e: React.MouseEvent) => {
     // Prevent navigation when clicking the add to cart button
@@ -42,7 +42,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
     // Create cart item
     addToCart({
-      id: product.id_product_mysql,
+      id: product.arcleunik,
       name: product.title,
       price: regularPrice,
       image: imageSrc,
@@ -65,7 +65,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
   const handleIncreaseQuantity = (e: React.MouseEvent) => {
     e.stopPropagation()
-    updateQuantity(product.id_product_mysql, currentQuantity + 1)
+    updateQuantity(product.arcleunik, currentQuantity + 1)
 
     toast({
       title: "Hoeveelheid bijgewerkt",
@@ -76,7 +76,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const handleDecreaseQuantity = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (currentQuantity > 1) {
-      updateQuantity(product.id_product_mysql, currentQuantity - 1)
+      updateQuantity(product.arcleunik, currentQuantity - 1)
 
       toast({
         title: "Hoeveelheid bijgewerkt",
@@ -87,7 +87,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
   const navigateToProductPage = () => {
     // Use the product ID for navigation
-    router.push(`/product/${product.id_product_mysql}`)
+    router.push(`/product/${product.arcleunik}`)
   }
 
   return (

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react"
 import Image from "next/image"
 import { X, Plus, Minus } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
+import Link from "next/link"
 
 interface SideCartProps {
   isOpen: boolean
@@ -158,7 +159,7 @@ export function SideCart({ isOpen, onClose }: SideCartProps) {
                     <p className="text-sm font-bold text-red-600">
                       €{(item.price * item.quantity).toFixed(2).replace(".", ",")}
                     </p>
-                    <p className="text-[10px] text-gray-500">€{item.price.toFixed(2).replace(".", ",")} Per Tree</p>
+                    <p className="text-[12px] text-gray-500">€{item.price.toFixed(2).replace(".", ",")} Per Tree</p>
                   </div>
                 </div>
               ))}
@@ -168,18 +169,30 @@ export function SideCart({ isOpen, onClose }: SideCartProps) {
           {/* Footer - fixed height */}
           {cart.length > 0 && (
             <div className="border-t p-3 bg-gray-50 mt-auto">
-              <div className="flex justify-between text-sm font-bold mb-1">
+              <div className="flex justify-between text-[16pxs] font-bold mb-1">
                 <p>Subtotaal</p>
                 <p>€{totalPrice.toFixed(2).replace(".", ",")}</p>
               </div>
-              <p className="text-[10px] text-gray-500 mb-3">Verzendkosten worden berekend bij het afrekenen.</p>
+              <p className="text-[12px] text-gray-500 mb-3">Verzendkosten worden berekend bij het afrekenen.</p>
               <div>
+                <div>
+                <Link href="/winkelmand">
+                <button
+                  className="flex items-center mb-2 justify-center w-full bg-[#0F3059] text-white py-2 px-3 rounded font-bold text-sm"
+                  onClick={onClose}
+                >
+                  Bekijk winkelmand
+                </button>
+                </Link>
+                </div>
+              <Link href="/checkout">
                 <button
                   className="flex items-center justify-center w-full bg-[#0F3059] text-white py-2 px-3 rounded font-bold text-sm"
                   onClick={onClose}
                 >
                   Afrekenen
                 </button>
+                </Link>
               </div>
             </div>
           )}

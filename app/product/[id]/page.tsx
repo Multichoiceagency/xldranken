@@ -7,5 +7,5 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   console.log("Page rendering with product ID:", productId)
 
-  return <ProductPage productId={productId} />
+  return <ProductPage productId={productId} />
 }

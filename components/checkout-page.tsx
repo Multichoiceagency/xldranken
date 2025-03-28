@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useCart } from "@/lib/cart-context"
-import { PaymentMethodsPage } from "./payment-methods-page"
 import { useToast } from "@/hooks/use-toast"
 import { FaCcMastercard, FaCcVisa, FaIdeal } from "react-icons/fa"
+import { useRouter } from "next/navigation"
 
 // Define the CustomerData interface
 interface CustomerData {
@@ -43,6 +43,7 @@ const getDeliveryDates = () => {
       dates.push({
         day: date.toLocaleDateString("nl-NL", { weekday: "short" }),
         date: date.toLocaleDateString("nl-NL", { day: "numeric", month: "short" }),
+        fullDate: date.toISOString().split("T")[0], // YYYY-MM-DD format for API
       })
     }
   }
@@ -51,22 +52,41 @@ const getDeliveryDates = () => {
 
 const deliveryDates = getDeliveryDates()
 
+// Add a function to generate test data at the top of the file, after the deliveryDates constant
+const generateTestData = (): CustomerData => {
+  return {
+    clcleunik: "TEST123456",
+    customerNumber: "TEST-CUST-001",
+    login: "test@example.com",
+    email: "test@example.com",
+    firstName: "Test",
+    lastName: "User",
+    address: "Teststraat 123",
+    zipcode: "1234 AB",
+    city: "Amsterdam",
+    country: "Nederland",
+    phone: "0201234567",
+    cellphone: "0612345678",
+    denomination: "Test BV",
+    tvaNumber: "NL123456789B01",
+    isTestAccount: true,
+  }
+}
+
+// Add a new state for test mode
 export function CheckoutPage() {
+  const router = useRouter()
   const { toast } = useToast()
-  const [step, setStep] = useState<"delivery" | "payment">("delivery")
-  const [deliveryOption, setDeliveryOption] = useState<"delivery" | "pickup">("delivery")
   const [customerData, setCustomerData] = useState<CustomerData | null>(null)
   const [isLoading, setIsLoading] = useState(true) // Start with true since we need to fetch data
-  const [isSaving, setIsSaving] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [apiError, setApiError] = useState(false)
-  const { cart, getCartTotal } = useCart()
+  const [isTestMode, setIsTestMode] = useState(false)
+  const { cart, getCartTotal, clearCart, setNotification, orderComplete, setOrderComplete, orderGuid, setOrderGuid } =
+    useCart()
   const { totalPrice } = getCartTotal()
-  const shippingCost = deliveryOption === "delivery" ? 4.95 : 0
-  const subtotal = totalPrice
-  const total = subtotal + shippingCost
 
-  // Initialize formData state similar to AccountDetails component
+  // Initialize formData state
   const [formData, setFormData] = useState({
     // Customer data (read-only in this component)
     firstName: "",
@@ -85,6 +105,11 @@ export function CheckoutPage() {
     differentBillingAddress: false,
   })
 
+  // Calculate shipping cost and totals
+  const shippingCost = formData.deliveryOption === "delivery" ? 4.95 : 0
+  const subtotal = totalPrice
+  const total = subtotal + shippingCost
+
   // Update formData when customerData changes
   useEffect(() => {
     if (customerData) {
@@ -102,53 +127,50 @@ export function CheckoutPage() {
     }
   }, [customerData])
 
-  // Fetch customer data from API - updated to try "customers" endpoint first
+  // Fetch customer data from API
   useEffect(() => {
-    // Skip API call if we already know it's failing
-    if (apiError) return
+    // Skip API call if we already know it's failing or if in test mode
+    if (apiError || isTestMode) {
+      if (isTestMode && !customerData) {
+        setCustomerData(generateTestData())
+        setIsLoading(false)
+      }
+      return
+    }
 
     const fetchCustomerData = async () => {
       setIsLoading(true)
       try {
-        // Try multiple possible API endpoints - with "customers" (plural) first
-        const endpoints = [
-          "/api/account/customers",
-        ]
+        const response = await fetch("/api/account/customer")
 
-        let response = null
-        let succeeded = false
-
-        // Try each endpoint until one works
-        for (const endpoint of endpoints) {
+        if (!response.ok) {
+          let errorMessage = `API Error: ${response.status} ${response.statusText}`
           try {
-            console.log(`Trying endpoint: ${endpoint}`)
-            response = await fetch(endpoint)
-            if (response.ok) {
-              console.log(`Endpoint ${endpoint} succeeded`)
-              succeeded = true
-              break
+            const errorData = await response.json()
+            if (errorData.error) {
+              errorMessage = errorData.error
             }
-          } catch (err) {
-            // Continue to next endpoint
-            console.log(`Endpoint ${endpoint} failed, trying next...`)
+          } catch (e) {
+            // Error parsing JSON
           }
-        }
-
-        if (!succeeded || !response) {
-          throw new Error("All API endpoints failed")
+          throw new Error(errorMessage)
         }
 
         const data = await response.json()
-        console.log("Customer data loaded:", data)
+
+        if (!data || !data.clcleunik) {
+          throw new Error("Invalid customer data received")
+        }
+
         setCustomerData(data)
         setApiError(false)
       } catch (error) {
-        console.error("Error fetching customer data:", error)
         setApiError(true)
 
         toast({
           title: "Fout bij laden",
-          description: "Kon klantgegevens niet laden. Probeer het later opnieuw.",
+          description:
+            error instanceof Error ? error.message : "Kon klantgegevens niet laden. Probeer het later opnieuw.",
           variant: "destructive",
         })
       } finally {
@@ -157,7 +179,7 @@ export function CheckoutPage() {
     }
 
     fetchCustomerData()
-  }, [toast, apiError])
+  }, [toast, apiError, isTestMode, customerData])
 
   // Format the customer name with safe access
   const customerName = `${formData.firstName || ""} ${formData.lastName || ""}`.trim() || "Niet ingesteld"
@@ -167,23 +189,48 @@ export function CheckoutPage() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  // Send order to checkout system
+  // Modify the submitOrder function to handle test mode
   const submitOrder = async () => {
     if (!customerData?.clcleunik) {
+      if (isTestMode) {
+        // In test mode, create test customer data if it doesn't exist
+        setCustomerData(generateTestData())
+        // Continue with order processing
+      } else {
+        toast({
+          title: "Error",
+          description: "Klantinformatie is niet beschikbaar. Probeer het opnieuw.",
+          variant: "destructive",
+        })
+        return false
+      }
+    }
+
+    // If in test mode and not explicitly sending to API, just simulate success
+    if (isTestMode && !confirm("Dit is een TEST bestelling. Wilt u deze echt verzenden naar de API?")) {
+      // Simulate successful order without API call
+      const mockGuid = `TEST-${generateUUID()}-${new Date().getTime().toString().slice(-4)}`
+      setOrderGuid(mockGuid)
+      setOrderComplete(true)
+      clearCart()
+      setNotification("TEST Bestelling succesvol gesimuleerd!")
       toast({
-        title: "Error",
-        description: "Klantinformatie is niet beschikbaar. Probeer het opnieuw.",
-        variant: "destructive",
+        title: "TEST Bestelling",
+        description: "Uw TEST bestelling is succesvol gesimuleerd (niet verzonden naar kassasysteem).",
+        variant: "default",
       })
-      return false
+      return true
     }
 
     setIsSubmitting(true)
     try {
+      // Get the delivery date in YYYY-MM-DD format
+      const deliveryDate = formData.bezorgdatum || formData.selectedDate.fullDate
+
       // Prepare order data
       const orderData = {
-        customerId: customerData.clcleunik,
-        customerEmail: customerData.email,
+        customerId: customerData?.clcleunik,
+        customerEmail: customerData?.login,
         customerName: customerName,
         deliveryOption: formData.deliveryOption,
         deliveryAddress:
@@ -196,40 +243,59 @@ export function CheckoutPage() {
               }
             : null,
         pickupLocation: formData.deliveryOption === "pickup" ? "XL Groothandel" : null,
-        deliveryDate:
-          formData.deliveryOption === "delivery" ? formData.bezorgdatum || formData.selectedDate.date : null,
+        deliveryDate: deliveryDate,
         items: cart.map((item) => ({
           id: item.id,
           name: item.name,
           quantity: item.quantity,
           price: item.price,
           total: item.price * item.quantity,
+          productCode: item.productCode,
+          volume: item.volume,
+          image: item.image,
         })),
         subtotal,
         shippingCost,
         total,
       }
 
-      // Make the actual API call
-      const response = await fetch("/api/checkout/order", {
+      // Send the order directly to Megawin via our API route
+      const response = await fetch("/api/checkout/send-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
       })
 
-      if (!response.ok) throw new Error("Failed to submit order to checkout system")
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to send order to Megawin")
+      }
+
+      const result = await response.json()
+
+      // Store the order GUID for reference
+      setOrderGuid(result.guid)
+
+      // Mark order as complete
+      setOrderComplete(true)
+
+      // Clear the cart
+      clearCart()
+
+      // Show notification
+      setNotification("Bestelling succesvol geplaatst!")
 
       toast({
         title: "Bestelling geplaatst",
         description: "Uw bestelling is succesvol verzonden naar het kassasysteem.",
         variant: "default",
       })
+
       return true
-    } catch (error) {
-      console.error("Error submitting order:", error)
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Kon bestelling niet verzenden naar kassasysteem. Probeer het opnieuw.",
+        description: error.message || "Kon bestelling niet verzenden naar kassasysteem. Probeer het opnieuw.",
         variant: "destructive",
       })
       return false
@@ -238,27 +304,49 @@ export function CheckoutPage() {
     }
   }
 
-  const handleContinue = async () => {
-    // Submit order to checkout system
-    const success = await submitOrder()
-
-    // Only proceed to payment if order submission was successful
-    if (success) {
-      setStep("payment")
-    }
+  // Handle the order submission
+  const handlePlaceOrder = async () => {
+    await submitOrder()
   }
 
-  const handleBack = () => {
-    setStep("delivery")
-  }
-
-  const handleComplete = () => {
-    // Here you would typically handle the completion of the checkout process
-    console.log("Checkout completed")
-  }
-
-  if (step === "payment") {
-    return <PaymentMethodsPage onBack={handleBack} onComplete={handleComplete} />
+  // If order is complete, show confirmation
+  if (orderComplete) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Bestelling geplaatst!</h2>
+          <p className="text-gray-600 mb-4">Uw bestelling is succesvol verzonden naar het kassasysteem.</p>
+          {orderGuid && (
+            <div className="bg-gray-100 p-3 rounded mb-4 text-sm">
+              <p className="font-medium">Bestelling referentie:</p>
+              <p className="font-mono">{orderGuid}</p>
+            </div>
+          )}
+          <Button
+            className="w-full bg-[#FF6B35] hover:bg-[#E85A24] text-white"
+            onClick={() => {
+              // Reset order state when returning to shop
+              setOrderComplete(false)
+              setOrderGuid(null)
+              router.push("/")
+            }}
+          >
+            Terug naar de winkel
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   // Helper function to display field value or "Niet ingesteld" if empty
@@ -266,6 +354,7 @@ export function CheckoutPage() {
     return value ? value : "Niet ingesteld"
   }
 
+  // Add a button to toggle test mode in the UI, right after the apiError notification
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -284,12 +373,48 @@ export function CheckoutPage() {
           </div>
         )}
 
+        {/* Test Mode Toggle */}
+        <div className="mb-4 flex justify-end">
+          <Button
+            variant={isTestMode ? "destructive" : "outline"}
+            size="sm"
+            onClick={() => {
+              if (!isTestMode) {
+                // When enabling test mode, fill with test data
+                setCustomerData(generateTestData())
+                setApiError(false)
+                setIsLoading(false)
+              }
+              setIsTestMode(!isTestMode)
+            }}
+            className="flex items-center gap-2"
+          >
+            {isTestMode ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                Test Modus Actief
+              </>
+            ) : (
+              "Test Modus Activeren"
+            )}
+          </Button>
+        </div>
+
+        {isTestMode && (
+          <div className="mb-4 p-3 bg-yellow-100 border border-yellow-300 rounded-md text-yellow-800">
+            <p className="font-medium">Test Modus Actief</p>
+            <p className="text-sm">
+              U gebruikt test gegevens. Bestellingen worden niet daadwerkelijk verzonden tenzij u dit expliciet
+              bevestigt.
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column - Delivery Options */}
           <div className="flex-1 space-y-8">
             <nav className="flex gap-8 border-b">
               <button className="font-medium text-primary border-b-2 border-primary pb-4">Bezorging</button>
-              <button className="font-medium text-gray-400 pb-4">Betaalmethode</button>
             </nav>
 
             <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -397,7 +522,9 @@ export function CheckoutPage() {
                           </div>
 
                           <div className="flex gap-4 text-sm">
-                            <button className="text-primary hover:underline">Wijzig mijn adres</button>
+                            <Link href="/account" className="text-primary hover:underline">
+                              Wijzig mijn adres
+                            </Link>
                             <button className="text-primary hover:underline">Ander bezorgadres</button>
                           </div>
 
@@ -500,14 +627,16 @@ export function CheckoutPage() {
 
         {/* Bottom Section */}
         <div className="mt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <Button variant="ghost" className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            TERUG NAAR WINKELWAGEN
+          <Button variant="ghost" className="flex items-center gap-2" asChild>
+            <Link href="/cart">
+              <ArrowLeft className="h-4 w-4" />
+              TERUG NAAR WINKELWAGEN
+            </Link>
           </Button>
           <div className="flex flex-col items-center gap-4">
             <Button
               className="bg-[#FF6B35] hover:bg-[#E85A24] text-white min-w-[200px]"
-              onClick={handleContinue}
+              onClick={handlePlaceOrder}
               disabled={isLoading || isSubmitting}
             >
               {isLoading || isSubmitting ? (
@@ -516,7 +645,7 @@ export function CheckoutPage() {
                   {isLoading ? "LADEN..." : "BESTELLING PLAATSEN..."}
                 </>
               ) : (
-                "DOORGAAN"
+                "BESTELLING PLAATSEN"
               )}
             </Button>
             <div className="flex gap-4">
@@ -569,5 +698,13 @@ export function CheckoutPage() {
       </div>
     </div>
   )
+}
+
+// Add a helper function to generate UUID at the bottom of the file
+function generateUUID() {
+  return "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx".replace(/[x]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    return r.toString(16)
+  })
 }
 

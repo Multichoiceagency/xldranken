@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "../../auth/[...nextauth]/route"
 import { updateCustomer } from "@/lib/api"
+import { NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +10,7 @@ export async function PUT(request: Request) {
   const session = await getServerSession(authOptions)
 
   if (!session) {
-    return ({ error: "Unauthorized" })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   try {
@@ -18,16 +19,15 @@ export async function PUT(request: Request) {
 
     // Validate that the user is only updating their own account
     if (session.user.clcleunik !== id) {
-      return "error: Unauthorized to update this account"
+      return NextResponse.json({ error: "Unauthorized to update this account" }, { status: 403 })
     }
 
     // Call the API function to update the customer
     await updateCustomer(id, updateData)
 
-    return ({ success: true, message: "Account updated successfully" })
+    return NextResponse.json({ success: true, message: "Account updated successfully" })
   } catch (error) {
     console.error("Error updating account:", error)
-    return ({ error: "Failed to update account" })
+    return NextResponse.json({ error: "Failed to update account" }, { status: 500 })
   }
 }
-

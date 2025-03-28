@@ -2,7 +2,7 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -23,13 +23,11 @@ export const authOptions: NextAuthOptions = {
           const apiKey = process.env.NEXT_PUBLIC_API_KEY
 
           if (!customerApiUrl || !apiKey) {
-            console.error("Customer API URL or API Key is not defined")
             return null
           }
 
           // Construct the URL for customer endpoint
           const url = `${customerApiUrl}?apikey=${apiKey}&email=${credentials.email}`
-          console.log("Auth API URL:", url) // Debug log
 
           const response = await fetch(url)
           const data = await response.json()
@@ -53,7 +51,7 @@ export const authOptions: NextAuthOptions = {
             }
           }
         } catch (error) {
-          console.error("Authentication error:", error)
+          // Authentication error
         }
 
         return null
@@ -64,7 +62,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        // Safely assign clcleunik if it exists
+        // Ensure clcleunik is stored in the token
         if (user.clcleunik) {
           token.clcleunik = String(user.clcleunik)
         }
@@ -74,7 +72,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token) {
         session.user.id = String(token.id)
-        // Safely assign clcleunik if it exists
+        // Ensure clcleunik is available in the session
         if (token.clcleunik) {
           session.user.clcleunik = String(token.clcleunik)
         }
@@ -88,8 +86,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  // Add debug mode to help troubleshoot issues
-  debug: process.env.NODE_ENV !== "production",
 }
 
 const handler = NextAuth(authOptions)

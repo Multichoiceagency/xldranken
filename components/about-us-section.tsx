@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export function AboutUsSection() {
   return (
@@ -20,7 +21,7 @@ export function AboutUsSection() {
                 zorgvuldig geselecteerd om aan al uw wensen te voldoen.
               </p>
               <p>
-                Van ambachtelijke bieren en exclusieve wijnen tot premium sterke drank en 
+                Van poolse bieren tot exclusieve alcoholise dranken en premium sterke drank en 
                 verfrissende frisdranken - ons uitgebreide aanbod biedt voor ieder moment 
                 de perfecte drank. Ontdek nieuwe smaken of vind uw vertrouwde favorieten 
                 in ons constant vernieuwende assortiment.
@@ -38,16 +39,18 @@ export function AboutUsSection() {
                 voor zowel particulieren als bedrijven in de horeca- en retailsector.
               </p>
             </div>
+            <Link href="/assortiment">
             <Button className="mt-6 bg-[#FF6B35] hover:bg-[#E85A24] text-white">
               Ontdek ons assortiment
             </Button>
+            </Link>
           </div>
-          <div className="relative h-[400px] rounded-lg overflow-hidden">
+          <div className="relative h-[700px] rounded-lg overflow-hidden">
             <Image
-              src="https://images.pexels.com/photos/1283219/pexels-photo-1283219.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-              alt="XL Dranken Store"
+              src="/winkel/winkel2.jpeg"
+              alt="XL Dranken Groothandel"
               fill
-              className="object-cover rounded-lg"
+              className="object-contain rounded-lg"
             />
           </div>
         </div>

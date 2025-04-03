@@ -13,8 +13,8 @@ const FeaturedProductsCarousel = dynamic(
   { loading: () => <FeaturedProductsCarouselSkeleton /> },
 )
 
-const ShopByCategory = dynamic(() => import("@/components/shop-by-category").then((mod) => mod.ShopByCategory), {
-  loading: () => <ShopByCategorySkeleton />,
+const LovkaProductsection = dynamic(() => import("@/components/LovkaProductsection").then((mod) => mod), {
+  loading: () => <LovkaProductsectionSkeleton />,
 })
 
 const AboutUsSection = dynamic(() => import("@/components/about-us-section").then((mod) => mod.AboutUsSection), {
@@ -68,23 +68,25 @@ function FeaturedProductsCarouselSkeleton({ backgroundColor = "white" }) {
   )
 }
 
-function ShopByCategorySkeleton() {
+function LovkaProductsectionSkeleton() {
   return (
-    <div className="w-full py-10 px-4 bg-white">
+    <div className="w-full py-10 px-4 bg-[#0F3059]">
       <div className="container mx-auto">
-        <Skeleton className="h-8 w-64 mb-6 bg-gray-200" />
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {Array(8)
-            .fill(0)
-            .map((_, i) => (
-              <Skeleton key={i} className="aspect-square rounded-md bg-gray-200" />
-            ))}
+        <Skeleton className="h-8 w-64 mb-4 bg-gray-700" />
+        <div className="grid md:grid-cols-2 gap-8">
+          <div>
+            <Skeleton className="h-4 w-full mb-2 bg-gray-700" />
+            <Skeleton className="h-4 w-full mb-2 bg-gray-700" />
+            <Skeleton className="h-4 w-full mb-2 bg-gray-700" />
+            <Skeleton className="h-4 w-3/4 mb-2 bg-gray-700" />
+          </div>
+          <Skeleton className="aspect-video rounded-md bg-gray-700" />
         </div>
       </div>
     </div>
   )
 }
+
 
 function AboutUsSectionSkeleton() {
   return (
@@ -135,28 +137,81 @@ export default async function Home() {
         <PromoGrid />
       </Suspense>
 
+      {/* New sections */}
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="white" />}>
+        <IkratBlikSection />
+      </Suspense>
+
       <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="#0F3059" />}>
-        <AlcoholProductsSection />
+        <FrisdrankenSection />
       </Suspense>
 
       <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="white" />}>
-        <LovkaProductsSection />
+        <LimonadenSection />
       </Suspense>
 
       <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="#0F3059" />}>
-        <SoftDrinkProductsSection />
+        <PoolsDrankenSection />
       </Suspense>
 
       <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="white" />}>
-        <WineProductsSection />
+        <WaterNLSection />
       </Suspense>
 
       <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="#0F3059" />}>
-        <NonFoodProductsSection />
+        <WaterPLSection />
       </Suspense>
 
-      <Suspense fallback={<ShopByCategorySkeleton />}>
-        <ShopByCategory />
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="white" />}>
+        <KoffieTheeSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="#0F3059" />}>
+        <NonFoodSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="white" />}>
+        <SchoonmaakSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="#0F3059" />}>
+        <HoutskoolSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="white" />}>
+        <BierenNLSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="#0F3059" />}>
+        <PoolseBierenFlexSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="white" />}>
+        <PoolseBierenBlikSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="#0F3059" />}>
+        <SterkeDrankSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="white" />}>
+        <MixDrankSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="#0F3059" />}>
+        <CocktailsSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="white" />}>
+        <WijnenSection />
+      </Suspense>
+
+      <Suspense fallback={<FeaturedProductsCarouselSkeleton backgroundColor="#0F3059" />}>
+        <VoedingSection />
+      </Suspense>
+
+      <Suspense fallback={<LovkaProductsection />}>
+        <LovkaProductsection />
       </Suspense>
 
       <Suspense fallback={<AboutUsSectionSkeleton />}>
@@ -170,16 +225,16 @@ export default async function Home() {
   )
 }
 
-// Separate components for each product section to enable independent loading
-async function AlcoholProductsSection() {
-  const alcoholProducts = await getProductsByFam2ID("1").catch(() => [])
+// DRANKEN - IKRAT / BLIK (ID: 23)
+async function IkratBlikSection() {
+  const ikratBlikProducts = await getProductsByFam2ID("23").catch(() => [])
 
   return (
     <FeaturedProductsCarousel
-      title="MEEST VERKOCHTE BIER SOORTEN"
-      subtitle="Ontdek onze selectie van populaire dranken"
-      products={alcoholProducts.slice(0, 10)}
-      viewAllLink="/alcohol"
+      title="DRANKEN - IKRAT / BLIK"
+      subtitle="Dranken in kratten en blikken"
+      products={ikratBlikProducts.slice(0, 10)}
+      viewAllLink="/dranken/ikrat-blik"
       backgroundColor="#0F3059"
       titleColor="#D0C298"
       subtitleColor="white"
@@ -188,15 +243,18 @@ async function AlcoholProductsSection() {
   )
 }
 
-async function LovkaProductsSection() {
-  const LovkaProducts = await getProductsByFam2ID("5").catch(() => [])
+
+
+// DRANKEN - FRISDRANKEN (ID: 6)
+async function FrisdrankenSection() {
+  const frisdrankenProducts = await getProductsByFam2ID("6").catch(() => [])
 
   return (
     <FeaturedProductsCarousel
-      title="LOVKA DRINKS"
-      subtitle="Premium vodka met een flamboyante smaak"
-      products={LovkaProducts.slice(0, 10)}
-      viewAllLink="/cocktails"
+      title="DRANKEN - FRISDRANKEN"
+      subtitle="Verfrissende frisdranken voor elk moment"
+      products={frisdrankenProducts.slice(0, 10)}
+      viewAllLink="/dranken/frisdranken"
       backgroundColor="white"
       titleColor="#D0C298"
       subtitleColor="black"
@@ -205,15 +263,16 @@ async function LovkaProductsSection() {
   )
 }
 
-async function SoftDrinkProductsSection() {
-  const softDrinkProducts = await getProductsByFam2ID("7").catch(() => [])
+// DRANKEN - LIMONADEN (ID: 1)
+async function LimonadenSection() {
+  const limonadenProducts = await getProductsByFam2ID("1").catch(() => [])
 
   return (
     <FeaturedProductsCarousel
-      title="FRISDRANKEN"
-      subtitle="Verfrissende dranken voor elk moment"
-      products={softDrinkProducts.slice(0, 10)}
-      viewAllLink="/frisdranken"
+      title="DRANKEN - LIMONADEN"
+      subtitle="Verfrissende limonades voor elke gelegenheid"
+      products={limonadenProducts.slice(0, 10)}
+      viewAllLink="/dranken/limonaden"
       backgroundColor="#0F3059"
       titleColor="#D0C298"
       subtitleColor="white"
@@ -222,15 +281,16 @@ async function SoftDrinkProductsSection() {
   )
 }
 
-async function WineProductsSection() {
-  const wineProducts = await getProductsByFam2ID("4").catch(() => [])
+// DRANKEN - POOLS (ID: 2)
+async function PoolsDrankenSection() {
+  const poolsDrankenProducts = await getProductsByFam2ID("2").catch(() => [])
 
   return (
     <FeaturedProductsCarousel
-      title="MEEST VERKOCHTE BIER SOORTEN"
-      subtitle="Uitgebreid assortiment aan pools bier en andere bier soorten"
-      products={wineProducts.slice(0, 10)}
-      viewAllLink="/bier"
+      title="DRANKEN - POOLS"
+      subtitle="Poolse dranken en specialiteiten"
+      products={poolsDrankenProducts.slice(0, 10)}
+      viewAllLink="/dranken/pools"
       backgroundColor="white"
       titleColor="#D0C298"
       subtitleColor="black"
@@ -239,19 +299,254 @@ async function WineProductsSection() {
   )
 }
 
-async function NonFoodProductsSection() {
-  const NonFood = await getProductsByFam2ID("22").catch(() => [])
+// DRANKEN - WATER NL (ID: 7)
+async function WaterNLSection() {
+  const waterNLProducts = await getProductsByFam2ID("7").catch(() => [])
 
   return (
     <FeaturedProductsCarousel
-      title="Food & Non Food"
-      subtitle="Food en Non-Food producten voor restaurants en Cafe Bar's"
-      products={NonFood.slice(0, 10)}
-      viewAllLink="/shop"
+      title="DRANKEN - WATER NL"
+      subtitle="Nederlandse water producten"
+      products={waterNLProducts.slice(0, 10)}
+      viewAllLink="/dranken/water-nl"
       backgroundColor="#0F3059"
       titleColor="#D0C298"
       subtitleColor="white"
       linkColor="#D0C298"
+    />
+  )
+}
+
+// DRANKEN - WATER PL (ID: 12)
+async function WaterPLSection() {
+  const waterPLProducts = await getProductsByFam2ID("12").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="DRANKEN - WATER PL"
+      subtitle="Poolse water producten"
+      products={waterPLProducts.slice(0, 10)}
+      viewAllLink="/dranken/water-pl"
+      backgroundColor="white"
+      titleColor="#D0C298"
+      subtitleColor="black"
+      linkColor="black"
+    />
+  )
+}
+
+// DRANKEN - KOFFIE THEE (ID: 18)
+async function KoffieTheeSection() {
+  const koffieTheeProducts = await getProductsByFam2ID("18").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="DRANKEN - KOFFIE THEE"
+      subtitle="Kwaliteitskoffie en thee voor de echte liefhebber"
+      products={koffieTheeProducts.slice(0, 10)}
+      viewAllLink="/dranken/koffie-thee"
+      backgroundColor="#0F3059"
+      titleColor="#D0C298"
+      subtitleColor="white"
+      linkColor="#D0C298"
+    />
+  )
+}
+
+// NON FOOD (ID: 21)
+async function NonFoodSection() {
+  const nonFoodProducts = await getProductsByFam2ID("21").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="NON FOOD"
+      subtitle="Non-Food producten voor restaurants en Cafe Bar's"
+      products={nonFoodProducts.slice(0, 10)}
+      viewAllLink="/non-food"
+      backgroundColor="white"
+      titleColor="#D0C298"
+      subtitleColor="black"
+      linkColor="black"
+    />
+  )
+}
+
+// NON FOOD - SCHOONMAAK (ID: 22)
+async function SchoonmaakSection() {
+  const schoonmaakProducts = await getProductsByFam2ID("22").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="NON FOOD - SCHOONMAAK"
+      subtitle="Schoonmaakproducten voor professioneel gebruik"
+      products={schoonmaakProducts.slice(0, 10)}
+      viewAllLink="/non-food/schoonmaak"
+      backgroundColor="#0F3059"
+      titleColor="#D0C298"
+      subtitleColor="white"
+      linkColor="#D0C298"
+    />
+  )
+}
+
+// NON FOOD - HOUTSKOOL (ID: 19)
+async function HoutskoolSection() {
+  const houtskoolProducts = await getProductsByFam2ID("19").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="NON FOOD - HOUTSKOOL"
+      subtitle="Houtskool voor barbecue en grill"
+      products={houtskoolProducts.slice(0, 10)}
+      viewAllLink="/non-food/houtskool"
+      backgroundColor="white"
+      titleColor="#D0C298"
+      subtitleColor="black"
+      linkColor="black"
+    />
+  )
+}
+
+// SPIRITS - BIEREN NL (ID: 9)
+async function BierenNLSection() {
+  const bierenNLProducts = await getProductsByFam2ID("9").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="SPIRITS - BIEREN NL"
+      subtitle="Uitgebreid assortiment aan Nederlandse bieren"
+      products={bierenNLProducts.slice(0, 10)}
+      viewAllLink="/spirits/bieren-nl"
+      backgroundColor="#0F3059"
+      titleColor="#D0C298"
+      subtitleColor="white"
+      linkColor="#D0C298"
+    />
+  )
+}
+
+// SPIRITS - POOLSE BIEREN FLEX (ID: 3)
+async function PoolseBierenFlexSection() {
+  const poolseBierenFlexProducts = await getProductsByFam2ID("3").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="SPIRITS - POOLSE BIEREN FLEX"
+      subtitle="Flexibele verpakkingen van Poolse bieren"
+      products={poolseBierenFlexProducts.slice(0, 10)}
+      viewAllLink="/spirits/poolse-bieren-flex"
+      backgroundColor="white"
+      titleColor="#D0C298"
+      subtitleColor="black"
+      linkColor="black"
+    />
+  )
+}
+
+// SPIRITS - POOLSE BIEREN BLIK (ID: 4)
+async function PoolseBierenBlikSection() {
+  const poolseBierenBlikProducts = await getProductsByFam2ID("4").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="SPIRITS - POOLSE BIEREN BLIK"
+      subtitle="Poolse bieren in blik"
+      products={poolseBierenBlikProducts.slice(0, 10)}
+      viewAllLink="/spirits/poolse-bieren-blik"
+      backgroundColor="#0F3059"
+      titleColor="#D0C298"
+      subtitleColor="white"
+      linkColor="#D0C298"
+    />
+  )
+}
+
+// SPIRITS - STERKE DRANK (ID: 16)
+async function SterkeDrankSection() {
+  const sterkeDrankProducts = await getProductsByFam2ID("16").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="SPIRITS - STERKE DRANK"
+      subtitle="Premium sterke dranken en spirits"
+      products={sterkeDrankProducts.slice(0, 10)}
+      viewAllLink="/spirits/sterke-drank"
+      backgroundColor="white"
+      titleColor="#D0C298"
+      subtitleColor="black"
+      linkColor="black"
+    />
+  )
+}
+
+// SPIRITS - MIX DRANK (ID: 5)
+async function MixDrankSection() {
+  const mixDrankProducts = await getProductsByFam2ID("5").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="SPIRITS - MIX DRANK"
+      subtitle="Mix dranken en cocktail ingrediënten"
+      products={mixDrankProducts.slice(0, 10)}
+      viewAllLink="/spirits/mix-drank"
+      backgroundColor="#0F3059"
+      titleColor="#D0C298"
+      subtitleColor="white"
+      linkColor="#D0C298"
+    />
+  )
+}
+
+// SPIRITS - COCKTAILS (ID: 10)
+async function CocktailsSection() {
+  const cocktailsProducts = await getProductsByFam2ID("10").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="SPIRITS - COCKTAILS"
+      subtitle="Heerlijke cocktails voor elke gelegenheid"
+      products={cocktailsProducts.slice(0, 10)}
+      viewAllLink="/spirits/cocktails"
+      backgroundColor="white"
+      titleColor="#D0C298"
+      subtitleColor="black"
+      linkColor="black"
+    />
+  )
+}
+
+// SPIRITS - WIJNEN (ID: 13)
+async function WijnenSection() {
+  const wijnenProducts = await getProductsByFam2ID("13").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="SPIRITS - WIJNEN"
+      subtitle="Uitgebreid assortiment aan wijnen"
+      products={wijnenProducts.slice(0, 10)}
+      viewAllLink="/spirits/wijnen"
+      backgroundColor="#0F3059"
+      titleColor="#D0C298"
+      subtitleColor="white"
+      linkColor="#D0C298"
+    />
+  )
+}
+
+// FOOD - VOEDING (ID: 14)
+async function VoedingSection() {
+  const voedingProducts = await getProductsByFam2ID("14").catch(() => [])
+
+  return (
+    <FeaturedProductsCarousel
+      title="FOOD - VOEDING"
+      subtitle="Voedingsproducten voor restaurants en cafés"
+      products={voedingProducts.slice(0, 10)}
+      viewAllLink="/food/voeding"
+      backgroundColor="white"
+      titleColor="#D0C298"
+      subtitleColor="black"
+      linkColor="black"
     />
   )
 }

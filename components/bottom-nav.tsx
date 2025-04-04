@@ -73,7 +73,7 @@ export function BottomNav() {
           <span className="text-xs font-medium mt-1">Shop</span>
         </Link>
         <a
-          href="https://wa.me/1234567890"
+          href="https://wa.me/31618495949"
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-col items-center text-green-600"

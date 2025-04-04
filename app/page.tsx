@@ -231,7 +231,7 @@ async function IkratBlikSection() {
 
   return (
     <FeaturedProductsCarousel
-      title="DRANKEN - IKRAT / BLIK"
+      title="DRANKEN - KRAT / BLIK"
       subtitle="Dranken in kratten en blikken"
       products={ikratBlikProducts.slice(0, 10)}
       viewAllLink="/dranken/ikrat-blik"

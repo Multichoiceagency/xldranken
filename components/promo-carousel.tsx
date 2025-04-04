@@ -9,7 +9,7 @@ import { Book, Smartphone, Store, HandshakeIcon, ChevronLeft, ChevronRight } fro
 // Updated promos array with local video
 const promos = [
   {
-    title: "XL DRANKEN – BEVERAGES & NON FOOD",
+    title: "",
     description: "Ontdek een breed assortiment aan alcoholische dranken, frisdranken en exclusieve merken.",
     discount: "",
     media: {
@@ -20,7 +20,7 @@ const promos = [
     href: "/assortiment",
   },
   {
-    title: "Lovka - 10% Vodka Mixed With Energy Drink & Cafeïne",
+    title: "",
     description: "Ontdek Lovka, een nieuw product met pure vodka, caffeïne en energy smaak.",
     discount: "NIEUW PRODUCT",
     media: {
@@ -31,8 +31,8 @@ const promos = [
     href: "/products/lovka",
   },
   {
-    title: "Bekijk nu de aanbieding van deze maand",
-    description: "Aanbieding vanaf 23/01/2025 Sydney Dranken",
+    title: "",
+    description: "Aanbiedingen",
     discount: "KORTINGEN TOT WEL 20%",
     media: {
       type: "image",
@@ -42,7 +42,7 @@ const promos = [
     href: "/assortiment",
   },
   {
-    title: "Ontdek Onze Eigen Merken – Exclusieve Rumselectie",
+    title: "",
     description: "Geniet van een exotische reis met onze ambachtelijke rumcollectie.",
     discount: "25% KORTING",
     media: {

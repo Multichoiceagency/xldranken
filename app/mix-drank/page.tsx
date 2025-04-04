@@ -3,24 +3,24 @@ import type { ProductProps } from "@/types/product"
 import Hero from "@/components/Hero"
 import { Suspense } from "react"
 import { Spinner } from "@/components/ui/spinner"
-import FrisdrankenPageClient from "./frisdranken-page-client"
+import MixdrankenPageClient from "./mixdranken-page-client"
 
-export default function FrisdrankenPage() {
-  const categoryId = "6"
+export default function MixdrankenPage() {
+  const categoryId = "5"
 
   // Fetch products on the server - use async/await in a separate function
   const ProductGrid = async () => {
     const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId)
 
     return (
-      <FrisdrankenPageClient initialProducts={allProducts} />
+      <MixdrankenPageClient initialProducts={allProducts} />
     )
   }
 
   return (
     <div>
       {/* Hero Section */}
-      <Hero title="Frisdranken" description=" 100 diverse frisdranken" />
+      <Hero title="Mix dranken" description="" />
 
       {/* Product Section */}
       <div className="container mx-auto px-8 py-8">

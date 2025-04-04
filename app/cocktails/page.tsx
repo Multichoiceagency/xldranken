@@ -21,7 +21,7 @@ export default function CocktailsPage() {
   return (
     <div>
       {/* Hero Section */}
-      <Hero title="Cocktails" description="Bekijk meer dan 100 diverse cocktail soorten" />
+      <Hero title="Cocktails" description=" 100 diverse cocktail soorten" />
 
       {/* Product Section */}
       <div className="container mx-auto px-8 py-8">

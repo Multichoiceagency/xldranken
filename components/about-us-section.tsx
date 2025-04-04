@@ -9,12 +9,12 @@ export function AboutUsSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div>
             <div className="flex items-center gap-2 mb-6">
-              <h2 className="text-3xl font-bold">Over XL Dranken</h2>
+              <h2 className="text-3xl font-bold">XL Dranken</h2>
               <span className="text-sm font-medium text-muted-foreground">
                 900+ DRANKEN & PRODUCTEN
               </span>
             </div>
-            <div className="space-y-6 text-muted-foreground">
+            <div className="space-y-6">
               <p>
                 Welkom bij XL Dranken, dé specialist in alcoholische en non-alcoholische dranken. 
                 Met trots bieden wij een assortiment van meer dan 900 verschillende dranken aan, 

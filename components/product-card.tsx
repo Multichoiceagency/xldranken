@@ -176,13 +176,16 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   }
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-lg border transition-all duration-500 h-full">
+    <div className="group relative flex flex-col bg-white rounded-lg border transition-all duration-500 h-full w-full min-w-[220px] md:min-w-[240px]">
       {/* Product image - clickable */}
-      <div className="relative h-[200px] w-full overflow-hidden p-4 cursor-pointer" onClick={navigateToProductPage}>
+      <div
+        className="relative h-[160px] md:h-[200px] w-full overflow-hidden p-2 md:p-4 cursor-pointer"
+        onClick={navigateToProductPage}
+      >
         <Image
           src={imageSrc || "/placeholder.svg"}
           alt={product.title}
-          style={{ padding: "10px" }}
+          style={{ padding: "2px" }}
           fill
           className={`object-contain transition-transform duration-500 ${
             isAnimating ? "scale-110" : "group-hover:scale-105"
@@ -201,21 +204,40 @@ export default function ProductCard({ product }: { product: ProductProps }) {
       </div>
 
       {/* Product details */}
-      <div className="flex flex-col p-4 pt-0" style={{ paddingTop: "15px" }}>
+      <div className="flex flex-col p-3 md:p-4 pt-0" style={{ paddingTop: "10px" }}>
         <h3
-          className="font-bold text-[#002B7F] min-h-[2.5rem] line-clamp-2 cursor-pointer"
+          className="font-bold text-[#002B7F] min-h-[2.5rem] line-clamp-2 text-sm md:text-base cursor-pointer mb-2"
           onClick={navigateToProductPage}
         >
           {product.title}
         </h3>
 
-        {/* Price display - not clickable */}
-        <div className="space-y-1">
+        {/* Price display with inline trash icon */}
+        <div className="space-y-1 flex items-center justify-between">
           {regularPrice > 0 ? (
-            <div className="text-[#E31931] text-2xl font-bold">€ {regularPrice.toFixed(2).replace(".", ",")}</div>
+            <div className="text-[#E31931] text-lg md:text-2xl font-bold">
+              € {regularPrice.toFixed(2).replace(".", ",")}
+            </div>
           ) : (
             <div className="text-gray-500 text-sm">Prijs niet beschikbaar</div>
           )}
+
+          {/* Trash icon with tooltip */}
+          <div className="relative group/trash">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+              onClick={handleRemoveFromCart}
+              disabled={!inCartInfo.inCart}
+            >
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only">Verwijderen</span>
+            </Button>
+            <div className="absolute right-0 bottom-full mb-1 w-auto min-w-max opacity-0 group-hover/trash:opacity-100 transition-opacity duration-200 bg-gray-800 text-white text-xs rounded py-1 px-2 pointer-events-none z-10">
+              Product verwijderen
+            </div>
+          </div>
         </div>
 
         {/* Add to cart button or quantity controls */}
@@ -228,53 +250,39 @@ export default function ProductCard({ product }: { product: ProductProps }) {
           ) : (
             <>
               {/* Mobile layout (stacked) */}
-              <div className="flex flex-col space-y-2 md:hidden">
-                <div className="flex items-center justify-between">
-                  {/* Quantity controls */}
-                  <div className="flex items-center border rounded-md">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900"
-                      onClick={handleDecreaseQuantity}
-                      disabled={Number.parseInt(quantityInput, 10) <= 0} // Disable at 0
-                    >
-                      <Minus className="h-3 w-3" />
-                      <span className="sr-only">Verminderen</span>
-                    </Button>
-
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={quantityInput}
-                      onChange={handleQuantityChange}
-                      onBlur={handleQuantityBlur}
-                      onKeyDown={handleKeyDown}
-                      className="w-8 text-center text-sm font-medium border-0 focus:ring-0 focus:outline-none"
-                      aria-label="Quantity"
-                    />
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900"
-                      onClick={handleIncreaseQuantity}
-                    >
-                      <Plus className="h-3 w-3" />
-                      <span className="sr-only">Vermeerderen</span>
-                    </Button>
-                  </div>
-
-                  {/* Trash button */}
+              <div className="flex flex-col space-y-1 md:hidden">
+                {/* Quantity controls */}
+                <div className="flex items-center border rounded-md">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                    onClick={handleRemoveFromCart}
-                    disabled={!inCartInfo.inCart}
+                    className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900"
+                    onClick={handleDecreaseQuantity}
+                    disabled={Number.parseInt(quantityInput, 10) <= 0} // Disable at 0
                   >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Verwijderen</span>
+                    <Minus className="h-3 w-3" />
+                    <span className="sr-only">Verminderen</span>
+                  </Button>
+
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={quantityInput}
+                    onChange={handleQuantityChange}
+                    onBlur={handleQuantityBlur}
+                    onKeyDown={handleKeyDown}
+                    className="w-8 text-center text-sm font-medium border-0 focus:ring-0 focus:outline-none"
+                    aria-label="Quantity"
+                  />
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 p-0 text-gray-600 hover:text-gray-900"
+                    onClick={handleIncreaseQuantity}
+                  >
+                    <Plus className="h-3 w-3" />
+                    <span className="sr-only">Vermeerderen</span>
                   </Button>
                 </div>
 
@@ -284,7 +292,9 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                   onClick={handleAddToCart}
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  <span className="whitespace-nowrap">{inCartInfo.inCart ? "In winkelmand" : "In winkelmand"}</span>
+                  <span className="whitespace-nowrap text-xs md:text-sm">
+                    {inCartInfo.inCart ? "In winkelmand" : "In winkelmand"}
+                  </span>
                 </Button>
               </div>
 
@@ -295,7 +305,9 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                   onClick={handleAddToCart}
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  <span className="whitespace-nowrap">{inCartInfo.inCart ? "In winkelmand" : "In winkelmand"}</span>
+                  <span className="whitespace-nowrap text-xs md:text-sm">
+                    {inCartInfo.inCart ? "In winkelmand" : "In winkelmand"}
+                  </span>
                 </Button>
 
                 {/* Quantity controls */}
@@ -331,18 +343,6 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                     <span className="sr-only">Vermeerderen</span>
                   </Button>
                 </div>
-
-                {/* Trash button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                  onClick={handleRemoveFromCart}
-                  disabled={!inCartInfo.inCart}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Verwijderen</span>
-                </Button>
               </div>
             </>
           )}

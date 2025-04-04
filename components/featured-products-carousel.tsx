@@ -69,7 +69,7 @@ export function FeaturedProductsCarousel({
 
   return (
     <div className="w-full py-8" style={{ backgroundColor }}>
-      <div className="mx-auto" style={{ maxWidth: "1440px" }}>
+      <div className="mx-auto w-[1700px]">
         {/* Header */}
         <div className="flex justify-between items-center mb-6 px-6">
           <div>

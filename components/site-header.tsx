@@ -112,49 +112,51 @@ export function SiteHeader() {
       name: "ALCOHOL",
       href: "/alcohol",
       submenu: [
-        { name: "STERKE DRANK", href: "/spirits/sterke-drank", id: "16" },
-        { name: "MIX DRANK", href: "/spirits/mix-drank", id: "5" },
-        { name: "COCKTAILS", href: "/spirits/cocktails", id: "10" },
-        { name: "LOVKA", href: "/products/lovka", id: "" },
+        { name: "STERKE DRANK", href: "/sterke-drank", id: "16" },
+        { name: "MIX DRANK", href: "/mix-drank", id: "5" },
+        { name: "COCKTAILS", href: "/cocktails", id: "10" },
+        { name: "LOVKA", href: "/lovka", id: "" },
       ],
     },
     {
       name: "WIJN",
       href: "/wijn",
       submenu: [
-        { name: "", href: "/spirits/wijnen", id: "13" },
       ],
     },
     {
       name: "BIER",
       href: "/bier",
       submenu: [
-        { name: "POOLSE BIER BLIK", href: "/spirits/poolse-bieren-blik", id: "4" },
-        { name: "POOLSE BIER FLES", href: "/spirits/poolse-bieren-flex", id: "3" },
-        { name: "NL BIER", href: "/spirits/poolse-bieren-blik", id: "5" },
+        { name: "POOLSE BIER BLIK", href: "/poolse-bier-blik", id: "4" },
+        { name: "POOLSE BIER FLES", href: "/poolse-bier-fles", id: "3" },
+        { name: "NL BIER", href: "/nl-bier", id: "5" },
       ],
     },
     {
       name: "FRISDRANKEN",
       href: "/frisdranken",
       submenu: [
-        { name: "FRISDRANKEN", href: "/dranken/frisdranken", id: "6" },
-        { name: "LIMONADEN", href: "/dranken/limonaden", id: "1" },
-        { name: "WATER NL", href: "/dranken/water-nl", id: "7" },
-        { name: "WATER PL", href: "/dranken/water-pl", id: "12" },
-        { name: "KOFFIE THEE", href: "/dranken/koffie-thee", id: "18" },
+        { name: "FRISDRANKEN", href: "/frisdranken", id: "6" },
+        { name: "LIMONADEN", href: "/limonaden", id: "1" },
+        { name: "WATER NL", href: "/water-nl", id: "7" },
+        { name: "WATER PL", href: "/water-pl", id: "12" },
+        { name: "KOFFIE THEE", href: "/koffie-thee", id: "18" },
       ],
     },
     {
       name: "FOOD",
-      href: "/frisdranken",
+      href: "/food",
       submenu: [
       ],
     },
     {
       name: "NON-FOOD",
-      href: "/frisdranken",
+      href: "/non-food",
       submenu: [
+        { name: "SCHOONMAAK", href: "/schoonmaak", id: "6" },
+        { name: "HOUTSKOOL", href: "/houtskool", id: "6" },
+
       ],
     },
     {

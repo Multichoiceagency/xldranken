@@ -4,76 +4,59 @@ import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Book, Smartphone, Store, HandshakeIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { FaAppStore, FaGooglePlay } from "react-icons/fa"
 
-// Updated promos array with local video
+// Updated promos array with XL Dranken in titles
 const promos = [
   {
-    title: "",
-    description: "Ontdek een breed assortiment aan alcoholische dranken, frisdranken en exclusieve merken.",
-    discount: "",
+    title: "XL Dranken - Uw Dranken Specialist",
+    description:
+      "Verken ons uitgebreide aanbod van premium alcoholische dranken, verfrissende frisdranken en exclusieve merken voor elke gelegenheid.",
+    discount: "900+ PRODUCTEN",
     media: {
       type: "image",
-      src: "https://images.pexels.com/photos/66636/pexels-photo-66636.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop",
+      src: "/winkel/intro-1740433163.jpg",
     },
-    buttonText: "Nu bestellen",
+    buttonText: "Ontdek Assortiment",
     href: "/assortiment",
   },
   {
-    title: "",
-    description: "Ontdek Lovka, een nieuw product met pure vodka, caffeïne en energy smaak.",
+    title: "XL Dranken presenteert: Lovka",
+    description:
+      "Maak kennis met Lovka, onze nieuwste innovatie die pure vodka combineert met een verfrissende energy smaak en een vleugje cafeïne.",
     discount: "NIEUW PRODUCT",
     media: {
       type: "video",
       src: "/videos/lovka.mp4",
+      poster: "/videos/lovka-poster.jpg", // Add a poster image for the video
     },
-    buttonText: "Bekijk product",
+    buttonText: "Ontdek Lovka",
     href: "/products/lovka",
   },
   {
-    title: "",
-    description: "Aanbiedingen",
+    title: "XL Dranken Aanbiedingen",
+    description:
+      "Profiteer van onze tijdelijke kortingen op geselecteerde premium dranken en ontdek nieuwe favorieten tegen aantrekkelijke prijzen.",
     discount: "KORTINGEN TOT WEL 20%",
     media: {
       type: "image",
       src: "/winkel/winkel2.jpeg",
     },
-    buttonText: "Meer informatie",
+    buttonText: "Bekijk Deals",
     href: "/assortiment",
   },
   {
-    title: "",
-    description: "Geniet van een exotische reis met onze ambachtelijke rumcollectie.",
+    title: "XL Dranken Premium Collectie",
+    description:
+      "Laat u meevoeren op een smaakvolle reis met onze zorgvuldig geselecteerde ambachtelijke rumcollectie van over de hele wereld.",
     discount: "25% KORTING",
     media: {
       type: "image",
       src: "/winkel/winkel3.jpeg",
     },
-    buttonText: "Bekijken",
+    buttonText: "Verken Collectie",
     href: "/assortiment",
-  },
-]
-
-const navCards = [
-  {
-    title: "Folders",
-    icon: Book,
-    href: "#",
-  },
-  {
-    title: "XL Groothandel B.V. Bestellapp",
-    icon: Smartphone,
-    href: "#",
-  },
-  {
-    title: "Vestiging",
-    icon: Store,
-    href: "#",
-  },
-  {
-    title: "Registreren",
-    icon: HandshakeIcon,
-    href: "#",
   },
 ]
 
@@ -82,6 +65,7 @@ export function PromoGrid() {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null)
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
+  const [isVideoPlaying, setIsVideoPlaying] = useState<boolean[]>(Array(promos.length).fill(false))
 
   // Set up autoplay
   useEffect(() => {
@@ -98,12 +82,15 @@ export function PromoGrid() {
     }
   }, [currentSlide, isAutoPlaying])
 
-  // Handle video playback
+  // Handle video playback with improved error handling
   useEffect(() => {
-    // Pause all videos
-    videoRefs.current.forEach((video) => {
+    // Pause all videos first
+    videoRefs.current.forEach((video, index) => {
       if (video) {
         video.pause()
+        const newPlayingState = [...isVideoPlaying]
+        newPlayingState[index] = false
+        setIsVideoPlaying(newPlayingState)
       }
     })
 
@@ -113,8 +100,60 @@ export function PromoGrid() {
       const video = videoRefs.current[currentSlide]
       if (video) {
         video.currentTime = 0
-        video.play().catch((e) => console.error("Error playing video:", e))
+
+        // Only attempt to play if the document is visible and not in power saving mode
+        if (document.visibilityState === "visible") {
+          const playPromise = video.play()
+
+          // Handle the play promise properly
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                // Video started playing successfully
+                const newPlayingState = [...isVideoPlaying]
+                newPlayingState[currentSlide] = true
+                setIsVideoPlaying(newPlayingState)
+              })
+              .catch((error) => {
+                // Auto-play was prevented or interrupted
+                console.log("Video playback was prevented:", error.message)
+                // Don't throw an error, just log it and continue
+                // The poster image will be shown instead
+              })
+          }
+        }
       }
+    }
+  }, [currentSlide])
+
+  // Handle visibility change to pause videos when tab is not visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        // Pause all videos when tab is not visible
+        videoRefs.current.forEach((video) => {
+          if (video) {
+            video.pause()
+          }
+        })
+      } else if (document.visibilityState === "visible") {
+        // Try to resume current video when tab becomes visible again
+        const currentPromo = promos[currentSlide]
+        if (currentPromo.media.type === "video") {
+          const video = videoRefs.current[currentSlide]
+          if (video) {
+            video.play().catch((e) => {
+              console.log("Could not resume video playback:", e.message)
+            })
+          }
+        }
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
     }
   }, [currentSlide])
 
@@ -147,16 +186,16 @@ export function PromoGrid() {
     <div className="space-y-8">
       <div className="container mx-auto px-4 py-8">
         {/* Slider */}
-        <div 
-          className="relative h-[600px] overflow-hidden rounded-lg transition-all duration-300 hover:shadow-2xl"
+        <div
+          className="relative h-[800px] overflow-hidden rounded-lg transition-all duration-300 hover:shadow-2xl"
           onMouseEnter={pauseAutoPlay}
           onMouseLeave={resumeAutoPlay}
         >
           {/* Slides */}
           <div className="h-full w-full">
             {promos.map((promo, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`absolute inset-0 transition-opacity duration-700 ${
                   index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
                 }`}
@@ -170,26 +209,35 @@ export function PromoGrid() {
                     priority={index === 0}
                   />
                 ) : (
-                  <video
-                    ref={setVideoRef(index)}
-                    src={promo.media.src}
-                    className="w-full h-full object-cover"
-                    muted
-                    loop
-                    playsInline
-                  />
+                  <>
+                    {/* Fallback image that shows when video isn't playing */}
+                    {!isVideoPlaying[index] && promo.media.poster && (
+                      <Image
+                        src={promo.media.poster || "/placeholder.svg"}
+                        alt={promo.description}
+                        fill
+                        className="object-cover"
+                      />
+                    )}
+                    <video
+                      ref={setVideoRef(index)}
+                      src={promo.media.src}
+                      poster={promo.media.poster}
+                      className="w-full h-full object-cover"
+                      muted
+                      loop
+                      playsInline
+                      preload="auto"
+                    />
+                  </>
                 )}
                 <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-between p-6 md:p-12">
                   <div className="inline-block bg-[#E2B505] text-white px-3 py-1 text-sm self-start">
                     {promo.discount || "WEBSHOP*"}
                   </div>
                   <div className="max-w-2xl">
-                    <h2 className="text-4xl font-bold text-white leading-tight mb-4">
-                      {promo.title}
-                    </h2>
-                    <p className="text-white text-lg mb-6">
-                      {promo.description}
-                    </p>
+                    <h2 className="text-4xl font-bold text-white leading-tight mb-4">{promo.title}</h2>
+                    <p className="text-white text-lg mb-6">{promo.description}</p>
                     <Link href={promo.href}>
                       <Button className="bg-[#E2B505] hover:bg-[#E2B505]/90 transform hover:scale-105 transition-all duration-300 hover:shadow-lg active:scale-95">
                         {promo.buttonText}
@@ -233,25 +281,48 @@ export function PromoGrid() {
         </div>
       </div>
 
-      {/* Navigatiekaarten */}
-      <div className="bg-[#E8F0FE]">
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {navCards.map((card, index) => (
-              <Link
-                key={index}
-                href={card.href}
-                className="group bg-white rounded-lg p-6 flex flex-col items-center text-center transition-all duration-300 hover:shadow-2xl transform hover:-translate-y-2 hover:rotate-1"
+      {/* App Download Section with XL Dranken in title */}
+      <section className="bg-[#FFF5F5] py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#2D1B69] mb-4">XL Dranken App - Bestel Eenvoudig</h2>
+            <p className="text-lg mb-8 text-muted-foreground">
+              Ontdek het gemak van mobiel bestellen en krijg direct toegang tot ons volledige assortiment via onze
+              gebruiksvriendelijke app.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              {/* Google Play Store Button */}
+              <a
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-[200px] h-[60px] bg-[#d3a417] hover:bg-gray-700 text-white rounded-lg flex items-center justify-center px-4 transition-transform hover:scale-105 hover:shadow-lg"
               >
-                <card.icon className="w-12 h-12 text-[#E2B505] mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6" />
-                <span className="text-[#E2B505] font-medium transition-transform duration-300 group-hover:translate-y-1">
-                  {card.title}
-                </span>
-              </Link>
-            ))}
+                <FaGooglePlay className="h-8 w-8 mr-2 fill-white" />
+                <div className="flex flex-col items-start">
+                  <span className="text-xs">DOWNLOAD VIA DE</span>
+                  <span className="text-sm font-semibold">Google Play</span>
+                </div>
+              </a>
+
+              {/* Apple App Store Button */}
+              <a
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-[200px] h-[60px] bg-[#d3a417] hover:bg-gray-700 text-white rounded-lg flex items-center justify-center px-4 transition-transform hover:scale-105 hover:shadow-lg"
+              >
+                <FaAppStore className="h-8 w-8 mr-2" />
+                <div className="flex flex-col items-start">
+                  <span className="text-xs">DOWNLOAD VIA DE</span>
+                  <span className="text-sm font-semibold">App Store</span>
+                </div>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }
+

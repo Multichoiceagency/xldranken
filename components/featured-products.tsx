@@ -42,5 +42,5 @@ export function FeaturedProducts({ fam2ID = "" }: { fam2ID?: string }) {
     return <div className="text-center">No products found</div>
   }
 
-  return <FeaturedProductsCarousel products={products} />
+  return <FeaturedProductsCarousel products={products} title={''} />
 }

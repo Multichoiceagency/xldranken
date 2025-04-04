@@ -13,7 +13,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div>
             <Image
-                src="/logos/logo-xlgroothandelbv.jpg"
+                src="/logos/logo-wit.png"
                 alt="Shopping Awards Winner"
                 width={300}
                 height={60}
@@ -57,8 +57,6 @@ export function SiteFooter() {
           <div>
             <h3 className="font-bold mb-4">SERVICE</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/veelgestelde-vragen" className="hover:text-[#d0c298]">Veel gestelde vragen</Link></li>
-              <li><Link href="/online-drank-bestellen" className="hover:text-[#d0c298]">Online drank bestellen</Link></li>
               <li><Link href="/zakelijk" className="hover:text-[#d0c298]">Zakelijk</Link></li>
               <li><Link href="/winkels" className="hover:text-[#d0c298]">Winkels</Link></li>
               <li><Link href="/contact" className="hover:text-[#d0c298]">Contact</Link></li>
@@ -73,11 +71,7 @@ export function SiteFooter() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/over-ons" className="hover:text-[#d0c298]">Over XL Dranken</Link></li>
               <li><Link href="/vacatures" className="hover:text-[#d0c298]">Vacatures</Link></li>
-              <li><Link href="/premium" className="hover:text-[#d0c298]">Mijn XL Dranken Premium</Link></li>
-              <li><Link href="/kwetsbaarheid" className="hover:text-[#d0c298]">Kwetsbaarheid melden</Link></li>
-              <li><Link href="/verantwoord-alcoholgebruik" className="hover:text-[#d0c298]">Verantwoord alcoholgebruik</Link></li>
               <li><Link href="/duurzaamheid" className="hover:text-[#d0c298]">Duurzaamheid en XL Dranken</Link></li>
-              <li><Link href="/pers" className="hover:text-[#d0c298]">Pers</Link></li>
             </ul>
           </div>
         </div>
@@ -106,7 +100,7 @@ export function SiteFooter() {
                 className="object-contain"
               />
             </div>
-            
+
           </div>
           {/* Copyright and Legal */}
           <div className="mt-6 flex flex-col md:flex-row space-between justify-center items-center text-sm text-white">
@@ -131,4 +125,3 @@ export function SiteFooter() {
     </footer>
   )
 }
-

@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ShoppingCart, Heart, User, Menu, X } from "lucide-react"
+import { ShoppingCart, Heart, User, Menu, X, ChevronDown, ChevronRight } from 'lucide-react'
 import { useCart } from "@/lib/cart-context"
 import { SideCart } from "./side-cart"
 
@@ -16,7 +16,10 @@ export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMenuClosing, setIsMenuClosing] = useState(false)
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [expandedMobileMenus, setExpandedMobileMenus] = useState<string[]>([])
   const lastScrollY = useRef(0)
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Handle menu closing animation
   const handleCloseMenu = () => {
@@ -25,7 +28,22 @@ export function SiteHeader() {
     setTimeout(() => {
       setIsMobileMenuOpen(false)
       setIsMenuClosing(false)
+      setExpandedMobileMenus([]) // Reset expanded menus when closing
     }, 400) // Match animation duration
+  }
+
+  // Toggle mobile submenu
+  const toggleMobileSubmenu = (menuName: string, event: React.MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    setExpandedMobileMenus(prev => {
+      if (prev.includes(menuName)) {
+        return prev.filter(item => item !== menuName)
+      } else {
+        return [...prev, menuName]
+      }
+    })
   }
 
   // Prevent scrolling when mobile menu is open
@@ -74,6 +92,74 @@ export function SiteHeader() {
     }
   }, [])
 
+  // Handle dropdown menu
+  const handleDropdownEnter = (menu: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current)
+    }
+    setActiveDropdown(menu)
+  }
+
+  const handleDropdownLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null)
+    }, 200)
+  }
+
+  // Menu structure with submenus
+  const menuItems = [
+    {
+      name: "ALCOHOL",
+      href: "/alcohol",
+      submenu: [
+        { name: "STERKE DRANK", href: "/spirits/sterke-drank", id: "16" },
+        { name: "MIX DRANK", href: "/spirits/mix-drank", id: "5" },
+        { name: "COCKTAILS", href: "/spirits/cocktails", id: "10" },
+        { name: "LOVKA", href: "/products/lovka", id: "" },
+      ],
+    },
+    {
+      name: "WIJN",
+      href: "/wijn",
+      submenu: [
+        { name: "WIJNEN", href: "/spirits/wijnen", id: "13" },
+      ],
+    },
+    {
+      name: "BIER",
+      href: "/bier",
+      submenu: [
+        { name: "BIEREN NL", href: "/spirits/bieren-nl", id: "9" },
+        { name: "POOLSE BIEREN FLEX", href: "/spirits/poolse-bieren-flex", id: "3" },
+        { name: "POOLSE BIEREN BLIK", href: "/spirits/poolse-bieren-blik", id: "4" },
+      ],
+    },
+    {
+      name: "COCKTAILS",
+      href: "/cocktails",
+      submenu: [
+        { name: "COCKTAILS", href: "/spirits/cocktails", id: "10" },
+        { name: "MIX DRANK", href: "/spirits/mix-drank", id: "5" },
+      ],
+    },
+    {
+      name: "FRISDRANKEN",
+      href: "/frisdranken",
+      submenu: [
+        { name: "FRISDRANKEN", href: "/dranken/frisdranken", id: "6" },
+        { name: "LIMONADEN", href: "/dranken/limonaden", id: "1" },
+        { name: "WATER NL", href: "/dranken/water-nl", id: "7" },
+        { name: "WATER PL", href: "/dranken/water-pl", id: "12" },
+        { name: "KOFFIE THEE", href: "/dranken/koffie-thee", id: "18" },
+      ],
+    },
+    {
+      name: "ACTIES",
+      href: "/acties",
+      submenu: [],
+    },
+  ]
+
   return (
     <>
       {/* Header - with transition for hiding/showing */}
@@ -99,7 +185,7 @@ export function SiteHeader() {
             <div className="absolute left-1/2 transform -translate-x-1/2 lg:static lg:left-auto lg:transform-none">
               <Link href="/" className="flex items-center">
                 <Image
-                  src="/logos/logo-xlgroothandelbv.jpg"
+                  src="/logos/logo-xlgroothandelbv.png"
                   alt="XL Groothandel B.V. logo"
                   width={700}
                   height={48}
@@ -111,13 +197,41 @@ export function SiteHeader() {
 
             {/* Menu-items in het midden - desktop only */}
             <nav className="hidden lg:flex items-center gap-8 font-bold">
-              <NavLink href="/shop">SHOP</NavLink>
-              <NavLink href="/alcohol">ALCOHOL</NavLink>
-              <NavLink href="/bier">BIER</NavLink>
-              <NavLink href="/cocktails">COCKTAILS</NavLink>
-              <NavLink href="/frisdranken">FRISDRANKEN</NavLink>
-              <NavLink href="/mix-dranken">MIX DRANKEN</NavLink>
-              <NavLink href="/acties">Acties</NavLink>
+              {menuItems.map((item) => (
+                <div
+                  key={item.name}
+                  className="relative"
+                  onMouseEnter={() => handleDropdownEnter(item.name)}
+                  onMouseLeave={handleDropdownLeave}
+                >
+                  <Link
+                    href={item.href}
+                    className="px-2 py-1 hover:bg-[#E2B505] rounded-md hover:text-white transition-colors text-center flex items-center"
+                  >
+                    {item.name}
+                    {item.submenu.length > 0 && (
+                      <ChevronDown className="ml-1 h-4 w-4" />
+                    )}
+                  </Link>
+
+                  {/* Dropdown menu */}
+                  {item.submenu.length > 0 && activeDropdown === item.name && (
+                    <div className="absolute left-0 mt-1 w-64 bg-white shadow-lg rounded-md overflow-hidden z-50 animate-fadeIn">
+                      <div className="py-2">
+                        {item.submenu.map((subItem) => (
+                          <Link
+                            key={subItem.name}
+                            href={subItem.href}
+                            className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                          >
+                            {subItem.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </nav>
 
             {/* Icoontjes Rechts - reordered and wishlist hidden on mobile */}
@@ -149,11 +263,11 @@ export function SiteHeader() {
       {/* Fullscreen Mobile Menu with animations */}
       {(isMobileMenuOpen || isMenuClosing) && (
         <div
-          className={`fixed inset-0 bg-white z-50 flex flex-col overflow-hidden transition-opacity duration-300 ${
+          className={`fixed inset-0 bg-white z-50 flex flex-col overflow-auto transition-opacity duration-300 ${
             isMenuClosing ? "opacity-0" : "opacity-100"
           }`}
         >
-          <div className="container mx-auto px-4 py-6 h-full flex flex-col">
+          <div className="container mx-auto px-4 py-6 min-h-full flex flex-col">
             <div
               className={`flex justify-between items-center mb-6 ${isMenuClosing ? "animate-slide-out" : "animate-slide-in"}`}
               style={{
@@ -164,10 +278,10 @@ export function SiteHeader() {
               {/* Logo at the top of mobile menu - larger */}
               <Link href="/" className="flex items-center" onClick={handleCloseMenu}>
                 <Image
-                  src="/logos/logo-xlgroothandelbv.jpg"
+                  src="/logos/logo-xlgroothandelbv.png"
                   alt="XL Groothandel B.V. logo"
-                  width={250}
-                  height={48}
+                  width={300}
+                  height={65}
                   className="object-contain"
                   priority
                 />
@@ -183,72 +297,82 @@ export function SiteHeader() {
               </button>
             </div>
 
-            {/* Mobile menu links with staggered animation */}
-            <nav className="flex flex-col space-y-3 text-base font-bold">
-              <MobileNavLink
-                href="/shop"
-                onClick={handleCloseMenu}
-                delay={isMenuClosing ? 0 : 100}
-                isClosing={isMenuClosing}
-              >
-                SHOP
-              </MobileNavLink>
-              <MobileNavLink
-                href="/alcohol"
-                onClick={handleCloseMenu}
-                delay={isMenuClosing ? 50 : 150}
-                isClosing={isMenuClosing}
-              >
-                ALCOHOL
-              </MobileNavLink>
-              <MobileNavLink
-                href="/bier"
-                onClick={handleCloseMenu}
-                delay={isMenuClosing ? 100 : 200}
-                isClosing={isMenuClosing}
-              >
-                BIER
-              </MobileNavLink>
-              <MobileNavLink
-                href="/cocktails"
-                onClick={handleCloseMenu}
-                delay={isMenuClosing ? 150 : 250}
-                isClosing={isMenuClosing}
-              >
-                COCKTAILS
-              </MobileNavLink>
-              <MobileNavLink
-                href="/frisdranken"
-                onClick={handleCloseMenu}
-                delay={isMenuClosing ? 200 : 300}
-                isClosing={isMenuClosing}
-              >
-                FRISDRANKEN
-              </MobileNavLink>
-              <MobileNavLink
-                href="/mix-dranken"
-                onClick={handleCloseMenu}
-                delay={isMenuClosing ? 250 : 350}
-                isClosing={isMenuClosing}
-              >
-                MIX DRANKEN
-              </MobileNavLink>
-              <MobileNavLink
-                href="/assortiment"
-                onClick={handleCloseMenu}
-                delay={isMenuClosing ? 300 : 400}
-                isClosing={isMenuClosing}
-              >
-                ASSORTIMENT
-              </MobileNavLink>
-              <MobileNavLink
-                href="/acties"
-                onClick={handleCloseMenu}
-                delay={isMenuClosing ? 350 : 450}
-                isClosing={isMenuClosing}
-              >
-                Acties
-              </MobileNavLink>
+            {/* Mobile menu links with accordion-style submenus */}
+            <nav className="flex flex-col space-y-1 text-base font-bold">
+              {menuItems.map((item, index) => (
+                <div key={item.name} className="border-b border-gray-100 last:border-b-0">
+                  {item.submenu.length > 0 ? (
+                    <div
+                      className={`${isMenuClosing ? "animate-slide-out" : "animate-slide-in"}`}
+                      style={{
+                        animationDelay: isMenuClosing ? index * 50 + "ms" : 100 + index * 50 + "ms",
+                        animationFillMode: "both",
+                      }}
+                    >
+                      {/* Parent menu item with toggle button */}
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={item.href}
+                          className="px-2 py-3 hover:text-[#E2B505] transition-colors w-full block text-sm"
+                          onClick={(e) => {
+                            if (item.submenu.length > 0) {
+                              e.preventDefault()
+                            } else {
+                              handleCloseMenu()
+                            }
+                          }}
+                        >
+                          {item.name}
+                        </Link>
+                        <button
+                          onClick={(e) => toggleMobileSubmenu(item.name, e)}
+                          className="p-2 hover:text-[#E2B505] transition-colors"
+                          aria-label={expandedMobileMenus.includes(item.name) ? "Collapse menu" : "Expand menu"}
+                        >
+                          {expandedMobileMenus.includes(item.name) ? (
+                            <ChevronDown className="h-5 w-5" />
+                          ) : (
+                            <ChevronRight className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Submenu with slide animation */}
+                      {expandedMobileMenus.includes(item.name) && (
+                        <div className="pl-4 overflow-hidden animate-slideDown">
+                          {item.submenu.map((subItem, subIndex) => (
+                            <Link
+                              key={subItem.name}
+                              href={subItem.href}
+                              className="px-2 py-2 hover:text-[#E2B505] transition-colors w-full block text-sm border-l-2 border-gray-200 mb-1"
+                              onClick={handleCloseMenu}
+                              style={{
+                                animationDelay: `${subIndex * 50}ms`,
+                              }}
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className={`px-2 py-3 hover:text-[#E2B505] transition-colors w-full block text-sm ${
+                        isMenuClosing ? "animate-slide-out" : "animate-slide-in"
+                      }`}
+                      onClick={handleCloseMenu}
+                      style={{
+                        animationDelay: isMenuClosing ? index * 50 + "ms" : 100 + index * 50 + "ms",
+                        animationFillMode: "both",
+                      }}
+                    >
+                      {item.name}
+                    </Link>
+                  )}
+                </div>
+              ))}
             </nav>
 
             {/* Icons in mobile menu with animation - reordered to match header */}
@@ -339,6 +463,16 @@ export function SiteHeader() {
           }
         }
         
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideDown {
+          from { max-height: 0; opacity: 0; }
+          to { max-height: 500px; opacity: 1; }
+        }
+        
         .animate-slide-in {
           animation: slideIn 0.4s ease-out forwards;
         }
@@ -346,48 +480,15 @@ export function SiteHeader() {
         .animate-slide-out {
           animation: slideOut 0.4s ease-in forwards;
         }
+        
+        .animate-fadeIn {
+          animation: fadeIn 0.2s ease-out forwards;
+        }
+        
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out forwards;
+        }
       `}</style>
     </>
-  )
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="px-2 py-1 hover:bg-[#E2B505] rounded-md hover:text-white transition-colors text-center"
-    >
-      {children}
-    </Link>
-  )
-}
-
-function MobileNavLink({
-  href,
-  children,
-  onClick,
-  delay = 0,
-  isClosing = false,
-}: {
-  href: string
-  children: React.ReactNode
-  onClick?: () => void
-  delay?: number
-  isClosing?: boolean
-}) {
-  return (
-    <Link
-      href={href}
-      className={`px-2 py-2 hover:bg-[#E2B505] rounded-md hover:text-white transition-colors w-full block text-sm ${
-        isClosing ? "animate-slide-out" : "animate-slide-in"
-      }`}
-      onClick={onClick}
-      style={{
-        animationDelay: `${delay}ms`,
-        animationFillMode: "both",
-      }}
-    >
-      {children}
-    </Link>
   )
 }

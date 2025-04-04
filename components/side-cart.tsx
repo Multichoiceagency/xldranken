@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react"
 import Image from "next/image"
 import { X, Plus, Minus } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
+import Link from "next/link";
 
 interface SideCartProps {
   isOpen: boolean
@@ -174,12 +175,14 @@ export function SideCart({ isOpen, onClose }: SideCartProps) {
               </div>
               <p className="text-[10px] text-gray-500 mb-3">Verzendkosten worden berekend bij het afrekenen.</p>
               <div>
+                <Link href="/checkout">
                 <button
                   className="flex items-center justify-center w-full bg-[#0F3059] text-white py-2 px-3 rounded font-bold text-sm"
                   onClick={onClose}
                 >
                   Afrekenen
                 </button>
+                </Link>
               </div>
             </div>
           )}

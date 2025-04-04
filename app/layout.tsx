@@ -9,8 +9,8 @@ import { CartProvider } from "@/lib/cart-context"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 import { ProductProvider } from "@/context/ProductContext"
 import { Toaster } from "@/components/ui/toaster"
-import { OneSignalProvider } from "@/components/one-signal-provider"
 import { NotificationPopup } from "@/components/notification-popup"
+import { AgeVerificationPopup } from "@/components/AgeVerificationPopup"
 
 // Voeg alle beschikbare gewichten toe
 const poppins = Poppins({
@@ -48,7 +48,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="XL Dranken" />
       </head>
       <body className={`${poppins.className} overflow-x-hidden`}>
-        <OneSignalProvider>
+        <AgeVerificationPopup />
           <ProductProvider>
             <CartProvider>
               <SiteHeader />
@@ -62,9 +62,7 @@ export default function RootLayout({
               <NotificationPopup />
             </CartProvider>
           </ProductProvider>
-        </OneSignalProvider>
       </body>
     </html>
   )
 }
-

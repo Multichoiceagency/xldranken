@@ -238,10 +238,6 @@ export async function getCustomerOrderDetails(guid: string) {
 }
 
 // BESTELLINGEN AANMAKEN
-export function addLinesToOeder(orderLines: any){
-  console.log(orderLines)
-}
-
 export async function createEmptyORder(customerID: string){
   const url = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${API_KEY}`
 
@@ -263,13 +259,52 @@ export async function createEmptyORder(customerID: string){
 
 }
 
+export async function addLinesToOrder(orderID: any, orderLines: any[]) {
+  console.log("adding order lines for order: ", orderID);
+  for (const orderLine of orderLines) {
+    const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}
+    &arcleunik=${orderLine.volume}
+    &guid=${orderID}
+    &qty=${orderLine.quantity}`;
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+      });
+      const data = await res.json();
+      console.log("Added line:", data);
+    } catch (error) {
+      console.error("Error adding line to order:", error);
+    }
+  }
+
+}
+
+export async function sendToMegawin(orderID: any) {
+  const url = `${process.env.NEXT_PUBLIC_ORDERS_SEND_TO_MEGAWIN_URL}apikey=${API_KEY}&guid=${orderID}`
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+    });
+    const data = await res.json();
+    console.log("Added line:", data);
+  } catch (error) {
+    console.error("Error adding line to order:", error);
+  }
+}
+
 export async function handleOrders(orderData: any, customerID: any) {
   console.log("order data: ", orderData)
-  console.log("customer id: ", customerID)
+  console.log("customer id: ", customerID.clcleunik)
   try {
     const orderID = await createEmptyORder(customerID.clcleunik)
+    const fullOrder = addLinesToOrder(orderID.result.guid, orderData)
+    const completeOrder = sendToMegawin(orderID.result.guid)
 
-    console.log(orderID)
+    console.log(orderID.result.guid)
+    console.log(fullOrder)
+    console.log(completeOrder)
   } catch (error) {
     console.log(error)
   }

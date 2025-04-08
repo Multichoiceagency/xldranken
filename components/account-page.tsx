@@ -23,12 +23,10 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { icon: <ClipboardList className="w-8 h-8 text-gray-400" />, title: "Bestellingen", href: "/account/bestellingen" },
-  { icon: <MessageCircle className="w-8 h-8 text-gray-400" />, title: "Gesprekken", href: "/account/gesprekken" },
   { icon: <Tag className="w-8 h-8 text-gray-400" />, title: "Aanbiedingen", href: "/account/aanbiedingen" },
   { icon: <Package className="w-8 h-8 text-gray-400" />, title: "Bulkbestelling", href: "/account/bulkbestelling" },
   { icon: <MapPin className="w-8 h-8 text-gray-400" />, title: "Adressen", href: "/account/adressen" },
   { icon: <User className="w-8 h-8 text-gray-400" />, title: "Accountgegevens", href: "/account/gegevens" },
-  { icon: <Heart className="w-8 h-8 text-gray-400" />, title: "Wishlist", href: "/account/wishlist" },
   { icon: <LogOut className="w-8 h-8 text-gray-400" />, title: "Logout", href: "/logout" }
 ]
 

@@ -177,7 +177,7 @@ export default function AccountDetails({ customerData }: { customerData: Custome
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <Label>Klantnummer</Label>
-                <div className="p-2 border rounded-md bg-gray-50">{customerData.customerNumber}</div>
+                <div className="p-2 border rounded-md bg-gray-50">{customerData.clcleunik}</div>
               </div>
               <div>
                 <Label>Email</Label>

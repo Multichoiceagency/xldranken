@@ -33,7 +33,6 @@ export default async function Orders() {
           <TableRow>
             <TableHead>Bestelnummer</TableHead>
             <TableHead>Datum</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead>Totaal</TableHead>
             <TableHead>Actie</TableHead>
           </TableRow>

@@ -7,7 +7,7 @@ export default function LogoutPage() {
 
   useEffect(() => {
     localStorage.removeItem("token")
-    router.push("/login")
+    router.push("/logout")
   }, [router])
 
   return (

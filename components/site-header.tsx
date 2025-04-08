@@ -115,7 +115,6 @@ export function SiteHeader() {
         { name: "STERKE DRANK", href: "/sterke-drank", id: "16" },
         { name: "MIX DRANK", href: "/mix-drank", id: "5" },
         { name: "COCKTAILS", href: "/cocktails", id: "10" },
-        { name: "LOVKA", href: "/lovka", id: "" },
       ],
     },
     {

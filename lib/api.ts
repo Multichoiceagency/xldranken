@@ -72,6 +72,7 @@ export async function getCustomerById(id: string) {
 
     const response = await fetch(url)
 
+
     if (!response.ok) {
       throw new Error(`API Error: ${response.status} ${response.statusText}`)
     }
@@ -234,4 +235,44 @@ export async function getCustomerOrderDetails(guid: string) {
     console.error("Error fetching order details:", error)
     throw error
   }
+}
+
+// BESTELLINGEN AANMAKEN
+export function addLinesToOeder(orderLines: any){
+  console.log(orderLines)
+}
+
+export async function createEmptyORder(customerID: string){
+  const url = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${API_KEY}`
+
+   const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        clcleunik: customerID,
+        use: "clcleunik"
+      }),
+    })
+
+  const order_guid = await  response.json()
+  console.log(order_guid)
+
+  return order_guid
+
+}
+
+export async function handleOrders(orderData: any, customerID: any) {
+  console.log("order data: ", orderData)
+  console.log("customer id: ", customerID)
+  try {
+    const orderID = await createEmptyORder(customerID.clcleunik)
+
+    console.log(orderID)
+  } catch (error) {
+    console.log(error)
+  }
+
+
 }

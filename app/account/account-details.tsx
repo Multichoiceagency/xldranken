@@ -315,20 +315,10 @@ export default function AccountDetails({ customerData }: { customerData: Custome
         </CardContent>
       </Card>
 
-      <Card className="border-red-200">
-        <CardHeader>
-          <CardTitle className="text-red-600">Danger Zone</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="mb-4 text-gray-600">
-            Deleting your account will remove all of your information from our database. This cannot be undone.
-          </p>
           <Button variant="default" onClick={LogoutPage}>
             <Trash2 className="h-4 w-4 mr-2" />
             Uitloggen
           </Button>
-        </CardContent>
-      </Card>
     </div>
   )
 }

@@ -20,7 +20,7 @@ export default function FrisdrankenPage() {
   return (
     <div>
       {/* Hero Section */}
-      <Hero title="Houtskool" description=" 100 diverse frisdranken" />
+      <Hero title="Houtskool" description="" />
 
       {/* Product Section */}
       <div className="container mx-auto px-8 py-8">

@@ -1,16 +1,16 @@
-import { getProductsByFam2ID } from "@/lib/api"
+import { getProductsByFam1ID } from "@/lib/api"
 import type { ProductProps } from "@/types/product"
 import Hero from "@/components/Hero"
 import { Suspense } from "react"
 import { Spinner } from "@/components/ui/spinner"
-import FoodPageClient from "./frisdranken-page-client"
+import FoodPageClient from "./food-page-client"
 
 export default function FrisdrankenPage() {
   const categoryId = "14"
 
   // Fetch products on the server - use async/await in a separate function
   const ProductGrid = async () => {
-    const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId)
+    const allProducts: ProductProps[] = await getProductsByFam1ID(categoryId)
 
     return (
       <FoodPageClient initialProducts={allProducts} />

@@ -39,6 +39,28 @@ function constructApiUrl(endpoint: string, params: Record<string, string>, isCus
   return `${PRODUCT_API_URL}?${queryParams}`
 }
 
+export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[]> {
+  try {
+    // Construct the URL for products
+    const url = constructApiUrl("", { fam1ID }, false)
+    console.log("Fetching products by fam1ID from URL:", url) // Debug log
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    // Ensure products is always an array
+    return Array.isArray(data.result?.product) ? data.result.product : []
+  } catch (error) {
+    console.error("Error fetching products by fam1ID:", error)
+    return []
+  }
+}
+
 export async function getProductsByFam2ID(fam2ID: string): Promise<ProductProps[]> {
   try {
     // Construct the URL for products
@@ -71,7 +93,6 @@ export async function getCustomerById(id: string) {
     console.log("Fetching customer by ID from URL:", url) // Debug log
 
     const response = await fetch(url)
-
 
     if (!response.ok) {
       throw new Error(`API Error: ${response.status} ${response.statusText}`)
@@ -191,7 +212,6 @@ export async function cleanTestData(id: string) {
 
 export async function getCustomerOrder(id: string) {
   try {
-
     // Use customer API URL for customer endpoints
     const url = `${process.env.NEXT_PUBLIC_CUSTOMER_ORDERS_API_URL}&clcleunik=${id}&apikey=${API_KEY}`
     console.log("Fetching customer orders from URL:", url) // Debug log
@@ -205,7 +225,6 @@ export async function getCustomerOrder(id: string) {
     const data = await response.json()
     console.log(data.result.order)
 
-
     return data.result.order
   } catch (error) {
     console.error("Error fetching customer orders:", error)
@@ -214,8 +233,7 @@ export async function getCustomerOrder(id: string) {
 }
 
 export async function getCustomerOrderDetails(guid: string) {
-    try {
-
+  try {
     // Use customer API URL for customer endpoints
     const url = `${process.env.NEXT_PUBLIC_CUSTOMER_ORDER_DETAILS_API_URL}apikey=${API_KEY}&guid=${guid}`
     console.log("Fetching order details from URL:", url) // Debug log
@@ -229,7 +247,6 @@ export async function getCustomerOrderDetails(guid: string) {
     const data = await response.json()
     console.log(data.result.order)
 
-
     return data.result.order
   } catch (error) {
     console.error("Error fetching order details:", error)
@@ -238,29 +255,28 @@ export async function getCustomerOrderDetails(guid: string) {
 }
 
 // BESTELLINGEN AANMAKEN
-export function addLinesToOeder(orderLines: any){
+export function addLinesToOeder(orderLines: any) {
   console.log(orderLines)
 }
 
-export async function createEmptyORder(customerID: string){
+export async function createEmptyORder(customerID: string) {
   const url = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${API_KEY}`
 
-   const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        clcleunik: customerID,
-        use: "clcleunik"
-      }),
-    })
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      clcleunik: customerID,
+      use: "clcleunik",
+    }),
+  })
 
-  const order_guid = await  response.json()
+  const order_guid = await response.json()
   console.log(order_guid)
 
   return order_guid
-
 }
 
 export async function handleOrders(orderData: any, customerID: any) {
@@ -273,6 +289,4 @@ export async function handleOrders(orderData: any, customerID: any) {
   } catch (error) {
     console.log(error)
   }
-
-
 }

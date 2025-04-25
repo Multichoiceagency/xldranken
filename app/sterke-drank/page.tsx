@@ -20,7 +20,7 @@ export default function BierPage() {
   return (
     <div>
       {/* Hero Section */}
-      <Hero title="Spirits Assortiment" description=" " />
+      <Hero title="Sterke Dranken" description=" " />
 
       {/* Product Section */}
       <div className="container mx-auto px-8 py-8">

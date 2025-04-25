@@ -1,4 +1,6 @@
 export interface ProductProps {
+  imageAlt: any;
+  productId: string;
   id_product_mysql: string; // Unieke ID uit de database
   title: string; // Naam van het product
   prix_vente_groupe: number; // Standaard verkoopprijs

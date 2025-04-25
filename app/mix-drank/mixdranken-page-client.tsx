@@ -1,44 +1,97 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import { useState, useEffect, useRef, useCallback } from "react"
+import { useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons"
+import { faThLarge, faTh, faSpinner } from "@fortawesome/free-solid-svg-icons"
 import ProductCard from "@/components/product-card"
 import type { ProductProps } from "@/types/product"
 
-type MixdrankenPageClientProps = {
+type MixDrankenPageClientProps = {
   initialProducts: ProductProps[]
 }
 
-export default function MixdrankenPageClient({ initialProducts }: MixdrankenPageClientProps) {
+export default function MixDrankenPageClient({ initialProducts }: MixDrankenPageClientProps) {
   const searchParams = useSearchParams()
-  const [products, setProducts] = useState(initialProducts)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [products, setProducts] = useState<ProductProps[]>([])
+  const [displayedProducts, setDisplayedProducts] = useState<ProductProps[]>([])
   const [productsPerPage, setProductsPerPage] = useState(24)
-  const [gridView, setGridView] = useState<'grid2' | 'grid4'>('grid4')
+  const [gridView, setGridView] = useState<"grid2" | "grid4">("grid4")
+  const [loading, setLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(1)
 
-  useEffect(() => {
-    const page = Number(searchParams.get('page')) || 1
-    const limit = Number(searchParams.get('limit')) || 24
-    const view = searchParams.get('view') as 'grid2' | 'grid4' | null
+  const observer = useRef<IntersectionObserver | null>(null)
+  const lastProductElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loading) return
+      if (observer.current) observer.current.disconnect()
 
-    setCurrentPage(page)
-    setProductsPerPage(limit)
-    if (view) setGridView(view)
-  }, [searchParams])
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore) {
+            loadMoreProducts()
+          }
+        },
+        { threshold: 0.5 },
+      )
 
-  const totalPages = Math.ceil(products.length / productsPerPage)
-  const paginatedProducts = products.slice(
-    (currentPage - 1) * productsPerPage,
-    currentPage * productsPerPage
+      if (node) observer.current.observe(node)
+    },
+    [loading, hasMore],
   )
+
+  // Initialize with search params
+  useEffect(() => {
+    const view = searchParams.get("view") as "grid2" | "grid4" | null
+    const limit = Number(searchParams.get("limit")) || 24
+
+    if (view) setGridView(view)
+    setProductsPerPage(limit)
+    setProducts(initialProducts)
+
+    // Initialize with first batch of products
+    setDisplayedProducts(initialProducts.slice(0, limit))
+    setHasMore(initialProducts.length > limit)
+  }, [initialProducts, searchParams])
+
+  const loadMoreProducts = () => {
+    if (!hasMore || loading) return
+
+    setLoading(true)
+
+    // Simulate a delay to show loading state (remove in production)
+    setTimeout(() => {
+      const nextPage = page + 1
+      const startIndex = (nextPage - 1) * productsPerPage
+      const endIndex = nextPage * productsPerPage
+      const newProducts = products.slice(startIndex, endIndex)
+
+      if (newProducts.length > 0) {
+        setDisplayedProducts((prev) => [...prev, ...newProducts])
+        setPage(nextPage)
+        setHasMore(endIndex < products.length)
+      } else {
+        setHasMore(false)
+      }
+
+      setLoading(false)
+    }, 800)
+  }
 
   const createURL = (key: string, value: string | number) => {
     const params = new URLSearchParams(searchParams)
     params.set(key, value.toString())
-    return `/Mixdranken?${params.toString()}`
+    return `/MixDranken?${params.toString()}`
+  }
+
+  const handleProductsPerPageChange = (limit: number) => {
+    setProductsPerPage(limit)
+    // Reset displayed products and page when changing limit
+    setDisplayedProducts(products.slice(0, limit))
+    setPage(1)
+    setHasMore(products.length > limit)
   }
 
   return (
@@ -48,13 +101,13 @@ export default function MixdrankenPageClient({ initialProducts }: MixdrankenPage
         <div className="flex items-center space-x-2 text-sm">
           <span className="font-medium">Aantal producten per pagina:</span>
           {[8, 12, 20, 28].map((num) => (
-            <Link
+            <button
               key={num}
-              href={createURL("limit", num)}
+              onClick={() => handleProductsPerPageChange(num)}
               className={`px-2 ${productsPerPage === num ? "font-bold text-black" : "text-gray-500"}`}
             >
               {num}
-            </Link>
+            </button>
           ))}
         </div>
 
@@ -76,9 +129,22 @@ export default function MixdrankenPageClient({ initialProducts }: MixdrankenPage
       </div>
 
       {/* Product Grid */}
-      <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}>
-        {paginatedProducts.length > 0 ? (
-          paginatedProducts.map((product) => <ProductCard key={product.id_product_mysql} product={product} />)
+      <div
+        className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}
+      >
+        {displayedProducts.length > 0 ? (
+          displayedProducts.map((product, index) => {
+            // Add ref to last product for intersection observer
+            if (displayedProducts.length === index + 1) {
+              return (
+                <div key={product.arcleunik} ref={lastProductElementRef}>
+                  <ProductCard product={product} />
+                </div>
+              )
+            } else {
+              return <ProductCard key={product.arcleunik} product={product} />
+            }
+          })
         ) : (
           <div className="col-span-full text-center py-10">
             <p className="text-lg font-medium">Geen producten gevonden</p>
@@ -86,28 +152,21 @@ export default function MixdrankenPageClient({ initialProducts }: MixdrankenPage
         )}
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center items-center gap-4 mt-8">
-        {currentPage > 1 && (
-          <Link
-            href={createURL("page", currentPage - 1)}
-            className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded"
-          >
-            Vorige
-          </Link>
-        )}
-        <span className="font-medium">
-          Pagina {currentPage} van {totalPages}
-        </span>
-        {currentPage < totalPages && (
-          <Link
-            href={createURL("page", currentPage + 1)}
-            className="px-4 py-2 bg-[#E2B505] text-white font-semibold hover:text-black rounded"
-          >
-            Volgende
-          </Link>
-        )}
-      </div>
+      {/* Loading indicator */}
+      {loading && (
+        <div className="flex justify-center items-center py-8">
+          <FontAwesomeIcon icon={faSpinner} spin className="text-[#E2B505] text-2xl mr-2" />
+          <span className="font-medium">Producten laden...</span>
+        </div>
+      )}
+
+      {/* End of products message */}
+      {!hasMore && displayedProducts.length > 0 && (
+        <div className="text-center py-8 text-gray-500">
+          <p>Alle producten zijn geladen</p>
+        </div>
+      )}
     </>
   )
 }
+

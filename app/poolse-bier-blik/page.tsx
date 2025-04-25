@@ -3,24 +3,30 @@ import type { ProductProps } from "@/types/product"
 import Hero from "@/components/Hero"
 import { Suspense } from "react"
 import { Spinner } from "@/components/ui/spinner"
-import PoolsPageClient from "./pools-page-client"
+import PoolseBierPageClient from "./pools-page-client"
 
-export default function BierPage() {
-  const categoryId = "4"
+export const metadata = {
+  title: "Sterke Dranken | XL Dranken",
+  description: "Bekijk ons assortiment sterke dranken",
+}
+
+export default function PoolseBierPage() {
+  const categoryId = "4" // Category ID for Sterke Dranken
 
   // Fetch products on the server - use async/await in a separate function
   const ProductGrid = async () => {
-    const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId)
+    // Use the updated getProductsByFam2ID function with the limit parameter
+    const allProducts: ProductProps[] = await getProductsByFam2ID(categoryId, 700)
 
-    return (
-      <PoolsPageClient initialProducts={allProducts} />
-    )
+    console.log(`Server: Fetched ${allProducts.length} products for Sterke Dranken`)
+
+    return <PoolseBierPageClient initialProducts={allProducts} />
   }
 
   return (
     <div>
       {/* Hero Section */}
-      <Hero title="Poolse bier blik" description=" " />
+      <Hero title="Pools Bier Blik" description=" " />
 
       {/* Product Section */}
       <div className="container mx-auto px-8 py-8">

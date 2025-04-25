@@ -5,6 +5,11 @@ const PRODUCT_API_URL = process.env.NEXT_PUBLIC_API_URL
 const CUSTOMER_API_URL = process.env.NEXT_PUBLIC_CUSTOMER_API_URL
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY
 
+// Helper function to create a delay
+const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 // Helper function to construct API URL with parameters
 function constructApiUrl(endpoint: string, params: Record<string, string>, isCustomerEndpoint = false) {
   // Validate environment variables before making the request
@@ -61,13 +66,27 @@ export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[
   }
 }
 
-export async function getProductsByFam2ID(fam2ID: string): Promise<ProductProps[]> {
+// Updated to handle larger batch sizes
+export async function getProductsByFam2ID(fam2ID: string, limit = 48, page = 1): Promise<ProductProps[]> {
   try {
-    // Construct the URL for products
-    const url = constructApiUrl("", { fam2ID }, false)
-    console.log("Fetching products from URL:", url) // Debug log
+    // Get the base URL from constructApiUrl with the fam2ID parameter
+    const baseUrl = constructApiUrl("", { fam2ID }, false)
 
-    const response = await fetch(url)
+    // Create URL object to easily add parameters
+    const url = new URL(baseUrl)
+
+    // Add pagination parameters directly to the URL
+    url.searchParams.append("limit", limit.toString())
+    url.searchParams.append("page", page.toString())
+
+    // Log the final URL with all parameters
+    console.log("Fetching products from URL:", url.toString())
+    console.log(`Page: ${page}, Limit: ${limit}`)
+
+    // Add a delay before fetching (300ms)
+    await sleep(300)
+
+    const response = await fetch(url.toString())
 
     if (!response.ok) {
       throw new Error(`API Error: ${response.status} ${response.statusText}`)
@@ -75,11 +94,83 @@ export async function getProductsByFam2ID(fam2ID: string): Promise<ProductProps[
 
     const data = await response.json()
 
+    // Add a delay after fetching (200ms)
+    await sleep(200)
+
     // Ensure products is always an array
-    return Array.isArray(data.result?.product) ? data.result.product : []
+    const products = Array.isArray(data.result?.product) ? data.result.product : []
+
+    // Return products without adding any additional fields
+    // We'll use arcleunik as the unique identifier
+    return products
   } catch (error) {
     console.error("Error fetching products:", error)
     return []
+  }
+}
+
+// New function to fetch products in batches with the updated batch size
+export async function getProductsBatch(fam2ID: string, batchSize = 48, batchNumber = 1): Promise<ProductProps[]> {
+  try {
+    // Calculate the page number based on batch size and number
+    const page = batchNumber
+    const limit = batchSize
+
+    console.log(`Fetching batch ${batchNumber} with size ${batchSize}`)
+
+    // Use the existing function but with the specified limits
+    return await getProductsByFam2ID(fam2ID, limit, page)
+  } catch (error) {
+    console.error("Error fetching product batch:", error)
+    return []
+  }
+}
+
+// Add this new function to get the total count of products for a category
+export async function getProductsCount(fam2ID: string): Promise<number> {
+  try {
+    // Get the base URL from constructApiUrl with the fam2ID parameter
+    const baseUrl = constructApiUrl("", { fam2ID }, false)
+
+    // Create URL object to easily add parameters
+    const url = new URL(baseUrl)
+
+    // Add count parameter to only get the count, not the actual products
+    url.searchParams.append("count", "true")
+
+    // Log the final URL with all parameters
+    console.log("Fetching product count from URL:", url.toString())
+
+    const response = await fetch(url.toString())
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    // Check if the API returns a count directly
+    if (data.count !== undefined) {
+      return Number(data.count)
+    }
+
+    // If not, try to get the total from the result
+    if (data.result?.total !== undefined) {
+      return Number(data.result.total)
+    }
+
+    // If the API doesn't provide a count, estimate based on the products returned
+    if (Array.isArray(data.result?.product)) {
+      // If we get all products at once, use the length
+      return data.result.product.length
+    }
+
+    // Default fallback - return a reasonable estimate
+    return 480
+  } catch (error) {
+    console.error("Error fetching product count:", error)
+    // Return a default estimate if count fetch fails
+    return 480
   }
 }
 

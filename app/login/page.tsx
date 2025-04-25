@@ -139,6 +139,7 @@ export default function LoginPage() {
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                  
                   <Checkbox id="robot" />
                   <Label htmlFor="robot"> Ik ben geen robot</Label>
                 </div>

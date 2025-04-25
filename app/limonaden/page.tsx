@@ -3,7 +3,7 @@ import type { ProductProps } from "@/types/product"
 import Hero from "@/components/Hero"
 import { Suspense } from "react"
 import { Spinner } from "@/components/ui/spinner"
-import LimonadenPageClient from "./mixdranken-page-client"
+import LimonadenPageClient from "./limonaden-page-client"
 
 export default function LimonadenPage() {
   const categoryId = "1"

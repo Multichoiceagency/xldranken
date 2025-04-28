@@ -36,7 +36,7 @@ export function SiteHeader() {
   const toggleMobileSubmenu = (menuName: string, event: React.MouseEvent) => {
     event.preventDefault()
     event.stopPropagation()
-
+    
     setExpandedMobileMenus(prev => {
       if (prev.includes(menuName)) {
         return prev.filter(item => item !== menuName)
@@ -112,45 +112,50 @@ export function SiteHeader() {
       name: "ALCOHOL",
       href: "/alcohol",
       submenu: [
-        { name: "STERKE DRANK", href: "/spirits/sterke-drank", id: "16" },
-        { name: "MIX DRANK", href: "/spirits/mix-drank", id: "5" },
-        { name: "COCKTAILS", href: "/spirits/cocktails", id: "10" },
-        { name: "LOVKA", href: "/products/lovka", id: "" },
+        { name: "STERKE DRANK", href: "/sterke-drank", id: "16" },
+        { name: "MIX DRANK", href: "/mix-drank", id: "5" },
+        { name: "COCKTAILS", href: "/cocktails", id: "10" },
       ],
     },
     {
       name: "WIJN",
       href: "/wijn",
       submenu: [
-        { name: "WIJNEN", href: "/spirits/wijnen", id: "13" },
       ],
     },
     {
       name: "BIER",
       href: "/bier",
       submenu: [
-        { name: "BIEREN NL", href: "/spirits/bieren-nl", id: "9" },
-        { name: "POOLSE BIEREN FLEX", href: "/spirits/poolse-bieren-flex", id: "3" },
-        { name: "POOLSE BIEREN BLIK", href: "/spirits/poolse-bieren-blik", id: "4" },
-      ],
-    },
-    {
-      name: "COCKTAILS",
-      href: "/cocktails",
-      submenu: [
-        { name: "COCKTAILS", href: "/spirits/cocktails", id: "10" },
-        { name: "MIX DRANK", href: "/spirits/mix-drank", id: "5" },
+        { name: "POOLSE BIER BLIK", href: "/poolse-bier-blik", id: "4" },
+        { name: "POOLSE BIER FLES", href: "/poolse-bier-fles", id: "3" },
+        { name: "NL BIER", href: "/nl-bier", id: "5" },
       ],
     },
     {
       name: "FRISDRANKEN",
       href: "/frisdranken",
       submenu: [
-        { name: "FRISDRANKEN", href: "/dranken/frisdranken", id: "6" },
-        { name: "LIMONADEN", href: "/dranken/limonaden", id: "1" },
-        { name: "WATER NL", href: "/dranken/water-nl", id: "7" },
-        { name: "WATER PL", href: "/dranken/water-pl", id: "12" },
-        { name: "KOFFIE THEE", href: "/dranken/koffie-thee", id: "18" },
+        { name: "FRISDRANKEN", href: "/frisdranken", id: "6" },
+        { name: "LIMONADEN", href: "/limonaden", id: "1" },
+        { name: "WATER NL", href: "/water-nl", id: "7" },
+        { name: "WATER PL", href: "/water-pl", id: "12" },
+        { name: "KOFFIE THEE", href: "/koffie-thee", id: "18" },
+      ],
+    },
+    {
+      name: "FOOD",
+      href: "/food",
+      submenu: [
+      ],
+    },
+    {
+      name: "NON-FOOD",
+      href: "/non-food",
+      submenu: [
+        { name: "SCHOONMAAK", href: "/schoonmaak", id: "6" },
+        { name: "HOUTSKOOL", href: "/houtskool", id: "6" },
+
       ],
     },
     {
@@ -213,7 +218,7 @@ export function SiteHeader() {
                       <ChevronDown className="ml-1 h-4 w-4" />
                     )}
                   </Link>
-
+                  
                   {/* Dropdown menu */}
                   {item.submenu.length > 0 && activeDropdown === item.name && (
                     <div className="absolute left-0 mt-1 w-64 bg-white shadow-lg rounded-md overflow-hidden z-50 animate-fadeIn">
@@ -336,7 +341,7 @@ export function SiteHeader() {
                           )}
                         </button>
                       </div>
-
+                      
                       {/* Submenu with slide animation */}
                       {expandedMobileMenus.includes(item.name) && (
                         <div className="pl-4 overflow-hidden animate-slideDown">

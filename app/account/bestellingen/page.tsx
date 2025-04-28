@@ -23,7 +23,6 @@ export default async function Orders() {
   }
 
   // Fetch the order data
-  // @ts-ignore
   const orderData: Order[] = await getCustomerOrder(session.user.clcleunik);
 
   return (
@@ -34,7 +33,6 @@ export default async function Orders() {
           <TableRow>
             <TableHead>Bestelnummer</TableHead>
             <TableHead>Datum</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead>Totaal</TableHead>
             <TableHead>Actie</TableHead>
           </TableRow>

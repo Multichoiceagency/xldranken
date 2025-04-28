@@ -40,6 +40,8 @@ export function ProductPage({ productId }: ProductPageProps) {
 
         const data = await res.json()
 
+        console.log('data', data.result.product[0])
+
         if (!data || !data.result.product[0] || data.result.product.length === 0) {
           throw new Error("Geen productdata ontvangen")
         }
@@ -79,7 +81,7 @@ export function ProductPage({ productId }: ProductPageProps) {
             <AlertCircle className="text-red-500 h-12 w-12" />
           </div>
           <h2 className="text-2xl font-bold mb-2">Product niet gevonden</h2>
-          <p className="text-gray-600 mb-4">Het product met ID "{product}" kon niet worden gevonden.</p>
+          <p className="text-gray-600 mb-4">Het product met ID "{productId}" kon niet worden gevonden.</p>
           <Button className="bg-[#0F3059] hover:bg-[#0A2547]" onClick={() => router.push("/")}>
             Terug naar de homepage
           </Button>
@@ -178,6 +180,6 @@ export function ProductPage({ productId }: ProductPageProps) {
           </div>
         </div>
       </div>
-    </div>
-  )
+    </div>
+  )
 }

@@ -29,7 +29,7 @@ const orders = [
 
 export function OrdersPage() {
   return (
-    <Card className="p-6">
+    <Card className="p-6 overflow-visible">
       <h1 className="text-2xl font-bold mb-6">Bestellingen</h1>
       <Table>
         <TableHeader>

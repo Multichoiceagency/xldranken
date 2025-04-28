@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {Home, Grid, Heart, BeerIcon, User, ShoppingBag} from "lucide-react"
+import { Home, Grid, Heart, BeerIcon } from "lucide-react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons"
 
@@ -63,39 +63,33 @@ export function BottomNav() {
           className={`flex flex-col items-center ${pathname === "/" ? "text-[#E2B505]" : "text-[#0F3059]"}`}
         >
           <Home className="h-5 w-5" />
-          {/*<span className="text-xs font-medium mt-1">Home</span>*/}
+          <span className="text-xs font-medium mt-1">Home</span>
         </Link>
         <Link
           href="/shop"
           className={`flex flex-col items-center ${pathname === "/shop" ? "text-[#E2B505]" : "text-[#0F3059]"}`}
         >
-          <ShoppingBag className="h-5 w-5" />
-          {/*<span className="text-xs font-medium mt-1">Shop</span>*/}
+          <BeerIcon className="h-5 w-5" />
+          <span className="text-xs font-medium mt-1">Shop</span>
         </Link>
         <a
-          href="https://wa.me/1234567890"
+          href="https://wa.me/31618495949"
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-col items-center text-green-600"
         >
           <FontAwesomeIcon icon={faWhatsapp} className="h-6 w-6" />
-          {/*<span className="text-xs font-bold mt-1">WhatsApp</span>*/}
+          <span className="text-xs font-bold mt-1">WhatsApp</span>
         </a>
         <Link
           href="/wishlist"
           className={`flex flex-col items-center ${pathname === "/wishlist" ? "text-[#E2B505]" : "text-[#0F3059]"}`}
         >
           <Heart className="h-5 w-5" />
-          {/*<span className="text-xs font-medium mt-1">Wenslijst</span>*/}
-        </Link>
-        <Link
-          href="/account"
-          className={`flex flex-col items-center ${pathname === "/account" ? "text-[#E2B505]" : "text-[#0F3059]"}`}
-        >
-          <User className="h-5 w-5" />
-          {/*<span className="text-xs font-medium mt-1">Wenslijst</span>*/}
+          <span className="text-xs font-medium mt-1">Wenslijst</span>
         </Link>
       </div>
     </nav>
   )
 }
+

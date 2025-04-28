@@ -280,15 +280,42 @@ export async function addLinesToOrder(orderID: any, orderLines: any[]) {
 
 }
 
+// GET ORDER TOTAL FORM MEGAWIN
+// TODO: cannot upadte the order total after the order is created, and order is not automatically calculated
+export async  function getOrderTotal(orderID: any) {
+  try {
+
+    console.log("Getting order total: ", orderID);
+    const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}&guid=${orderID}`
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    return (data.result.total)
+  } catch (error) {
+    console.error("Error fetching order details:", error)
+    throw error
+  }
+
+}
+
 export async function sendToMegawin(orderID: any) {
-  const url = `${process.env.NEXT_PUBLIC_ORDERS_SEND_TO_MEGAWIN_URL}apikey=${API_KEY}&guid=${orderID}`
+  console.log("Sending order to megawin....")
+  const url = `${process.env.NEXT_PUBLIC_ORDERS_SEND_TO_MEGAWIN_URL}apikey=${API_KEY}
+  &guid=${orderID}
+  &modeLivraison=1
+  &deliverydate=2025-05-01
+  &deliverycomment=TEST-API-DIAZ`
 
   try {
     const res = await fetch(url, {
       method: "POST",
     });
     const data = await res.json();
-    console.log("Added line:", data);
   } catch (error) {
     console.error("Error adding line to order:", error);
   }
@@ -299,8 +326,8 @@ export async function handleOrders(orderData: any, customerID: any) {
   console.log("customer id: ", customerID.clcleunik)
   try {
     const orderID = await createEmptyORder(customerID.clcleunik)
-    const fullOrder = addLinesToOrder(orderID.result.guid, orderData)
-    const completeOrder = sendToMegawin(orderID.result.guid)
+    const fullOrder = await addLinesToOrder(orderID.result.guid, orderData)
+    const completeOrder = await sendToMegawin(orderID.result.guid)
 
     console.log(orderID.result.guid)
     console.log(fullOrder)

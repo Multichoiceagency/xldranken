@@ -30,6 +30,7 @@ export let menuItemsList = [
     {
         name: "WIJN",
         href: "categorie/wijn",
+        id: "18",
         submenu: []
     },
     {

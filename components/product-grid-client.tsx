@@ -8,11 +8,12 @@ import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons"
 import ProductCard from "@/components/product-card"
 import type { ProductProps } from "@/types/product"
 
-type BierPageClientProps = {
-  initialProducts: ProductProps[]
+type ProductsGridClientProps = {
+  initialProducts: ProductProps[],
+  basePath: string  // "/cocktails", "/spirits", etc.
 }
 
-export default function BierPageClient({ initialProducts }: BierPageClientProps) {
+export default function ProductsGridClient({ initialProducts, basePath }: ProductsGridClientProps) {
   const searchParams = useSearchParams()
   const [products, setProducts] = useState(initialProducts)
   const [currentPage, setCurrentPage] = useState(1)
@@ -38,7 +39,7 @@ export default function BierPageClient({ initialProducts }: BierPageClientProps)
   const createURL = (key: string, value: string | number) => {
     const params = new URLSearchParams(searchParams)
     params.set(key, value.toString())
-    return `/bier?${params.toString()}`
+    return `${basePath}?${params.toString()}`
   }
 
   return (
@@ -78,7 +79,9 @@ export default function BierPageClient({ initialProducts }: BierPageClientProps)
       {/* Product Grid */}
       <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}>
         {paginatedProducts.length > 0 ? (
-          paginatedProducts.map((product) => <ProductCard key={product.arcleunik} product={product} />)
+          paginatedProducts.map((product) => (
+            <ProductCard key={product.arcleunik} product={product} />
+          ))
         ) : (
           <div className="col-span-full text-center py-10">
             <p className="text-lg font-medium">Geen producten gevonden</p>

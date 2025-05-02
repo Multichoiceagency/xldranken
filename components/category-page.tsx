@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-export function CategoryPage({ slug }: { slug: string }) {
+export function CategoryPage({ slug }: { slug: string, id: string }) {
   const [products, setProducts] = useState(sampleProducts)
   const [sortBy, setSortBy] = useState("featured")
 

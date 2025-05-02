@@ -16,7 +16,7 @@ export function FeaturedProducts({ fam2ID = "" }: { fam2ID?: string }) {
         setLoading(true)
         setError(null)
 
-        const data = await getProductsByFam2ID(fam2ID)
+        const data = await getProductsByFam2ID(fam2ID, 10, 1)
         setProducts(data)
       } catch (err) {
         setError("Error fetching products")

@@ -12,24 +12,24 @@ export let menuItemsList = [
         submenu: [
             {
                 name: "STERKE DRANK",
-                href: "categorie/sterke-drank",
+                href: "/categorie/sterke-drank",
                 id: "16"
             },
             {
                 name: "MIX DRANK",
-                href: "categorie/mix-drank",
+                href: "/categorie/mix-drank",
                 id: "5"
             },
             {
                 name: "COCKTAILS",
-                href: "categorie/cocktails",
+                href: "/categorie/cocktails",
                 id: "10"
             },
         ],
     },
     {
         name: "WIJN",
-        href: "categorie/wijn",
+        href: "/categorie/wijn",
         id: "18",
         submenu: []
     },
@@ -39,17 +39,17 @@ export let menuItemsList = [
         submenu: [
             {
                 name: "POOLSE BIER BLIK",
-                href: "categorie/poolse-bier-blik",
+                href: "/categorie/poolse-bier-blik",
                 id: "4"
             },
             {
                 name: "POOLSE BIER FLES",
-                href: "categorie/poolse-bier-fles",
+                href: "/categorie/poolse-bier-fles",
                 id: "3"
             },
             {
                 name: "NL BIER",
-                href: "categorie/bier",
+                href: "/categorie/bier",
                 id: "5"
             },
         ],
@@ -60,34 +60,34 @@ export let menuItemsList = [
         submenu: [
             {
                 name: "FRISDRANKEN",
-                href: "categorie/frisdranken",
+                href: "/categorie/frisdranken",
                 id: "6"
             },
             {
                 name: "LIMONADEN",
-                href: "categorie/limonaden",
+                href: "/categorie/limonaden",
                 id: "1"
             },
             {
                 name: "WATER NL",
-                href: "categorie/water-nl",
+                href: "/categorie/water-nl",
                 id: "7"
             },
             {
                 name: "WATER PL",
-                href: "categorie/water-pl",
+                href: "/categorie/water-pl",
                 id: "12"
             },
             {
                 name: "KOFFIE THEE",
-                href: "categorie/koffie-thee",
+                href: "/categorie/koffie-thee",
                 id: "18"
             },
         ],
     },
     {
         name: "FOOD",
-        href: "categorie/food",
+        href: "/categorie/food",
         id: "14",
         submenu: []
     },
@@ -98,12 +98,12 @@ export let menuItemsList = [
         submenu: [
             {
                 name: "SCHOONMAAK",
-                href: "categorie/schoonmaak",
+                href: "/categorie/schoonmaak",
                 id: "22"
             },
             {
                 name: "HOUTSKOOL",
-                href: "categorie/houtskool",
+                href: "/categorie/houtskool",
                 id: "19"
             },
         ],

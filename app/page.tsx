@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import dynamic from "next/dynamic"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getProductsByFam2ID } from "@/lib/api"
+import { useAuthContext } from '@/context/AuthContext';
 
 // Dynamically import components with lazy loading
 const PromoGrid = dynamic(() => import("@/components/promo-carousel").then((mod) => mod.PromoGrid), {

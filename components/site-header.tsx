@@ -1,12 +1,12 @@
 "use client"
 
-import React, {useEffect, useRef, useState} from "react"
+import React, { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import {ChevronDown, Heart, Menu, ShoppingCart, User} from "lucide-react"
-import {useCart} from "@/lib/cart-context"
-import {SideCart} from "./side-cart"
-import {menuItemsList} from "@/lib/api";
+import { ChevronDown, Heart, Menu, ShoppingCart, User } from "lucide-react"
+import { useCart } from "@/lib/cart-context"
+import { SideCart } from "./side-cart"
+import { menuItemsList } from "@/lib/api"
 
 export function SiteHeader() {
   const { totalItems } = useCart().getCartTotal()
@@ -20,6 +20,38 @@ export function SiteHeader() {
 
   const lastScrollY = useRef(0)
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? "hidden" : ""
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [isMobileMenuOpen])
+
+  // Show/hide header on scroll (mobile only)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerWidth >= 1024) {
+        setIsHeaderVisible(true)
+        return
+      }
+
+      const currentScrollY = window.scrollY
+      setIsHeaderVisible(currentScrollY <= 0 || currentScrollY < lastScrollY.current)
+      lastScrollY.current = currentScrollY
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // Cleanup dropdown timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current)
+    }
+  }, [])
 
   const handleCloseMenu = () => {
     setIsMenuClosing(true)
@@ -37,29 +69,6 @@ export function SiteHeader() {
       prev.includes(menuName) ? prev.filter((item) => item !== menuName) : [...prev, menuName]
     )
   }
-
-  useEffect(() => {
-    document.body.style.overflow = isMobileMenuOpen ? "hidden" : ""
-    return () => {
-      document.body.style.overflow = ""
-    }
-  }, [isMobileMenuOpen])
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerWidth >= 1024) {
-        setIsHeaderVisible(true)
-        return
-      }
-
-      const currentScrollY = window.scrollY
-      setIsHeaderVisible(currentScrollY <= 0 || currentScrollY < lastScrollY.current)
-      lastScrollY.current = currentScrollY
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
 
   const handleDropdownEnter = (menu: string) => {
     if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current)
@@ -79,16 +88,20 @@ export function SiteHeader() {
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center h-24 justify-between relative">
-            {/* Mobile menu button */}
+            {/* Mobile Menu Button */}
             <div className="lg:hidden">
-              <button onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu" className="p-2 hover:text-[#E2B505]">
+              <button
+                onClick={() => setIsMobileMenuOpen(true)}
+                aria-label="Open mobiel menu"
+                className="p-2 hover:text-[#E2B505]"
+              >
                 <Menu className="h-6 w-6" />
               </button>
             </div>
 
             {/* Logo */}
             <div className="absolute left-1/2 transform -translate-x-1/2 lg:static lg:transform-none">
-              <Link href="/" className="flex items-center">
+              <Link href="/" className="flex items-center" aria-label="Ga naar de homepage">
                 <Image
                   src="/logos/logo-xlgroothandelbv.png"
                   alt="XL Groothandel B.V. logo"
@@ -100,15 +113,25 @@ export function SiteHeader() {
               </Link>
             </div>
 
-            {/* Desktop menu */}
+            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-8 font-bold">
               {menuItemsList.map((item) => (
-                <div key={item.name} className="relative" onMouseEnter={() => handleDropdownEnter(item.name)} onMouseLeave={handleDropdownLeave}>
-                  <Link href={item.href} className="px-2 py-1 hover:bg-[#E2B505] rounded-md hover:text-white transition-colors flex items-center">
+                <div
+                  key={item.name}
+                  className="relative"
+                  onMouseEnter={() => handleDropdownEnter(item.name)}
+                  onMouseLeave={handleDropdownLeave}
+                >
+                  <Link
+                    href={item.href}
+                    className="px-2 py-1 hover:bg-[#E2B505] rounded-md hover:text-white transition-colors flex items-center"
+                  >
                     {item.name}
-                    {item.submenu.length > 0 && <ChevronDown className="ml-1 h-4 w-4" />}
+                    {item.submenu?.length > 0 && <ChevronDown className="ml-1 h-4 w-4" />}
                   </Link>
-                  {item.submenu.length > 0 && activeDropdown === item.name && (
+
+                  {/* Dropdown */}
+                  {item.submenu?.length > 0 && activeDropdown === item.name && (
                     <div className="absolute left-0 mt-1 w-64 bg-white shadow-lg rounded-md overflow-hidden z-50 animate-fadeIn">
                       <div className="py-2">
                         {item.submenu.map((sub) => (
@@ -127,18 +150,24 @@ export function SiteHeader() {
               ))}
             </nav>
 
-            {/* Icons */}
+            {/* User & Cart Icons */}
             <div className="flex items-center">
-              <Link href="/account" className="p-2 hover:text-[#E2B505]">
+              <Link href="/account" className="p-2 hover:text-[#E2B505]" aria-label="Account">
                 <User className="h-6 w-6" />
               </Link>
-              <button onClick={() => setIsCartOpen(true)} className="p-2 relative" aria-label="Open winkelmand">
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="p-2 relative"
+                aria-label="Open winkelmand"
+              >
                 <ShoppingCart className="h-6 w-6" />
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {totalItems}
-                </span>
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    {totalItems}
+                  </span>
+                )}
               </button>
-              <Link href="/wishlist" className="hidden lg:block p-2 hover:text-[#E2B505]">
+              <Link href="/wishlist" className="hidden lg:block p-2 hover:text-[#E2B505]" aria-label="Verlanglijst">
                 <Heart className="h-6 w-6" />
               </Link>
             </div>

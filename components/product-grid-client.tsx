@@ -1,50 +1,51 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons"
-import ProductCard from "@/components/product-card"
-import type { ProductProps } from "@/types/product"
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import type { ProductProps } from "@/types/product";
+import ProductCard from "./product-card";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
-type HoutskoolPageClientProps = {
-  initialProducts: ProductProps[]
+interface Props {
+  initialProducts: ProductProps[];
+  basePath: string;
+  fam2id: string; // Preserved in case of future use
 }
 
-export default function HoutskoolPageClient({ initialProducts }: HoutskoolPageClientProps) {
-  const searchParams = useSearchParams()
-  const [products, setProducts] = useState(initialProducts)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [productsPerPage, setProductsPerPage] = useState(24)
-  const [gridView, setGridView] = useState<'grid2' | 'grid4'>('grid4')
+export default function ProductsGridClient({ initialProducts, basePath }: Props) {
+  const searchParams = useSearchParams();
+  const query = useMemo(() => new URLSearchParams(searchParams.toString()), [searchParams]);
 
-  useEffect(() => {
-    const page = Number(searchParams.get('page')) || 1
-    const limit = Number(searchParams.get('limit')) || 24
-    const view = searchParams.get('view') as 'grid2' | 'grid4' | null
+  const productsPerPage = Number(query.get("limit")) || 20;
+  const currentPage = Number(query.get("page")) || 1;
+  const gridView = query.get("view") || "grid4";
 
-    setCurrentPage(page)
-    setProductsPerPage(limit)
-    if (view) setGridView(view)
-  }, [searchParams])
+  const totalPages = Math.ceil(initialProducts.length / productsPerPage);
 
-  const totalPages = Math.ceil(products.length / productsPerPage)
-  const paginatedProducts = products.slice(
-    (currentPage - 1) * productsPerPage,
-    currentPage * productsPerPage
-  )
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * productsPerPage;
+    return initialProducts.slice(start, start + productsPerPage);
+  }, [initialProducts, currentPage, productsPerPage]);
 
   const createURL = (key: string, value: string | number) => {
-    const params = new URLSearchParams(searchParams)
-    params.set(key, value.toString())
-    return `/Houtskool?${params.toString()}`
-  }
+    const params = new URLSearchParams(query.toString());
+    params.set(key, value.toString());
+
+    // Reset page when changing limit or view
+    if (key === "limit" || key === "view") {
+      params.set("page", "1");
+    }
+
+    return `${basePath}?${params.toString()}`;
+  };
 
   return (
     <>
-      {/* Show per page & Grid View Controls */}
+      {/* Controls */}
       <div className="flex items-center justify-between border-b pb-4 mb-6">
+        {/* Per page selection */}
         <div className="flex items-center space-x-2 text-sm">
           <span className="font-medium">Aantal producten per pagina:</span>
           {[8, 12, 20, 28].map((num) => (
@@ -58,17 +59,19 @@ export default function HoutskoolPageClient({ initialProducts }: HoutskoolPageCl
           ))}
         </div>
 
-        {/* Grid View Toggle */}
+        {/* Grid toggle */}
         <div className="flex space-x-2">
           <Link
             href={createURL("view", "grid2")}
             className={`p-2 rounded ${gridView === "grid2" ? "bg-gray-300" : "bg-gray-100"}`}
+            aria-label="2-kolommen weergave"
           >
             <FontAwesomeIcon icon={faThLarge} />
           </Link>
           <Link
             href={createURL("view", "grid4")}
             className={`p-2 rounded ${gridView === "grid4" ? "bg-gray-300" : "bg-gray-100"}`}
+            aria-label="4-kolommen weergave"
           >
             <FontAwesomeIcon icon={faTh} />
           </Link>
@@ -76,9 +79,17 @@ export default function HoutskoolPageClient({ initialProducts }: HoutskoolPageCl
       </div>
 
       {/* Product Grid */}
-      <div className={`grid gap-6 ${gridView === "grid2" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}>
+      <div
+        className={`grid gap-6 ${
+          gridView === "grid2"
+            ? "grid-cols-1 sm:grid-cols-2"
+            : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+        }`}
+      >
         {paginatedProducts.length > 0 ? (
-          paginatedProducts.map((product) => <ProductCard key={product.id_product_mysql} product={product} />)
+          paginatedProducts.map((product) => (
+            <ProductCard key={product.arcleunik} product={product} />
+          ))
         ) : (
           <div className="col-span-full text-center py-10">
             <p className="text-lg font-medium">Geen producten gevonden</p>
@@ -109,5 +120,5 @@ export default function HoutskoolPageClient({ initialProducts }: HoutskoolPageCl
         )}
       </div>
     </>
-  )
+  );
 }

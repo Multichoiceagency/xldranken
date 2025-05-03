@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getCustomerById } from "@/lib/api";
-import CheckoutPage from "@/components/checkout-page";
+import CheckoutPage from "@/components/checkout-page"; // Move CheckoutPage to components
 
 export default async function Checkout() {
     const session = await getServerSession(authOptions);

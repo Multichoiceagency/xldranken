@@ -10,11 +10,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Eye, EyeOff } from "lucide-react"
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import Link from "next/link"
 import Image from "next/image"
-import { Checkbox } from "@/components/ui/checkbox"
-import WhatsAppButton2 from "@/components/whatsapp-button2"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -72,7 +70,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col relative">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
-        <Image src="/winkel/winkel1.png" alt="Winkel achtergrond" fill className="object-cover" priority />
+        <Image
+          src="/winkel/winkel1.png"
+          alt="Winkel achtergrond"
+          fill
+          className="object-cover"
+          priority
+        />
         <div className="absolute inset-0 bg-black/50 z-10" />
       </div>
 
@@ -96,12 +100,15 @@ export default function LoginPage() {
             <CardHeader className="space-y-4 flex flex-col items-center">
               {/* Logo above the INLOGGEN text */}
               <div className="relative w-48 h-16 mb-2">
-                <Image src="/logos/logo-xlgroothandelbv.png" alt="XL Groothandel" fill className="object-contain" />
+                <Image
+                  src="/logos/logo-xlgroothandelbv.png"
+                  alt="XL Groothandel"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <CardTitle className="text-2xl font-bold text-center">INLOGGEN</CardTitle>
-              <CardDescription className="text-center">
-                Voer uw gegevens in om toegang te krijgen tot uw account
-              </CardDescription>
+              <CardDescription className="text-center">Voer uw gegevens in om toegang te krijgen tot uw account</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -136,12 +143,13 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                  
-                  <Checkbox id="robot" />
-                  <Label htmlFor="robot"> Ik ben geen robot</Label>
                 </div>
                 <Button
                   type="submit"
@@ -153,21 +161,22 @@ export default function LoginPage() {
               </form>
 
               <div className="mt-4 text-center">
-                <Link href="/forgot-password" className="text-sm text-[#E2B505] hover:underline">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-[#E2B505] hover:underline"
+                >
                   Wachtwoord vergeten?
                 </Link>
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-200 text-center">
                 <h2 className="font-bold mb-2">VOOR REGISTRATIE NEEM CONTACT MET ONS OP</h2>
-                <div className="flex flex-col items-center justify-center">
-                  <Link href="/register" className="text-[#FF6B35] hover:underline">
-                    info@xlgroothandelbv.nl
-                  </Link>
-                  <div className="flex items-center space-x-2 mt-4">
-                  </div>
-                  <WhatsAppButton2 />
-                </div>
+                <Link
+                  href="/register"
+                  className="text-[#FF6B35] hover:underline"
+                >
+                  Contact opnemen
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -181,12 +190,12 @@ export default function LoginPage() {
               Deze pagina is beveiligd met reCaptcha, het{" "}
               <Link href="/privacy" className="underline">
                 Privacybeleid
-              </Link>{" "}
-              en de{" "}
+              </Link>
+              {" "}en de{" "}
               <Link href="/terms" className="underline">
                 Servicevoorwaarden
-              </Link>{" "}
-              van ReCaptcha zijn van toepassing.
+              </Link>
+              {" "}van ReCaptcha zijn van toepassing.
             </p>
           </div>
         </footer>
@@ -194,4 +203,3 @@ export default function LoginPage() {
     </div>
   )
 }
-

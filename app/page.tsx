@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import dynamic from "next/dynamic"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getProductsByFam2ID } from "@/lib/api"
+import { useAuthContext } from '@/context/AuthContext';
 
 // Dynamically import components with lazy loading
 const PromoGrid = dynamic(() => import("@/components/promo-carousel").then((mod) => mod.PromoGrid), {
@@ -143,13 +144,13 @@ export default async function Home() {
 
 // DRANKEN - IKRAT / BLIK (ID: 23)
 async function IkratBlikSection() {
-  const ikratBlikProducts = await getProductsByFam2ID("4").catch(() => [])
+  const ikratBlikProducts = await getProductsByFam2ID("4", 10,1 ).catch(() => [])
 
   return (
     <FeaturedProductsCarousel
       title="POOLS BIER BLIK"
       subtitle="Dranken in kratten en blikken"
-      products={ikratBlikProducts.slice(0, 10)}
+      products={ikratBlikProducts}
       viewAllLink="/dranken/ikrat-blik"
       backgroundColor="#0F3059"
       titleColor="#D0C298"
@@ -163,13 +164,13 @@ async function IkratBlikSection() {
 
 // DRANKEN - FRISDRANKEN (ID: 6)
 async function FrisdrankenSection() {
-  const frisdrankenProducts = await getProductsByFam2ID("16").catch(() => [])
+  const frisdrankenProducts = await getProductsByFam2ID("16", 10, 1).catch(() => [])
 
   return (
     <FeaturedProductsCarousel
       title="STERKE DRANKEN"
       subtitle="Uitgebreid assortiment aan sterke dranken"
-      products={frisdrankenProducts.slice(0, 10)}
+      products={frisdrankenProducts}
       viewAllLink="/dranken/frisdranken"
       backgroundColor="white"
       titleColor="#D0C298"
@@ -181,13 +182,13 @@ async function FrisdrankenSection() {
 
 // DRANKEN - LIMONADEN (ID: 1)
 async function LimonadenSection() {
-  const limonadenProducts = await getProductsByFam2ID("1").catch(() => [])
+  const limonadenProducts = await getProductsByFam2ID("1", 10,1).catch(() => [])
 
   return (
     <FeaturedProductsCarousel
       title="LIMONADEN"
       subtitle="Verfrissende limonades voor elke gelegenheid"
-      products={limonadenProducts.slice(0, 10)}
+      products={limonadenProducts}
       viewAllLink="/dranken/limonaden"
       backgroundColor="#0F3059"
       titleColor="#D0C298"
@@ -199,13 +200,13 @@ async function LimonadenSection() {
 
 // DRANKEN - POOLS (ID: 2)
 async function PoolsDrankenSection() {
-  const poolsDrankenProducts = await getProductsByFam2ID("1").catch(() => [])
+  const poolsDrankenProducts = await getProductsByFam2ID("1", 10, 1).catch(() => [])
 
   return (
     <FeaturedProductsCarousel
       title="NON FOOD"
       subtitle="Non food producten voor horeca"
-      products={poolsDrankenProducts.slice(0, 10)}
+      products={poolsDrankenProducts}
       viewAllLink="/dranken/pools"
       backgroundColor="white"
       titleColor="#D0C298"

@@ -10,18 +10,6 @@ import { FaAppStore, FaGooglePlay } from "react-icons/fa"
 // Updated promos array with XL Dranken in titles
 const promos = [
   {
-    title: "XL Dranken Premium Collectie",
-    description:
-      "Laat u meevoeren op een smaakvolle reis met onze zorgvuldig geselecteerde ambachtelijke rumcollectie van over de hele wereld.",
-    discount: "25% KORTING",
-    media: {
-      type: "image",
-      src: "/winkel/winkel3.jpeg",
-    },
-    buttonText: "Verken Collectie",
-    href: "/assortiment",
-  },
-  {
     title: "XL Dranken - Uw Dranken Specialist",
     description:
       "Verken ons uitgebreide aanbod van premium alcoholische dranken, verfrissende frisdranken en exclusieve merken voor elke gelegenheid.",
@@ -45,6 +33,30 @@ const promos = [
     },
     buttonText: "Ontdek Lovka",
     href: "/products/lovka",
+  },
+  {
+    title: "XL Dranken Aanbiedingen",
+    description:
+      "Profiteer van onze tijdelijke kortingen op geselecteerde premium dranken en ontdek nieuwe favorieten tegen aantrekkelijke prijzen.",
+    discount: "KORTINGEN TOT WEL 20%",
+    media: {
+      type: "image",
+      src: "/winkel/winkel2.jpeg",
+    },
+    buttonText: "Bekijk Deals",
+    href: "/assortiment",
+  },
+  {
+    title: "XL Dranken Premium Collectie",
+    description:
+      "Laat u meevoeren op een smaakvolle reis met onze zorgvuldig geselecteerde ambachtelijke rumcollectie van over de hele wereld.",
+    discount: "25% KORTING",
+    media: {
+      type: "image",
+      src: "/winkel/winkel3.jpeg",
+    },
+    buttonText: "Verken Collectie",
+    href: "/assortiment",
   },
 ]
 
@@ -175,7 +187,7 @@ export function PromoGrid() {
       <div className="container mx-auto px-4 py-8">
         {/* Slider */}
         <div
-          className="relative h-[600px] overflow-hidden rounded-lg transition-all duration-300 hover:shadow-2xl"
+          className="relative h-[800px] overflow-hidden rounded-lg transition-all duration-300 hover:shadow-2xl"
           onMouseEnter={pauseAutoPlay}
           onMouseLeave={resumeAutoPlay}
         >

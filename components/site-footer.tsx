@@ -77,13 +77,13 @@ export function SiteFooter() {
                   className="font-bold hover:text-[#d0c298] flex items-center"
                 >
                   <FontAwesomeIcon icon={faEnvelope} className="mr-2 w-4 h-4" />
-                  info@xlgroothandelbv.nl
+                  Turfschipper 116, 2292 JB Wateringen
                 </Link>
               </li>
               <li>
                 <Link href="/contact" className="font-bold hover:text-[#d0c298] flex items-center">
                   <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 w-4 h-4" />
-                  Turfschipper 116, 2292 JB Wateringen
+                  info@xlgroothandelbv.nl
                 </Link>
               </li>
               <li>

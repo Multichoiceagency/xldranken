@@ -8,4 +8,15 @@ export interface ProductProps {
   arcleunik: string // Unieke productcode
   productCode?: string // Extra productcode
   prix_en_promo?: number | null // Promotieprijs, kan null zijn
+  // Add additional possible fields that might come from the API
+  name?: string
+  product?: string
+  description?: string
+  libelle?: string
+  designation?: string
+  code_article?: string
+  price?: number
+  id?: string
+  id_produit_mysql?: string
+  [key: string]: any // Add index signature to allow any string key
 }

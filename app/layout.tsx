@@ -48,7 +48,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
                 <meta name="apple-mobile-web-app-title" content="XL Dranken"/>
             </head>
-            <body className={`${poppins.className} overflow-x-hidden`}>
+            <body className={`${poppins.className}`}>
             <AgeVerificationPopup/>
             <ProductProvider>
                 <CartProvider>

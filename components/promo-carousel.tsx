@@ -29,7 +29,6 @@ const promos = [
     media: {
       type: "video",
       src: "/videos/lovka.mp4",
-      poster: "/videos/lovka-poster.jpg", // Add a poster image for the video
     },
     buttonText: "Ontdek Lovka",
     href: "/products/lovka",
@@ -210,19 +209,9 @@ export function PromoGrid() {
                   />
                 ) : (
                   <>
-                    {/* Fallback image that shows when video isn't playing */}
-                    {!isVideoPlaying[index] && promo.media.poster && (
-                      <Image
-                        src={promo.media.poster || "/placeholder.svg"}
-                        alt={promo.description}
-                        fill
-                        className="object-cover"
-                      />
-                    )}
                     <video
                       ref={setVideoRef(index)}
                       src={promo.media.src}
-                      poster={promo.media.poster}
                       className="w-full h-full object-cover"
                       muted
                       loop

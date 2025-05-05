@@ -75,6 +75,15 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     }
   }, [isOpen, mounted, isClosing])
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim().length >= 2) {
+      console.log(`[MobileMenu] Submitting search for: "${searchQuery}"`)
+      window.location.href = `/zoeken?q=${encodeURIComponent(searchQuery)}`
+      handleClose()
+    }
+  }
+
   // Handle search results
   useEffect(() => {
     if (searchTimeoutRef.current) {
@@ -130,11 +139,13 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
           console.log(`[MobileMenu] Found ${productResults.length} results`)
 
           if (productResults.length > 0) {
-            console.log("[MobileMenu] First product:", JSON.stringify(productResults[0]))
+            console.log("[MobileMenu] First product:", JSON.stringify(productResults[0]).substring(0, 200) + "...")
+            console.log("[MobileMenu] First product fields:", Object.keys(productResults[0]).join(", "))
           } else {
             console.log("[MobileMenu] No products found")
           }
 
+          // Accept all products - we'll handle missing fields in the ProductCard component
           setSearchResults((prev) => ({
             ...prev,
             products: productResults.slice(0, 5), // Limit to 5 products for better UX
@@ -186,14 +197,6 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
     setExpandedItems((prev) =>
       prev.includes(itemName) ? prev.filter((name) => name !== itemName) : [...prev, itemName],
     )
-  }
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim().length >= 2) {
-      window.location.href = `/zoeken?q=${encodeURIComponent(searchQuery)}`
-      handleClose()
-    }
   }
 
   if (!mounted) return null
@@ -250,12 +253,38 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
             </div>
             <input
               type="text"
-              className="w-full py-3 pl-10 pr-4 bg-gray-100 border-0 rounded-md focus:ring-2 focus:ring-[#E2B505] focus:bg-white"
+              className="w-full py-3 pl-10 pr-10 bg-gray-100 border-0 rounded-md focus:ring-2 focus:ring-[#E2B505] focus:bg-white"
               placeholder="Zoeken naar producten..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute inset-y-0 right-0 flex items-center pr-3"
+              >
+                <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+              </button>
+            )}
           </form>
+          {!showSearchResults && (
+            <div className="mt-3">
+              <p className="text-xs text-gray-500 mb-2">Populaire zoekopdrachten:</p>
+              <div className="flex flex-wrap gap-2">
+                {["Bier", "Wodka", "Frisdrank", "Wijn", "Poolse producten"].map((term) => (
+                  <button
+                    key={term}
+                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs"
+                    onClick={() => setSearchQuery(term)}
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Menu content */}
@@ -273,7 +302,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
 
               {/* Search Error */}
               {searchError && (
-                <div className="py-4 text-center text-red-500">
+                <div className="py-4 text-center text-red-500 bg-red-50 rounded-md p-3">
                   <p>{searchError}</p>
                 </div>
               )}
@@ -282,7 +311,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
               {searchResults.categories.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">Categorieën</h3>
-                  <ul className="space-y-1">
+                  <ul className="space-y-1 bg-gray-50 rounded-md p-2">
                     {searchResults.categories.map((result, index) => (
                       <li
                         key={`cat-${result.name}-${index}`}
@@ -315,7 +344,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   <div className="space-y-4">
                     {searchResults.products.map((product, index) => (
                       <div
-                        key={`prod-${product.arcleunik}-${index}`}
+                        key={`prod-${product.arcleunik || product.id || index}`}
                         style={{
                           opacity: 0,
                           animation: `fadeInRight 300ms ease-out forwards ${150 + index * 50}ms`,
@@ -340,7 +369,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                       className="block w-full py-3 text-center text-sm font-medium text-white bg-[#E2B505] rounded-md hover:bg-[#E2B505]/90"
                       onClick={handleClose}
                     >
-                      Bekijk alle resultaten
+                      Bekijk alle resultaten ({searchResults.products.length}+)
                     </Link>
                   </div>
                 </div>
@@ -356,6 +385,22 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                     <p className="text-sm text-gray-400 mb-4">
                       Probeer een andere zoekterm of blader door onze categorieën.
                     </p>
+
+                    {/* Suggestions */}
+                    <div className="mt-4 mb-6">
+                      <p className="text-xs text-gray-500 mb-2">Probeer een van deze zoekopdrachten:</p>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {["Bier", "Wodka", "Frisdrank", "Wijn", "Poolse producten"].map((term) => (
+                          <button
+                            key={term}
+                            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs"
+                            onClick={() => setSearchQuery(term)}
+                          >
+                            {term}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
                     {/* Debug info */}
                     <div className="mt-4 p-3 bg-gray-100 rounded-md text-left text-xs text-gray-600 max-w-lg mx-auto">

@@ -4,8 +4,6 @@ import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ProductProps } from "@/types/product";
 import ProductCard from "./product-card";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThLarge, faTh } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 
 interface Props {
@@ -61,20 +59,6 @@ export default function ProductsGridClient({ initialProducts, basePath }: Props)
 
         {/* Grid toggle */}
         <div className="flex space-x-2">
-          <Link
-            href={createURL("view", "grid2")}
-            className={`p-2 rounded ${gridView === "grid2" ? "bg-gray-300" : "bg-gray-100"}`}
-            aria-label="2-kolommen weergave"
-          >
-            <FontAwesomeIcon icon={faThLarge} />
-          </Link>
-          <Link
-            href={createURL("view", "grid4")}
-            className={`p-2 rounded ${gridView === "grid4" ? "bg-gray-300" : "bg-gray-100"}`}
-            aria-label="4-kolommen weergave"
-          >
-            <FontAwesomeIcon icon={faTh} />
-          </Link>
         </div>
       </div>
 

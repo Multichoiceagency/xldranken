@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { useCart } from "@/lib/cart-context"
 import { useToast } from "@/hooks/use-toast"
 import type { ProductProps } from "@/types/product"
-import { useAuthContext } from '@/context/AuthContext';
+import { useAuthContext } from "@/context/AuthContext"
 
 export default function ProductCard({ product }: { product: ProductProps }) {
   const { addToCart, isInCart, cart, updateQuantity, removeFromCart } = useCart()
@@ -39,7 +39,18 @@ export default function ProductCard({ product }: { product: ProductProps }) {
     setQuantityInput(quantity > 0 ? quantity.toString() : "0")
   }, [cart, isInCart, product])
 
-  if (!product) return <p className="text-gray-500">Product not found</p>
+  if (!product) {
+    console.error("ProductCard received undefined product")
+    return <p className="text-gray-500">Product not found</p>
+  }
+
+  // Log the product data to help debug
+  console.log("ProductCard rendering product:", {
+    arcleunik: product.arcleunik,
+    title: product.title,
+    price: product.prix_vente_groupe,
+    photo: product.photo1_base64 ? "Has photo" : "No photo",
+  })
 
   const imageSrc = product.photo1_base64
     ? product.photo1_base64.startsWith("data:image")
@@ -47,7 +58,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
       : `data:image/jpeg;base64,${product.photo1_base64}`
     : "/placeholder.svg"
 
-  const regularPrice = Number(product.prix_vente_groupe)
+  const regularPrice = Number(product.prix_vente_groupe) || 0
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -196,9 +207,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
         <div className="space-y-1 flex items-center justify-between">
           {isLoggedIn ? (
             <div className="text-[#E31931] text-lg md:text-2xl font-bold">
-              {regularPrice > 0
-                ? `€ ${regularPrice.toFixed(2).replace(".", ",")}`
-                : "Prijs niet beschikbaar"}
+              {regularPrice > 0 ? `€ ${regularPrice.toFixed(2).replace(".", ",")}` : "Prijs niet beschikbaar"}
             </div>
           ) : (
             <div className="text-gray-500 text-sm">Log in om prijzen te zien</div>

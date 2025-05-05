@@ -1,6 +1,6 @@
 import type React from "react"
 import type {Metadata} from "next"
-import {Poppins} from "next/font/google"
+import { Poppins } from 'next/font/google'
 import "./globals.css"
 import {SiteHeader} from "@/components/site-header"
 import {SiteFooter} from "@/components/site-footer"
@@ -29,6 +29,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
         <AuthProvider>
             <html lang="en">
             <head>
+                {/* Viewport meta tag for proper mobile rendering */}
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+                
                 {/* Manifest voor PWA */}
                 <link rel="manifest" href="/manifest.json"/>
 

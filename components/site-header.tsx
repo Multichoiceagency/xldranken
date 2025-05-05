@@ -4,16 +4,29 @@ import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ChevronDown, Heart, Menu, Search, ShoppingCart, User, ArrowLeft, Loader2, ChevronRight } from "lucide-react"
+import { ChevronDown, Heart, Menu, Search, ShoppingCart, User, ArrowLeft, Loader2, ChevronRight, X } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
 import { SideCart } from "./side-cart"
 import { menuItemsList, searchProducts } from "@/lib/api"
 import { MobileMenu } from "./mobile-menu"
 import type { ProductProps } from "@/types/product"
 import ProductCard from "@/components/product-card"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ClipboardList, LogIn, LogOut, UserPlus } from "lucide-react"
+import { useAuthContext } from "@/lib/auth-context"
+import { useRouter } from "next/navigation"
 
 export function SiteHeader() {
   const { totalItems } = useCart().getCartTotal()
+  const { isLoggedIn, logout } = useAuthContext()
+  const router = useRouter()
 
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -132,22 +145,29 @@ export function SiteHeader() {
       categories: categoryResults,
     }))
 
-    // Then search products with a delay to prevent too many API calls
+    // Then search products with a delay to prevent too many rapid requests
     setIsSearching(true)
     searchTimeoutRef.current = setTimeout(async () => {
       try {
         // Only search if query is at least 2 characters
         if (query.length >= 2) {
           console.log(`[SiteHeader] Searching for: "${query}"`)
+
+          // Show loading state
+          setIsSearching(true)
+
+          // Perform the search using the updated search function
           const productResults = await searchProducts(query)
           console.log(`[SiteHeader] Found ${productResults.length} results`)
 
           if (productResults.length > 0) {
-            console.log("[SiteHeader] First product:", JSON.stringify(productResults[0]))
+            console.log("[SiteHeader] First product:", JSON.stringify(productResults[0]).substring(0, 200) + "...")
+            console.log("[SiteHeader] First product fields:", Object.keys(productResults[0]).join(", "))
           } else {
             console.log("[SiteHeader] No products found")
           }
 
+          // Accept all products - we'll handle missing fields in the ProductCard component
           setSearchResults((prev) => ({
             ...prev,
             products: productResults.slice(0, 8), // Limit to 8 products for better UX
@@ -269,6 +289,14 @@ export function SiteHeader() {
     }
   }
 
+  const signOut = () => {
+    // If you're using NextAuth, you would use the signOut function from next-auth/react
+    // For now, we'll just use the logout function from the auth context
+    logout()
+    // Redirect to home page
+    router.push("/")
+  }
+
   return (
     <>
       <header
@@ -342,12 +370,70 @@ export function SiteHeader() {
 
             {/* User & Cart Icons */}
             <div className="flex items-center">
-              <button onClick={toggleSearch} className="p-2 hover:text-[#E2B505]" aria-label="Zoeken">
+              <button onClick={toggleSearch} className="p-2 hover:text-[#E2B505] hidden lg:block" aria-label="Zoeken">
                 <Search className="h-6 w-6" />
               </button>
-              <Link href="/account" className="p-2 hover:text-[#E2B505]" aria-label="Account">
-                <User className="h-6 w-6" />
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-2 hover:text-[#E2B505]" aria-label="Account">
+                    <User className="h-6 w-6" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {isLoggedIn ? (
+                    <>
+                      <DropdownMenuLabel>Mijn Account</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/winkelmand" className="w-full flex items-center">
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          <span>Winkelmand</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/account" className="w-full flex items-center">
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Mijn account</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/bestellingen" className="w-full flex items-center">
+                          <ClipboardList className="mr-2 h-4 w-4" />
+                          <span>Mijn bestellingen</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={signOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Uitloggen</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuLabel>Account</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/winkelmand" className="w-full flex items-center">
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          <span>Winkelmand</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/login" className="w-full flex items-center">
+                          <LogIn className="mr-2 h-4 w-4" />
+                          <span>Login</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/register" className="w-full flex items-center">
+                          <UserPlus className="mr-2 h-4 w-4" />
+                          <span>Registreren</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               <button
                 onClick={() => setIsCartOpen(true)}
@@ -384,7 +470,7 @@ export function SiteHeader() {
               <button
                 onClick={closeFullscreenSearch}
                 className="p-2 mr-4 hover:bg-gray-100 rounded-full"
-                aria-label="Sluiten"
+                aria-label="Terug"
               >
                 <ArrowLeft className="h-6 w-6" />
               </button>
@@ -394,15 +480,31 @@ export function SiteHeader() {
                     ref={fullscreenSearchInputRef}
                     type="text"
                     placeholder="Zoeken naar producten..."
-                    className="w-full py-3 pl-4 pr-4 bg-gray-100 border-0 rounded-l-md focus:ring-2 focus:ring-[#E2B505] focus:bg-white"
+                    className="w-full py-3 pl-4 pr-10 bg-gray-100 border-0 rounded-l-md focus:ring-2 focus:ring-[#E2B505] focus:bg-white"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-200"
+                    >
+                      <X className="h-5 w-5 text-gray-500" />
+                    </button>
+                  )}
                 </div>
                 <button type="submit" className="px-6 bg-[#E2B505] text-white rounded-r-md hover:bg-[#E2B505]/90">
                   Zoeken
                 </button>
               </form>
+              <button
+                onClick={closeFullscreenSearch}
+                className="ml-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"
+                aria-label="Sluiten"
+              >
+                <X className="h-6 w-6 text-gray-700" />
+              </button>
             </div>
           </div>
 
@@ -419,8 +521,9 @@ export function SiteHeader() {
 
               {/* Search Error */}
               {searchError && (
-                <div className="py-4 text-center text-red-500">
-                  <p>{searchError}</p>
+                <div className="py-4 text-center text-red-500 bg-red-50 rounded-md p-4 mb-6">
+                  <p className="font-medium">{searchError}</p>
+                  <p className="text-sm mt-2">Probeer het later opnieuw of gebruik een andere zoekterm.</p>
                 </div>
               )}
 
@@ -481,7 +584,7 @@ export function SiteHeader() {
               )}
 
               {/* Search Results */}
-              {searchQuery.trim() !== "" && (
+              {searchQuery.trim() !== "" && !isSearching && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Categories Column */}
                   <div className="lg:col-span-1">
@@ -548,7 +651,7 @@ export function SiteHeader() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {searchResults.products.map((product, index) => (
                             <div
-                              key={`prod-${product.arcleunik}-${index}`}
+                              key={`prod-${product.arcleunik || product.id || index}`}
                               style={{
                                 opacity: 0,
                                 animation: `fadeInUp 300ms ease-out forwards ${150 + index * 50}ms`,
@@ -584,8 +687,14 @@ export function SiteHeader() {
                           <div className="mt-8 p-4 bg-gray-100 rounded-md text-left text-xs text-gray-600 max-w-lg mx-auto">
                             <p className="font-semibold mb-2">Debug informatie:</p>
                             <p>Zoekopdracht: "{searchQuery}"</p>
-                            <p>API URL: {process.env.NEXT_PUBLIC_API_URL ? "Geconfigureerd" : "Niet geconfigureerd"}</p>
-                            <p>Zoekparameter: search={searchQuery}</p>
+                            <p>API URL: {process.env.NEXT_PUBLIC_API_URL || "Niet geconfigureerd"}</p>
+                            <p>API Key: {process.env.NEXT_PUBLIC_API_KEY ? "Geconfigureerd" : "Niet geconfigureerd"}</p>
+                            <p>Zoekparameter: rechercher_mot_cle={searchQuery}</p>
+                            <p>ID Membre: 1</p>
+                            <p className="mt-2 text-red-500 font-semibold">
+                              Als deze zoekopdracht geen resultaten oplevert, controleer de console voor meer
+                              informatie.
+                            </p>
                             <p className="mt-2">
                               Als u verwacht dat dit product beschikbaar zou moeten zijn, neem dan contact op met de
                               beheerder.

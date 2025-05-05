@@ -35,7 +35,7 @@ export const menuItemsList = [
   },
   {
     name: "BIER",
-    href: "/",
+    href: "/categorie/bier",
     submenu: [
       {
         name: "POOLSE BIER BLIK",
@@ -56,7 +56,7 @@ export const menuItemsList = [
   },
   {
     name: "FRISDRANKEN",
-    href: "/",
+    href: "/categorie/frisdranken",
     submenu: [
       {
         name: "FRISDRANKEN",
@@ -93,7 +93,7 @@ export const menuItemsList = [
   },
   {
     name: "NON-FOOD",
-    href: "/non-food",
+    href: "/categorie/non-food",
     id: "21",
     submenu: [
       {

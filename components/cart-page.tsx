@@ -10,6 +10,8 @@ import { useCart } from "@/lib/cart-context"
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 import { useRouter } from 'next/navigation'
+import {useAuthContext} from "@/context/AuthContext";
+
 
 const recommendedProducts = [
   {
@@ -64,6 +66,7 @@ export function CartPage() {
   const { cart, updateQuantity, removeFromCart, getCartTotal } = useCart()
   const { totalItems, totalPrice } = getCartTotal()
   const router = useRouter()
+  const { isLoggedIn } = useAuthContext();
 
   const shippingCost = totalPrice >= 55 ? 0 : 4.95
   const total = totalPrice + shippingCost
@@ -110,7 +113,9 @@ export function CartPage() {
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium">€{item.price.toFixed(2)}</span>
+                        <span className="font-medium">
+                          {isLoggedIn ? `€{item.price.toFixed(2)}` : "Login om prijs te zien"}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -174,7 +179,9 @@ export function CartPage() {
                           <div>
                             <p className="text-sm text-muted-foreground mb-2">{product.status}</p>
                             <div className="flex items-center justify-between">
-                              <span className="font-bold">€{product.price.toFixed(2)}</span>
+                              <span className="font-bold">
+                                {isLoggedIn ? `€{item.price.toFixed(2)}` : "Login om prijs te zien"}
+                              </span>
                               <Button variant="default" size="sm">TOEVOEGEN</Button>
                             </div>
                           </div>
@@ -240,7 +247,9 @@ export function CartPage() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Totaal Producten ({totalItems})</span>
-                <span>€ {totalPrice.toFixed(2)}</span>
+                <span>
+                  {isLoggedIn ? `€ {totalPrice.toFixed(2)}` : "Login om prijs te zien"}
+                </span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Bezorgkosten</span>
@@ -248,17 +257,21 @@ export function CartPage() {
               </div>
               <div className="flex justify-between font-bold pt-2 border-t">
                 <span>Totaal</span>
-                <span>€ {total.toFixed(2)}</span>
+                <span>
+                  {isLoggedIn ? ` € {total.toFixed(2)}` : " Login om prijs te zien"}
+                 </span>
               </div>
             </div>
 
             {/* Checkout Button */}
-            <Button 
+            { isLoggedIn ?
+              <Button
               className="w-full mt-6 bg-[#FF6B35] hover:bg-[#E85A24] text-white"
               onClick={() => router.push('/checkout')}
             >
               VERDER MET BESTELLEN
-            </Button>
+            </Button> : <span></span>
+            }
 
             {/* Payment Methods */}
             <div className="mt-4 flex justify-center gap-2">

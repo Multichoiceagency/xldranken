@@ -413,12 +413,6 @@ export function SiteHeader() {
                       <DropdownMenuLabel>Account</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/winkelmand" className="w-full flex items-center">
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          <span>Winkelmand</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
                         <Link href="/login" className="w-full flex items-center">
                           <LogIn className="mr-2 h-4 w-4" />
                           <span>Login</span>
@@ -435,21 +429,28 @@ export function SiteHeader() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className="p-2 relative hover:text-[#E2B505]"
-                aria-label="Open winkelmand"
-              >
-                <ShoppingCart className="h-6 w-6" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                    {totalItems}
-                  </span>
-                )}
-              </button>
-              <Link href="/wishlist" className="hidden lg:block p-2 hover:text-[#E2B505]" aria-label="Verlanglijst">
-                <Heart className="h-6 w-6" />
-              </Link>
+              {isLoggedIn ? (
+                  <>
+                  <button
+                    onClick={() => setIsCartOpen(true)}
+                    className="p-2 relative hover:text-[#E2B505]"
+                    aria-label="Open winkelmand"
+                  >
+                    <ShoppingCart className="h-6 w-6" />
+                    {totalItems > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                        {totalItems}
+                      </span>
+                    )}
+                  </button>
+                  <Link href="/wishlist" className="hidden lg:block p-2 hover:text-[#E2B505]" aria-label="Verlanglijst">
+                    <Heart className="h-6 w-6" />
+                  </Link>
+                  </>
+                ) : (
+                    <span></span>
+                  )
+              }
             </div>
           </div>
         </div>

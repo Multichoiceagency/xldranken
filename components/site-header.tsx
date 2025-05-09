@@ -1,224 +1,35 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ChevronDown, Heart, Menu, Search, ShoppingCart, User, ArrowLeft, Loader2, ChevronRight, X } from "lucide-react"
+import { ChevronDown, Menu, Search, ShoppingCart, User, X } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
 import { SideCart } from "./side-cart"
-import { menuItemsList, searchProducts } from "@/lib/api"
-import { MobileMenu } from "./mobile-menu"
-import type { ProductProps } from "@/types/product"
-import ProductCard from "@/components/product-card"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ClipboardList, LogIn, LogOut, UserPlus } from "lucide-react"
-import { useAuthContext } from "@/lib/auth-context"
+import { menuItemsList } from "@/lib/api"
 import { useRouter } from "next/navigation"
 
 export function SiteHeader() {
   const { totalItems } = useCart().getCartTotal()
-  const { isLoggedIn, logout } = useAuthContext()
   const router = useRouter()
 
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [isMenuClosing, setIsMenuClosing] = useState(false)
+  const [expandedMobileMenus, setExpandedMobileMenus] = useState<string[]>([])
+  const [isScrollingDown, setIsScrollingDown] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [isFullscreenSearchOpen, setIsFullscreenSearchOpen] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchResults, setSearchResults] = useState<{
-    categories: Array<{ name: string; href: string; isSubmenu?: boolean }>
-    products: ProductProps[]
-  }>({
-    categories: [],
-    products: [],
-  })
-  const [searchError, setSearchError] = useState<string | null>(null)
-  const [recentSearches, setRecentSearches] = useState<string[]>([])
-  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([
-    "Poolse bier",
-    "Wodka",
-    "Frisdrank",
-    "Wijn",
-    "Houtskool",
-    "Koffie",
-  ])
+  const [mobileSearchQuery, setMobileSearchQuery] = useState("")
 
   const lastScrollY = useRef(0)
-  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const ticking = useRef(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const fullscreenSearchInputRef = useRef<HTMLInputElement>(null)
-  const searchResultsRef = useRef<HTMLDivElement>(null)
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null)
 
-  // Load recent searches from localStorage on mount
+  // Prevent body scroll when mobile menu is open
   useEffect(() => {
-    const storedSearches = localStorage.getItem("recentSearches")
-    if (storedSearches) {
-      try {
-        const parsedSearches = JSON.parse(storedSearches)
-        if (Array.isArray(parsedSearches)) {
-          setRecentSearches(parsedSearches.slice(0, 5))
-        }
-      } catch (error) {
-        console.error("Error parsing recent searches:", error)
-      }
-    }
-  }, [])
-
-  // Show/hide header on scroll (mobile only)
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerWidth >= 1024) {
-        setIsHeaderVisible(true)
-        return
-      }
-
-      const currentScrollY = window.scrollY
-      setIsHeaderVisible(currentScrollY <= 0 || currentScrollY < lastScrollY.current)
-      lastScrollY.current = currentScrollY
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  // Cleanup dropdown timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current)
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
-    }
-  }, [])
-
-  // Handle search results
-  useEffect(() => {
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current)
-    }
-
-    setSearchError(null)
-
-    if (searchQuery.trim() === "") {
-      setSearchResults({
-        categories: [],
-        products: [],
-      })
-      return
-    }
-
-    // First, search categories immediately
-    const query = searchQuery.toLowerCase()
-    const categoryResults: Array<{ name: string; href: string; isSubmenu?: boolean }> = []
-
-    menuItemsList.forEach((item) => {
-      // Check main menu items
-      if (item.name.toLowerCase().includes(query)) {
-        categoryResults.push({ name: item.name, href: item.href })
-      }
-
-      // Check submenu items
-      item.submenu?.forEach((subItem) => {
-        if (subItem.name.toLowerCase().includes(query)) {
-          categoryResults.push({
-            name: subItem.name,
-            href: subItem.href,
-            isSubmenu: true,
-          })
-        }
-      })
-    })
-
-    // Update with category results immediately
-    setSearchResults((prev) => ({
-      ...prev,
-      categories: categoryResults,
-    }))
-
-    // Then search products with a delay to prevent too many rapid requests
-    setIsSearching(true)
-    searchTimeoutRef.current = setTimeout(async () => {
-      try {
-        // Only search if query is at least 2 characters
-        if (query.length >= 2) {
-          console.log(`[SiteHeader] Searching for: "${query}"`)
-
-          // Show loading state
-          setIsSearching(true)
-
-          // Perform the search using the updated search function
-          const productResults = await searchProducts(query)
-          console.log(`[SiteHeader] Found ${productResults.length} results`)
-
-          if (productResults.length > 0) {
-            console.log("[SiteHeader] First product:", JSON.stringify(productResults[0]).substring(0, 200) + "...")
-            console.log("[SiteHeader] First product fields:", Object.keys(productResults[0]).join(", "))
-          } else {
-            console.log("[SiteHeader] No products found")
-          }
-
-          // Accept all products - we'll handle missing fields in the ProductCard component
-          setSearchResults((prev) => ({
-            ...prev,
-            products: productResults.slice(0, 8), // Limit to 8 products for better UX
-          }))
-        }
-      } catch (error) {
-        console.error("[SiteHeader] Error searching products:", error)
-        setSearchError("Er is een fout opgetreden bij het zoeken. Probeer het later opnieuw.")
-      } finally {
-        setIsSearching(false)
-      }
-    }, 300)
-  }, [searchQuery])
-
-  // Close search results when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchResultsRef.current &&
-        !searchResultsRef.current.contains(event.target as Node) &&
-        searchInputRef.current &&
-        !searchInputRef.current.contains(event.target as Node)
-      ) {
-        setSearchResults({
-          categories: [],
-          products: [],
-        })
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  // Focus search input when search is opened
-  useEffect(() => {
-    if (isSearchOpen && searchInputRef.current) {
-      searchInputRef.current.focus()
-    }
-  }, [isSearchOpen])
-
-  // Focus fullscreen search input when opened
-  useEffect(() => {
-    if (isFullscreenSearchOpen && fullscreenSearchInputRef.current) {
-      fullscreenSearchInputRef.current.focus()
-    }
-  }, [isFullscreenSearchOpen])
-
-  // Lock body scroll when fullscreen search is open
-  useEffect(() => {
-    if (isFullscreenSearchOpen) {
+    if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden"
     } else {
       document.body.style.overflow = ""
@@ -227,81 +38,110 @@ export function SiteHeader() {
     return () => {
       document.body.style.overflow = ""
     }
-  }, [isFullscreenSearchOpen])
+  }, [isMobileMenuOpen])
 
-  const handleDropdownEnter = (menu: string) => {
-    if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current)
-    setActiveDropdown(menu)
-  }
-
-  const handleDropdownLeave = () => {
-    dropdownTimeoutRef.current = setTimeout(() => setActiveDropdown(null), 200)
-  }
-
-  const toggleSearch = () => {
-    setIsFullscreenSearchOpen(true)
-    setSearchQuery("")
-    setSearchResults({
-      categories: [],
-      products: [],
-    })
-    setSearchError(null)
-  }
-
-  const closeFullscreenSearch = () => {
-    setIsFullscreenSearchOpen(false)
-    setSearchQuery("")
-    setSearchResults({
-      categories: [],
-      products: [],
-    })
-    setSearchError(null)
-  }
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim().length >= 2) {
-      // Save to recent searches
-      const newRecentSearches = [searchQuery.trim(), ...recentSearches.filter((s) => s !== searchQuery.trim())].slice(
-        0,
-        5,
-      )
-      setRecentSearches(newRecentSearches)
-      localStorage.setItem("recentSearches", JSON.stringify(newRecentSearches))
-
-      // Navigate to search results page
-      window.location.href = `/zoeken?q=${encodeURIComponent(searchQuery)}`
-      closeFullscreenSearch()
+  // Show/hide header on scroll (mobile only)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          if (window.innerWidth < 1024) {
+            const currentScrollY = window.scrollY
+            if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+              setIsScrollingDown(true)
+            } else {
+              setIsScrollingDown(false)
+            }
+            lastScrollY.current = currentScrollY > 0 ? currentScrollY : 0
+          } else {
+            setIsScrollingDown(false)
+          }
+          ticking.current = false
+        })
+        ticking.current = true
+      }
     }
-  }
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setSearchQuery(suggestion)
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
-    // Save to recent searches
-    const newRecentSearches = [suggestion, ...recentSearches.filter((s) => s !== suggestion)].slice(0, 5)
-    setRecentSearches(newRecentSearches)
-    localStorage.setItem("recentSearches", JSON.stringify(newRecentSearches))
-
-    // Focus the input
-    if (isFullscreenSearchOpen && fullscreenSearchInputRef.current) {
-      fullscreenSearchInputRef.current.focus()
+  // Focus search input when mobile menu opens
+  useEffect(() => {
+    if (isMobileMenuOpen && mobileSearchInputRef.current) {
+      // Short delay to ensure the animation completes first
+      setTimeout(() => {
+        mobileSearchInputRef.current?.focus()
+      }, 300)
     }
-  }
+  }, [isMobileMenuOpen])
 
-  const signOut = () => {
-    // If you're using NextAuth, you would use the signOut function from next-auth/react
-    // For now, we'll just use the logout function from the auth context
-    logout()
-    // Redirect to home page
-    router.push("/")
-  }
+  const handleCloseMenu = useCallback(() => {
+    setIsMenuClosing(true)
+    setTimeout(() => {
+      setIsMobileMenuOpen(false)
+      setIsMenuClosing(false)
+      setExpandedMobileMenus([])
+    }, 300)
+  }, [])
+
+  const toggleMobileSubmenu = useCallback((menuName: string, event: React.MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setExpandedMobileMenus((prev) =>
+      prev.includes(menuName) ? prev.filter((item) => item !== menuName) : [...prev, menuName],
+    )
+  }, [])
+
+  const openMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen(true)
+  }, [])
+
+  const handleSearch = useCallback(
+    (e: React.FormEvent, query: string) => {
+      e.preventDefault()
+      if (query.trim()) {
+        router.push(`/search?q=${encodeURIComponent(query.trim())}`)
+        setSearchQuery("")
+        setMobileSearchQuery("")
+        if (isMobileMenuOpen) {
+          handleCloseMenu()
+        }
+      }
+    },
+    [router, isMobileMenuOpen, handleCloseMenu],
+  )
 
   return (
     <>
+      {/* Top bar - NOT sticky */}
+      <div className="bg-[#BEA46A] text-white py-2 px-4">
+        <div className="container mx-auto flex justify-between items-center text-sm">
+          <div className="flex items-center space-x-4">
+            <span>✓ Meer dan 4.000 verschillende dranken</span>
+            <span>✓ Dé drankengroothandel van Nederland</span>
+          </div>
+          <div className="hidden md:flex items-center space-x-4">
+            <Link href="https://wa.me/31618495949" className="hover:underline">
+              Registreren
+            </Link>
+            <Link href="/klantenservice" className="hover:underline">
+              Klantenservice
+            </Link>
+            <Link href="/over-ons" className="hover:underline">
+              Over ons
+            </Link>
+            <Link href="/werken-bij" className="hover:underline">
+              Werken bij
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Main header - sticky */}
       <header
-        className={`w-full bg-white sticky top-0 z-50 shadow-md transition-transform duration-300 ${
-          isHeaderVisible ? "translate-y-0" : "-translate-y-full"
+        className={`sticky top-0 bg-white z-50 shadow-md transition-transform duration-300 will-change-transform ${
+          isScrollingDown ? "lg:translate-y-0 -translate-y-full" : ""
         }`}
       >
         <div className="container mx-auto px-4">
@@ -309,37 +149,33 @@ export function SiteHeader() {
             {/* Mobile Menu Button */}
             <div className="lg:hidden">
               <button
-                onClick={() => setIsMobileMenuOpen(true)}
+                onClick={openMobileMenu}
                 aria-label="Open mobiel menu"
                 className="p-2 hover:text-[#E2B505]"
+                type="button"
               >
                 <Menu className="h-6 w-6" />
               </button>
             </div>
 
             {/* Logo */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 lg:static lg:transform-none">
+            <div className="lg:mr-8">
               <Link href="/" className="flex items-center" aria-label="Ga naar de homepage">
                 <Image
                   src="/logos/logo-xlgroothandelbv.png"
                   alt="XL Groothandel B.V. logo"
                   width={700}
                   height={48}
-                  className="object-contain w-[250px]"
+                  className="object-contain w-[200px]"
                   priority
                 />
               </Link>
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-8 font-bold">
+            <nav className="hidden lg:flex items-center gap-6 font-bold">
               {menuItemsList.map((item) => (
-                <div
-                  key={item.name}
-                  className="relative"
-                  onMouseEnter={() => handleDropdownEnter(item.name)}
-                  onMouseLeave={handleDropdownLeave}
-                >
+                <div key={item.name} className="relative group">
                   <Link
                     href={item.href}
                     className="px-2 py-1 hover:bg-[#E2B505] rounded-md hover:text-white transition-colors flex items-center"
@@ -348,9 +184,9 @@ export function SiteHeader() {
                     {item.submenu?.length > 0 && <ChevronDown className="ml-1 h-4 w-4" />}
                   </Link>
 
-                  {/* Dropdown */}
-                  {item.submenu?.length > 0 && activeDropdown === item.name && (
-                    <div className="absolute left-0 mt-1 w-64 bg-white shadow-lg rounded-md overflow-hidden z-50 animate-fadeIn">
+                  {/* CSS-only dropdown */}
+                  {item.submenu?.length > 0 && (
+                    <div className="absolute left-0 mt-1 w-64 bg-white shadow-lg rounded-md overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
                       <div className="py-2">
                         {item.submenu.map((sub) => (
                           <Link
@@ -368,77 +204,69 @@ export function SiteHeader() {
               ))}
             </nav>
 
-            {/* User & Cart Icons */}
-            <div className="flex items-center">
-              <button onClick={toggleSearch} className="p-2 hover:text-[#E2B505] hidden lg:block" aria-label="Zoeken">
-                <Search className="h-6 w-6" />
-              </button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-2 hover:text-[#E2B505]" aria-label="Account">
-                    <User className="h-6 w-6" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  {isLoggedIn ? (
-                    <>
-                      <DropdownMenuLabel>Mijn Account</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/winkelmand" className="w-full flex items-center">
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          <span>Winkelmand</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/account" className="w-full flex items-center">
-                          <User className="mr-2 h-4 w-4" />
-                          <span>Mijn account</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/bestellingen" className="w-full flex items-center">
-                          <ClipboardList className="mr-2 h-4 w-4" />
-                          <span>Mijn bestellingen</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={signOut}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Uitloggen</span>
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuLabel>Account</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/winkelmand" className="w-full flex items-center">
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          <span>Winkelmand</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/login" className="w-full flex items-center">
-                          <LogIn className="mr-2 h-4 w-4" />
-                          <span>Login</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/register" className="w-full flex items-center">
-                          <UserPlus className="mr-2 h-4 w-4" />
-                          <span>Registreren</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+            {/* Desktop Search Bar */}
+            <div className="hidden lg:flex flex-1 max-w-md mx-4 rounded-md">
+              <form onSubmit={(e) => handleSearch(e, searchQuery)} className="w-full relative">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Zoek naar het gewenste product..."
+                  className="w-full py-2 px-4 pr-10 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#E2B505]"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#E2B505]"
+                >
+                  <Search className="h-5 w-5" />
+                </button>
+              </form>
+            </div>
 
+            {/* User & Cart Icons */}
+            <div className="flex items-center gap-2">
+              <div className="relative group">
+                <button className="p-2 hover:text-[#E2B505]" aria-label="Account" type="button">
+                  <User className="h-6 w-6" />
+                </button>
+
+                {/* CSS-only User Dropdown */}
+                <div className="absolute right-0 mt-1 w-48 bg-white shadow-lg rounded-md overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
+                  <div className="py-2">
+                    <Link
+                      href="/account"
+                      className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                    >
+                      Mijn Account
+                    </Link>
+                    <Link
+                      href="/bestellingen"
+                      className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                    >
+                      Mijn Bestellingen
+                    </Link>
+                    <Link
+                      href="/gegevens"
+                      className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                    >
+                      Instellingen
+                    </Link>
+                    <div className="border-t border-gray-100 my-1"></div>
+                    <Link
+                      href="/logout"
+                      className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                    >
+                      Uitloggen
+                    </Link>
+                  </div>
+                </div>
+              </div>
               <button
                 onClick={() => setIsCartOpen(true)}
-                className="p-2 relative hover:text-[#E2B505]"
+                className="p-2 relative"
                 aria-label="Open winkelmand"
+                type="button"
               >
                 <ShoppingCart className="h-6 w-6" />
                 {totalItems > 0 && (
@@ -447,303 +275,285 @@ export function SiteHeader() {
                   </span>
                 )}
               </button>
-              <Link href="/wishlist" className="hidden lg:block p-2 hover:text-[#E2B505]" aria-label="Verlanglijst">
-                <Heart className="h-6 w-6" />
-              </Link>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu */}
-      <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
-
-      {/* SideCart */}
-      <SideCart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-
-      {/* Fullscreen Search Overlay */}
-      {isFullscreenSearchOpen && (
-        <div className="fixed inset-0 bg-white z-[9999] flex flex-col overflow-hidden">
-          {/* Search Header */}
-          <div className="border-b">
-            <div className="container mx-auto px-4 py-4 flex items-center">
-              <button
-                onClick={closeFullscreenSearch}
-                className="p-2 mr-4 hover:bg-gray-100 rounded-full"
-                aria-label="Terug"
-              >
-                <ArrowLeft className="h-6 w-6" />
-              </button>
-              <form onSubmit={handleSearchSubmit} className="flex-1 flex">
-                <div className="relative flex-1">
-                  <input
-                    ref={fullscreenSearchInputRef}
-                    type="text"
-                    placeholder="Zoeken naar producten..."
-                    className="w-full py-3 pl-4 pr-10 bg-gray-100 border-0 rounded-l-md focus:ring-2 focus:ring-[#E2B505] focus:bg-white"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-200"
-                    >
-                      <X className="h-5 w-5 text-gray-500" />
-                    </button>
-                  )}
-                </div>
-                <button type="submit" className="px-6 bg-[#E2B505] text-white rounded-r-md hover:bg-[#E2B505]/90">
-                  Zoeken
-                </button>
-              </form>
-              <button
-                onClick={closeFullscreenSearch}
-                className="ml-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"
-                aria-label="Sluiten"
-              >
-                <X className="h-6 w-6 text-gray-700" />
-              </button>
-            </div>
+      {/* Fullscreen Mobile Menu - Optimized for better fit */}
+      <div
+        className={`fixed inset-0 bg-white z-[100] transition-all duration-300 ${
+          isMobileMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+        }`}
+        aria-hidden={!isMobileMenuOpen}
+      >
+        {/* Mobile Menu Header */}
+        <div className="flex items-center justify-between p-3 border-b border-gray-200">
+          <div className="flex items-center">
+            <Image
+              src="/logos/logo-xlgroothandelbv.png"
+              alt="XL Groothandel B.V. logo"
+              width={220}
+              height={44}
+              className="object-contain"
+            />
           </div>
+          <button
+            onClick={handleCloseMenu}
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Sluit menu"
+            type="button"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
 
-          {/* Search Content */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="container mx-auto px-4 py-6">
-              {/* Loading Indicator */}
-              {isSearching && (
-                <div className="py-4 text-center text-gray-500">
-                  <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-                  <span>Zoeken naar producten...</span>
-                </div>
-              )}
+        {/* Mobile Search - Compact */}
+        <div className="px-3 py-2 border-b border-gray-200">
+          <form onSubmit={(e) => handleSearch(e, mobileSearchQuery)} className="relative">
+            <input
+              ref={mobileSearchInputRef}
+              type="text"
+              placeholder="Zoek naar het gewenste product..."
+              className="w-full py-2 px-3 pr-10 border rounded-lg focus:outline-none focus:ring-1 focus:ring-[#E2B505] bg-gray-50 text-sm"
+              value={mobileSearchQuery}
+              onChange={(e) => setMobileSearchQuery(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#E2B505] text-white p-1.5 rounded-md"
+              aria-label="Zoeken"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          </form>
+        </div>
 
-              {/* Search Error */}
-              {searchError && (
-                <div className="py-4 text-center text-red-500 bg-red-50 rounded-md p-4 mb-6">
-                  <p className="font-medium">{searchError}</p>
-                  <p className="text-sm mt-2">Probeer het later opnieuw of gebruik een andere zoekterm.</p>
-                </div>
-              )}
-
-              {/* Search Suggestions (when no query) */}
-              {searchQuery.trim() === "" && (
-                <>
-                  {/* Recent Searches */}
-                  {recentSearches.length > 0 && (
-                    <div className="mb-8">
-                      <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">Recente zoekopdrachten</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {recentSearches.map((search, index) => (
+        {/* Mobile Menu Content - Compact Grid Layout */}
+        <div className="h-[calc(100%-120px)] overflow-hidden">
+          <div className="grid grid-cols-2 gap-x-2 h-full">
+            {/* Main Menu Column */}
+            <div className="overflow-y-auto py-2 px-3">
+              <nav>
+                <ul className="space-y-1">
+                  {menuItemsList.map((item) => (
+                    <li key={item.name} className="border-b border-gray-100 pb-1">
+                      {item.submenu?.length ? (
+                        <>
                           <button
-                            key={`recent-${index}`}
-                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-sm"
-                            onClick={() => handleSuggestionClick(search)}
+                            className="flex justify-between items-center w-full text-left py-1.5"
+                            onClick={(e) => toggleMobileSubmenu(item.name, e)}
+                            type="button"
                           >
-                            {search}
+                            <span className="text-base font-medium">{item.name}</span>
+                            <ChevronDown
+                              className={`h-4 w-4 text-[#E2B505] transition-transform ${
+                                expandedMobileMenus.includes(item.name) ? "rotate-180" : ""
+                              }`}
+                            />
                           </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Popular Searches */}
-                  <div className="mb-8">
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">Populaire zoekopdrachten</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {searchSuggestions.map((suggestion, index) => (
-                        <button
-                          key={`suggestion-${index}`}
-                          className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-sm"
-                          onClick={() => handleSuggestionClick(suggestion)}
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Popular Categories */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">Populaire categorieën</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {menuItemsList.slice(0, 4).map((category) => (
-                        <Link
-                          key={category.name}
-                          href={category.href}
-                          className="p-4 bg-gray-100 hover:bg-gray-200 rounded-md text-center"
-                          onClick={closeFullscreenSearch}
-                        >
-                          <span className="font-medium">{category.name}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Search Results */}
-              {searchQuery.trim() !== "" && !isSearching && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Categories Column */}
-                  <div className="lg:col-span-1">
-                    {searchResults.categories.length > 0 && (
-                      <div className="mb-6">
-                        <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">Categorieën</h3>
-                        <ul className="space-y-1 bg-gray-50 rounded-md p-2">
-                          {searchResults.categories.map((result, index) => (
-                            <li
-                              key={`cat-${result.name}-${index}`}
-                              style={{
-                                opacity: 0,
-                                animation: `fadeInRight 300ms ease-out forwards ${100 + index * 50}ms`,
-                              }}
-                            >
-                              <Link
-                                href={result.href}
-                                className={`flex items-center py-2 px-3 hover:bg-gray-100 rounded-md ${
-                                  result.isSubmenu ? "pl-6" : ""
-                                }`}
-                                onClick={closeFullscreenSearch}
-                              >
-                                <ChevronRight className="mr-2 h-4 w-4 text-gray-400" />
-                                <span>
-                                  {result.isSubmenu && (
-                                    <span className="text-xs text-gray-500 mr-1">Subcategorie:</span>
-                                  )}
-                                  {result.name}
-                                </span>
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Related Searches */}
-                    <div className="mb-6">
-                      <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">
-                        Gerelateerde zoekopdrachten
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {searchSuggestions
-                          .filter((s) => s.toLowerCase().includes(searchQuery.toLowerCase()) || Math.random() > 0.7)
-                          .slice(0, 5)
-                          .map((suggestion, index) => (
-                            <button
-                              key={`related-${index}`}
-                              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-sm"
-                              onClick={() => handleSuggestionClick(suggestion)}
-                            >
-                              {suggestion}
-                            </button>
-                          ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Products Column */}
-                  <div className="lg:col-span-2">
-                    {searchResults.products.length > 0 ? (
-                      <>
-                        <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">Producten</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {searchResults.products.map((product, index) => (
-                            <div
-                              key={`prod-${product.arcleunik || product.id || index}`}
-                              style={{
-                                opacity: 0,
-                                animation: `fadeInUp 300ms ease-out forwards ${150 + index * 50}ms`,
-                              }}
-                              onClick={closeFullscreenSearch}
-                            >
-                              <ProductCard product={product} />
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* View All Results Link */}
-                        <div className="mt-6 text-center">
-                          <Link
-                            href={`/zoeken?q=${encodeURIComponent(searchQuery)}`}
-                            className="inline-block px-6 py-3 bg-[#E2B505] text-white rounded-md hover:bg-[#E2B505]/90"
-                            onClick={closeFullscreenSearch}
+                          <div
+                            className={`overflow-hidden transition-all duration-200 ${
+                              expandedMobileMenus.includes(item.name) ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                            }`}
                           >
-                            Bekijk alle resultaten
-                          </Link>
-                        </div>
-                      </>
-                    ) : (
-                      !isSearching &&
-                      searchQuery.trim().length >= 2 && (
-                        <div className="py-12 text-center">
-                          <p className="text-lg text-gray-500 mb-4">Geen resultaten gevonden voor "{searchQuery}"</p>
-                          <p className="text-sm text-gray-400 mb-6">
-                            Probeer een andere zoekterm of blader door onze categorieën.
-                          </p>
-
-                          {/* Debug info for developers */}
-                          <div className="mt-8 p-4 bg-gray-100 rounded-md text-left text-xs text-gray-600 max-w-lg mx-auto">
-                            <p className="font-semibold mb-2">Debug informatie:</p>
-                            <p>Zoekopdracht: "{searchQuery}"</p>
-                            <p>API URL: {process.env.NEXT_PUBLIC_API_URL || "Niet geconfigureerd"}</p>
-                            <p>API Key: {process.env.NEXT_PUBLIC_API_KEY ? "Geconfigureerd" : "Niet geconfigureerd"}</p>
-                            <p>Zoekparameter: rechercher_mot_cle={searchQuery}</p>
-                            <p>ID Membre: 1</p>
-                            <p className="mt-2 text-red-500 font-semibold">
-                              Als deze zoekopdracht geen resultaten oplevert, controleer de console voor meer
-                              informatie.
-                            </p>
-                            <p className="mt-2">
-                              Als u verwacht dat dit product beschikbaar zou moeten zijn, neem dan contact op met de
-                              beheerder.
-                            </p>
+                            <ul className="pl-3 space-y-0.5 py-1">
+                              {item.submenu.map((sub) => (
+                                <li key={sub.name}>
+                                  <Link
+                                    href={sub.href}
+                                    className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                                    onClick={handleCloseMenu}
+                                  >
+                                    {sub.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </div>
-              )}
+                        </>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          className="text-base font-medium hover:text-[#E2B505] block py-1.5"
+                          onClick={handleCloseMenu}
+                        >
+                          {item.name}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
+
+            {/* Secondary Links Column */}
+            <div className="overflow-y-auto border-l border-gray-100 py-2 px-3">
+              {/* Customer Service Links */}
+              <div className="mb-4">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Klantenservice</h3>
+                <ul className="space-y-1">
+                  <li>
+                    <Link
+                      href="/klantenservice"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Klantenservice
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/over-ons"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Over ons
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/werken-bij"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Werken bij
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="https://wa.me/31618495949"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Contact via WhatsApp
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Account Links */}
+              <div className="mb-4">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Mijn Account</h3>
+                <ul className="space-y-1">
+                  <li>
+                    <Link
+                      href="/account"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Mijn Account
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/bestellingen"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Mijn Bestellingen
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/gegevens"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Instellingen
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/logout"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Uitloggen
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Popular Categories */}
+              <div>
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  Populaire Categorieën
+                </h3>
+                <ul className="space-y-1">
+                  <li>
+                    <Link
+                      href="/categorie/bier"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Bier
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/categorie/wijn"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Wijn
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/categorie/sterke-drank"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Sterke Drank
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/categorie/frisdrank"
+                      className="text-gray-600 hover:text-[#E2B505] block py-1 text-sm"
+                      onClick={handleCloseMenu}
+                    >
+                      Frisdrank
+                    </Link>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
-      )}
 
-      {/* Animation keyframes */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes fadeInRight {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-in-out;
-        }
-      `}</style>
+        {/* Mobile Menu Footer */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-4 flex justify-between items-center">
+          <div className="text-xs text-gray-500">
+            <p>© {new Date().getFullYear()} XL Groothandel B.V.</p>
+          </div>
+          <div className="flex space-x-4">
+            <Link href="/account" className="text-[#E2B505]" onClick={handleCloseMenu}>
+              <User className="h-5 w-5" />
+            </Link>
+            <button
+              onClick={() => {
+                handleCloseMenu()
+                setTimeout(() => setIsCartOpen(true), 300)
+              }}
+              className="text-[#E2B505] relative"
+              aria-label="Open winkelmand"
+              type="button"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* SideCart */}
+      <SideCart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   )
 }

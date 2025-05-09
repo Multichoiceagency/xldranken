@@ -93,7 +93,7 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/blank" className="text-green-600 font-bold hover:text-[#d0c298] flex items-center">
+                <Link href="https://wa.me/31618495949" className="text-green-600 font-bold hover:text-[#d0c298] flex items-center">
                   <FontAwesomeIcon icon={faWhatsapp} className="mr-2 w-4 h-4" />
                   Whatsapp bericht versturen
                 </Link>

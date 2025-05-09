@@ -5,22 +5,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { FaAppStore, FaGooglePlay } from "react-icons/fa"
 
 // Updated promos array with XL Dranken in titles
 const promos = [
-  {
-    title: "XL Dranken - Uw Dranken Specialist",
-    description:
-      "Verken ons uitgebreide aanbod van premium alcoholische dranken, verfrissende frisdranken en exclusieve merken voor elke gelegenheid.",
-    discount: "900+ PRODUCTEN",
-    media: {
-      type: "image",
-      src: "/winkel/intro-1740433163.jpg",
-    },
-    buttonText: "Ontdek Assortiment",
-    href: "/assortiment",
-  },
   {
     title: "XL Dranken presenteert: Lovka",
     description:
@@ -34,10 +21,10 @@ const promos = [
     href: "/products/lovka",
   },
   {
-    title: "XL Dranken Aanbiedingen",
+    title: "XL Dranken - Uw Dranken Specialist",
     description:
-      "Profiteer van onze tijdelijke kortingen op geselecteerde premium dranken en ontdek nieuwe favorieten tegen aantrekkelijke prijzen.",
-    discount: "KORTINGEN TOT WEL 20%",
+    "Verken ons uitgebreide aanbod van premium alcoholische dranken, verfrissende frisdranken en exclusieve merken voor elke gelegenheid.",
+    discount: "900+ PRODUCTEN",
     media: {
       type: "image",
       src: "/winkel/winkel2.jpeg",
@@ -56,6 +43,82 @@ const promos = [
     },
     buttonText: "Verken Collectie",
     href: "/assortiment",
+  },
+]
+
+// Featured products data
+const featuredProducts = [
+  {
+    id: 1,
+    name: "Lovka Energy Vodka",
+    description: "De perfecte mix van premium vodka en verfrissende energy. Ideaal voor een energieke avond.",
+    price: 24.95,
+    image: "/products/lovka-bottle.jpg",
+    badge: "NIEUW",
+    href: "/products/lovka-energy-vodka",
+  },
+  {
+    id: 2,
+    name: "Johnnie Walker Blue Label",
+    description: "Een exceptionele Scotch whisky met rijke, complexe smaken en een zijdezachte afdronk.",
+    price: 189.95,
+    image: "/products/johnnie-walker.jpg",
+    badge: "PREMIUM",
+    href: "/products/johnnie-walker-blue",
+  },
+  {
+    id: 3,
+    name: "Dom Pérignon Vintage 2012",
+    description: "Elegante champagne met tonen van witte bloemen, citrusvruchten en mineralen.",
+    price: 219.5,
+    image: "/products/dom-perignon.jpg",
+    badge: "EXCLUSIEF",
+    href: "/products/dom-perignon-2012",
+  },
+  {
+    id: 4,
+    name: "Hendrick's Gin",
+    description: "Handgemaakte gin met een unieke infusie van komkommer en rozenblaadjes.",
+    price: 34.95,
+    image: "/products/hendricks-gin.jpg",
+    badge: "BESTSELLER",
+    href: "/products/hendricks-gin",
+  },
+  {
+    id: 5,
+    name: "Patrón Silver Tequila",
+    description: "Ultrapremium tequila, handgemaakt van 100% Weber Blue Agave.",
+    price: 49.95,
+    image: "/products/patron-tequila.jpg",
+    badge: "POPULAIR",
+    href: "/products/patron-silver",
+  },
+  {
+    id: 6,
+    name: "Grey Goose Vodka",
+    description: "Franse premium vodka, gedistilleerd van de fijnste tarwe uit Picardy.",
+    price: 39.95,
+    image: "/products/grey-goose.jpg",
+    badge: "AANBIEDING",
+    href: "/products/grey-goose",
+  },
+  {
+    id: 7,
+    name: "Bacardi 8 Años Rum",
+    description: "Complexe gouden rum, 8 jaar gerijpt in eikenhouten vaten voor een rijke smaak.",
+    price: 29.95,
+    image: "/products/bacardi-8.jpg",
+    badge: "AANRADER",
+    href: "/products/bacardi-8-anos",
+  },
+  {
+    id: 8,
+    name: "Moët & Chandon Ice Impérial",
+    description: "De eerste champagne speciaal gemaakt om te serveren met ijs.",
+    price: 59.95,
+    image: "/products/moet-ice.jpg",
+    badge: "ZOMER FAVORIET",
+    href: "/products/moet-ice-imperial",
   },
 ]
 
@@ -182,11 +245,11 @@ export function PromoGrid() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-16">
       <div className="container mx-auto px-4 py-8">
-        {/* Slider */}
+        {/* Hero Slider */}
         <div
-          className="relative h-[800px] overflow-hidden rounded-lg transition-all duration-300 hover:shadow-2xl"
+          className="relative h-[600px] md:h-[650px] lg:h-[700px] overflow-hidden rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl"
           onMouseEnter={pauseAutoPlay}
           onMouseLeave={resumeAutoPlay}
         >
@@ -199,16 +262,17 @@ export function PromoGrid() {
                   index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
                 }`}
               >
-                {promo.media.type === "image" ? (
-                  <Image
-                    src={promo.media.src || "/placeholder.svg"}
-                    alt={promo.description}
-                    fill
-                    className="object-cover"
-                    priority={index === 0}
-                  />
-                ) : (
-                  <>
+                {/* Media container */}
+                <div className="absolute inset-0">
+                  {promo.media.type === "image" ? (
+                    <Image
+                      src={promo.media.src || "/placeholder.svg"}
+                      alt={promo.description}
+                      fill
+                      className="object-cover"
+                      priority={index === 0}
+                    />
+                  ) : (
                     <video
                       ref={setVideoRef(index)}
                       src={promo.media.src}
@@ -218,17 +282,23 @@ export function PromoGrid() {
                       playsInline
                       preload="auto"
                     />
-                  </>
-                )}
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-between p-6 md:p-12">
-                  <div className="inline-block bg-[#E2B505] text-white px-3 py-1 text-sm self-start">
-                    {promo.discount || "WEBSHOP*"}
-                  </div>
-                  <div className="max-w-2xl">
-                    <h2 className="text-4xl font-bold text-white leading-tight mb-4">{promo.title}</h2>
-                    <p className="text-white text-lg mb-6">{promo.description}</p>
+                  )}
+                  {/* Gradient overlay for better text visibility */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
+                </div>
+
+                {/* Content container - positioned on the left side */}
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full md:w-1/2 p-6 md:p-12 lg:p-16">
+                    <div className="inline-block bg-[#E2B505] text-white px-3 py-1 text-sm font-medium rounded-md mb-4 shadow-md">
+                      {promo.discount || "WEBSHOP*"}
+                    </div>
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4 drop-shadow-md">
+                      {promo.title}
+                    </h2>
+                    <p className="text-white text-base md:text-lg mb-6 max-w-xl drop-shadow-md">{promo.description}</p>
                     <Link href={promo.href}>
-                      <Button className="bg-[#E2B505] hover:bg-[#E2B505]/90 transform hover:scale-105 transition-all duration-300 hover:shadow-lg active:scale-95">
+                      <Button className="bg-[#E2B505] hover:bg-[#E2B505]/90 transform hover:scale-105 transition-all duration-300 hover:shadow-lg active:scale-95 text-white font-medium px-6 py-2.5 rounded-md">
                         {promo.buttonText}
                       </Button>
                     </Link>
@@ -240,14 +310,14 @@ export function PromoGrid() {
 
           {/* Navigation arrows */}
           <button
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/40 rounded-full p-2 backdrop-blur-sm transition-all duration-300"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/40 rounded-full p-2.5 backdrop-blur-sm transition-all duration-300 shadow-md"
             onClick={prevSlide}
             aria-label="Previous slide"
           >
             <ChevronLeft className="w-6 h-6 text-white" />
           </button>
           <button
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/40 rounded-full p-2 backdrop-blur-sm transition-all duration-300"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/40 rounded-full p-2.5 backdrop-blur-sm transition-all duration-300 shadow-md"
             onClick={nextSlide}
             aria-label="Next slide"
           >
@@ -255,63 +325,20 @@ export function PromoGrid() {
           </button>
 
           {/* Dots indicator */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-3">
             {promos.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index === currentSlide ? "bg-[#E2B505] w-6" : "bg-white/50 hover:bg-white/80"
+                className={`w-3 h-3 rounded-full transition-all duration-300 shadow-md ${
+                  index === currentSlide ? "bg-[#E2B505] w-8" : "bg-white/60 hover:bg-white/90"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>
         </div>
-      </div>
-
-      {/* App Download Section with XL Dranken in title */}
-      <section className="bg-[#FFF5F5] py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#2D1B69] mb-4">XL Dranken App - Bestel Eenvoudig</h2>
-            <p className="text-lg mb-8 text-muted-foreground">
-              Ontdek het gemak van mobiel bestellen en krijg direct toegang tot ons volledige assortiment via onze
-              gebruiksvriendelijke app.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              {/* Google Play Store Button */}
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-[200px] h-[60px] bg-[#d3a417] hover:bg-gray-700 text-white rounded-lg flex items-center justify-center px-4 transition-transform hover:scale-105 hover:shadow-lg"
-              >
-                <FaGooglePlay className="h-8 w-8 mr-2 fill-white" />
-                <div className="flex flex-col items-start">
-                  <span className="text-xs">DOWNLOAD VIA DE</span>
-                  <span className="text-sm font-semibold">Google Play</span>
-                </div>
-              </a>
-
-              {/* Apple App Store Button */}
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-[200px] h-[60px] bg-[#d3a417] hover:bg-gray-700 text-white rounded-lg flex items-center justify-center px-4 transition-transform hover:scale-105 hover:shadow-lg"
-              >
-                <FaAppStore className="h-8 w-8 mr-2" />
-                <div className="flex flex-col items-start">
-                  <span className="text-xs">DOWNLOAD VIA DE</span>
-                  <span className="text-sm font-semibold">App Store</span>
-                </div>
-              </a>
-            </div>
-          </div>
         </div>
-      </section>
-    </div>
+      </div>
   )
 }
-

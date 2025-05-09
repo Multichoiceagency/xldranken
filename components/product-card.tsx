@@ -44,14 +44,6 @@ export default function ProductCard({ product }: { product: ProductProps }) {
     return <p className="text-gray-500">Product not found</p>
   }
 
-  // Log the product data to help debug
-  console.log("ProductCard rendering product:", {
-    arcleunik: product.arcleunik,
-    title: product.title,
-    price: product.prix_vente_groupe,
-    photo: product.photo1_base64 ? "Has photo" : "No photo",
-  })
-
   const imageSrc = product.photo1_base64
     ? product.photo1_base64.startsWith("data:image")
       ? product.photo1_base64
@@ -183,7 +175,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
           style={{ padding: "2px" }}
           fill
           className={`object-contain transition-transform duration-500 ${
-            isAnimating ? "scale-110" : "group-hover:scale-105"
+            isAnimating ? "scale-110" : "group-hover:scale-75"
           }`}
           unoptimized
         />
@@ -198,7 +190,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
       <div className="flex flex-col p-3 md:p-4 pt-0">
         <h3
-          className="text-center font-bold text-[#002B7F] min-h-[2.5rem] line-clamp-2 text-sm md:text-base cursor-pointer mb-2"
+          className="text-left font-bold text-[#002B7F] min-h-[2.5rem] line-clamp-2 text-sm md:text-base cursor-pointer mb-2"
           onClick={navigateToProductPage}
         >
           {product.title}
@@ -210,7 +202,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
               {regularPrice > 0 ? `€ ${regularPrice.toFixed(2).replace(".", ",")}` : "Prijs niet beschikbaar"}
             </div>
           ) : (
-            <div className="text-gray-500 text-sm">Log in om prijzen te zien</div>
+            <div className="text-black text-sm font-bold">Log in om prijzen te zien</div>
           )}
 
           <div className="relative group/trash">

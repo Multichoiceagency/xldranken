@@ -16,7 +16,7 @@ import {AuthProvider} from '@/context/AuthContext';
 // Voeg alle beschikbare gewichten toe
 const poppins = Poppins({
     subsets: ["latin-ext"],
-    weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+    weight: ["400", "500", "600", "700", "800", "900"],
 })
 
 export const metadata: Metadata = {
@@ -48,7 +48,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
                 <meta name="apple-mobile-web-app-title" content="XL Dranken"/>
             </head>
-            <body className={`${poppins.className}`}>
+            <body className={`${poppins.className} bg-background text-text`}>
             <AgeVerificationPopup/>
             <ProductProvider>
                 <CartProvider>
@@ -65,6 +65,6 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
             </ProductProvider>
             </body>
             </html>
-        </AuthProvider>
+            </AuthProvider>
     )
 }

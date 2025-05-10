@@ -122,7 +122,7 @@ export function SiteHeader() {
             <span>✓ Dé drankengroothandel van Nederland</span>
           </div>
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="https://wa.me/31618495949" className="hover:underline">
+            <Link href="/zakelijk" className="hover:underline">
               Registreren
             </Link>
             <Link href="/klantenservice" className="hover:underline">

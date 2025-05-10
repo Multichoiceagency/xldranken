@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faCheckCircle, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons"
@@ -29,6 +28,7 @@ export function ZakelijkRegistratieForm() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null)
+  const [statusMessage, setStatusMessage] = useState("")
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -71,8 +71,6 @@ export function ZakelijkRegistratieForm() {
     if (!formData.contactpersoonVoornaam.trim()) newErrors.contactpersoonVoornaam = "Voornaam is verplicht"
     if (!formData.contactpersoonAchternaam.trim()) newErrors.contactpersoonAchternaam = "Achternaam is verplicht"
     if (!formData.email.trim()) newErrors.email = "E-mailadres is verplicht"
-    if (!formData.telefoon.trim()) newErrors.telefoon = "Telefoonnummer is verplicht"
-    if (!formData.branche) newErrors.branche = "Selecteer uw branche"
     if (!formData.voorwaarden) newErrors.voorwaarden = "U moet akkoord gaan met de voorwaarden"
 
     // Format validations
@@ -88,7 +86,7 @@ export function ZakelijkRegistratieForm() {
       newErrors.email = "Voer een geldig e-mailadres in"
     }
 
-    if (formData.postcode.trim() && !/^\d{4}\s?[a-zA-Z]{2}$/.test(formData.postcode.trim())) {
+    if (formData.postcode.trim() && !/^\d{4}\s?[a-zA-Z]{2}$/i.test(formData.postcode.trim())) {
       newErrors.postcode = "Voer een geldige postcode in (bijv. 1234 AB)"
     }
 
@@ -105,18 +103,50 @@ export function ZakelijkRegistratieForm() {
     setSubmitStatus(null)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch("/api/zakelijk-registratie", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
 
-      // In a real application, you would send the data to your API here
-      console.log("Form submitted:", formData)
+      const result = await response.json()
 
-      setSubmitStatus("success")
-      // Optionally reset form after successful submission
-      // setFormData({ ...initialFormState })
+      if (result.success) {
+        setSubmitStatus("success")
+        setStatusMessage(
+          result.message || "Uw aanvraag is succesvol verzonden. We nemen binnen 1-2 werkdagen contact met u op.",
+        )
+        // Reset form after successful submission
+        setFormData({
+          bedrijfsnaam: "",
+          kvkNummer: "",
+          btwNummer: "",
+          adres: "",
+          postcode: "",
+          plaats: "",
+          contactpersoonVoornaam: "",
+          contactpersoonAchternaam: "",
+          functie: "",
+          email: "",
+          telefoon: "",
+          branche: "",
+          aantalMedewerkers: "",
+          geschatteAfname: "",
+          opmerkingen: "",
+          voorwaarden: false,
+        })
+      } else {
+        setSubmitStatus("error")
+        setStatusMessage(result.message || "Er is een fout opgetreden bij het verzenden van uw aanvraag.")
+      }
     } catch (error) {
       console.error("Error submitting form:", error)
       setSubmitStatus("error")
+      setStatusMessage(
+        "Er is een fout opgetreden bij het verzenden van uw aanvraag. Probeer het later opnieuw of neem contact op met onze klantenservice.",
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -133,10 +163,7 @@ export function ZakelijkRegistratieForm() {
             </div>
             <div className="ml-3">
               <h3 className="text-green-800 font-medium">Aanvraag succesvol ingediend!</h3>
-              <p className="text-green-700 text-sm mt-1">
-                Bedankt voor uw aanvraag. We nemen binnen 1-2 werkdagen contact met u op om uw zakelijk account te
-                activeren.
-              </p>
+              <p className="text-green-700 text-sm mt-1">{statusMessage}</p>
             </div>
           </div>
         </div>
@@ -150,10 +177,7 @@ export function ZakelijkRegistratieForm() {
             </div>
             <div className="ml-3">
               <h3 className="text-red-800 font-medium">Er is een fout opgetreden</h3>
-              <p className="text-red-700 text-sm mt-1">
-                We konden uw aanvraag niet verwerken. Probeer het later opnieuw of neem contact op met onze
-                klantenservice.
-              </p>
+              <p className="text-red-700 text-sm mt-1">{statusMessage}</p>
             </div>
           </div>
         </div>

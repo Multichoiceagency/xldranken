@@ -153,14 +153,15 @@ export default async function Home() {
         <LovkaProductsection />
       </Suspense>
 
+      <Suspense fallback={<AboutUsSectionSkeleton />}>
+        <AboutUsSection />
+      </Suspense>
+
       {/* Install App Section - Added before About Us */}
       <Suspense fallback={<InstallAppSkeleton />}>
         <InstallApp />
       </Suspense>
 
-      <Suspense fallback={<AboutUsSectionSkeleton />}>
-        <AboutUsSection />
-      </Suspense>
     </div>
   )
 }
@@ -207,8 +208,8 @@ async function LimonadenSection() {
 
   return (
     <FeaturedProductsCarousel
-      title="LIMONADEN"
-      subtitle="Verfrissende limonades voor elke gelegenheid"
+      title="Frisdranken"
+      subtitle="Verfrissende frisdranken voor elke gelegenheid"
       products={limonadenProducts}
       viewAllLink="/dranken/limonaden"
       backgroundColor="#0F3059"
@@ -221,7 +222,7 @@ async function LimonadenSection() {
 
 // DRANKEN - POOLS (ID: 2)
 async function PoolsDrankenSection() {
-  const poolsDrankenProducts = await getProductsByFam2ID("1", 10, 1).catch(() => [])
+  const poolsDrankenProducts = await getProductsByFam2ID("10", 10, 1).catch(() => [])
 
   return (
     <FeaturedProductsCarousel

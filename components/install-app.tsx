@@ -5,23 +5,23 @@ import { FaAppStore, FaGooglePlay } from "react-icons/fa"
 
 export function InstallApp() {
   return (
-    <section className="bg-gradient-to-r from-[#2D1B69] to-[#5D4A9C] py-16 text-white">
+    <section className="bg-gradient-to-r from-[#9A8555] to-[#BEA46A] py-16 text-white">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Left side: Text content */}
           <div className="md:w-1/2 space-y-6">
-            <div className="inline-block bg-[#E2B505] text-white px-3 py-1 text-sm font-medium rounded-md mb-2">
+            <div className="inline-block bg-[#7A6B44] text-white px-3 py-1 text-sm font-medium rounded-md mb-2">
               DOWNLOAD NU
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">XL Dranken App - Bestel Eenvoudig</h2>
-            <p className="text-lg mb-6 text-white/80 max-w-xl">
+            <p className="text-lg mb-6 text-white/90 max-w-xl">
               Ontdek het gemak van mobiel bestellen en krijg direct toegang tot ons volledige assortiment via onze
               gebruiksvriendelijke app. Geniet van exclusieve app-only aanbiedingen en snellere checkout.
             </p>
             <ul className="space-y-3 mb-6">
               <li className="flex items-start">
                 <svg
-                  className="h-6 w-6 text-[#E2B505] mr-2 flex-shrink-0"
+                  className="h-6 w-6 text-white mr-2 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -32,7 +32,7 @@ export function InstallApp() {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="h-6 w-6 text-[#E2B505] mr-2 flex-shrink-0"
+                  className="h-6 w-6 text-white mr-2 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -43,7 +43,7 @@ export function InstallApp() {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="h-6 w-6 text-[#E2B505] mr-2 flex-shrink-0"
+                  className="h-6 w-6 text-white mr-2 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -54,7 +54,7 @@ export function InstallApp() {
               </li>
               <li className="flex items-start">
                 <svg
-                  className="h-6 w-6 text-[#E2B505] mr-2 flex-shrink-0"
+                  className="h-6 w-6 text-white mr-2 flex-shrink-0"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -70,9 +70,9 @@ export function InstallApp() {
                 href="#"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-[200px] h-[60px] bg-white text-[#2D1B69] rounded-lg flex items-center justify-center px-4 transition-transform hover:scale-105 hover:shadow-lg"
+                className="w-[200px] h-[60px] bg-white text-[#7A6B44] rounded-lg flex items-center justify-center px-4 transition-transform hover:scale-105 hover:shadow-lg"
               >
-                <FaGooglePlay className="h-8 w-8 mr-2 text-[#2D1B69]" />
+                <FaGooglePlay className="h-8 w-8 mr-2 text-[#7A6B44]" />
                 <div className="flex flex-col items-start">
                   <span className="text-xs">DOWNLOAD VIA DE</span>
                   <span className="text-sm font-semibold">Google Play</span>
@@ -84,9 +84,9 @@ export function InstallApp() {
                 href="#"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-[200px] h-[60px] bg-white text-[#2D1B69] rounded-lg flex items-center justify-center px-4 transition-transform hover:scale-105 hover:shadow-lg"
+                className="w-[200px] h-[60px] bg-white text-[#7A6B44] rounded-lg flex items-center justify-center px-4 transition-transform hover:scale-105 hover:shadow-lg"
               >
-                <FaAppStore className="h-8 w-8 mr-2 text-[#2D1B69]" />
+                <FaAppStore className="h-8 w-8 mr-2 text-[#7A6B44]" />
                 <div className="flex flex-col items-start">
                   <span className="text-xs">DOWNLOAD VIA DE</span>
                   <span className="text-sm font-semibold">App Store</span>

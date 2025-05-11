@@ -18,45 +18,33 @@ const menuItems = [
     name: "ALCOHOL",
     href: "/alcohol",
     submenu: [
-      { name: "STERKE DRANK", href: "/sterke-drank", id: "16" },
-      { name: "MIX DRANK", href: "/mix-drank", id: "5" },
-      { name: "COCKTAILS", href: "/cocktails", id: "10" },
-      { name: "LOVKA", href: "/lovka", id: "" },
     ],
   },
   {
     name: "WIJN",
-    href: "/wijn",
+    href: "/categorie/wijn",
     submenu: [],
   },
   {
     name: "BIER",
-    href: "/bier",
+    href: "/categorie/bier",
     submenu: [
-      { name: "POOLSE BIER BLIK", href: "/poolse-bieren-blik", id: "4" },
-      { name: "POOLSE BIER FLES", href: "/poolse-bieren-flex", id: "3" },
-      { name: "NL BIER", href: "/poolse-bieren-blik", id: "5" },
     ],
   },
   {
     name: "FRISDRANKEN",
-    href: "/frisdranken",
+    href: "/categorie/frisdranken",
     submenu: [
-      { name: "FRISDRANKEN", href: "/frisdranken", id: "6" },
-      { name: "LIMONADEN", href: "/limonaden", id: "1" },
-      { name: "WATER NL", href: "/water-nl", id: "7" },
-      { name: "WATER PL", href: "/water-pl", id: "12" },
-      { name: "KOFFIE THEE", href: "/koffie-thee", id: "18" },
     ],
   },
   {
     name: "FOOD",
-    href: "/food",
+    href: "/categorie/food",
     submenu: [],
   },
   {
     name: "NON-FOOD",
-    href: "/non-food",
+    href: "/categorie/non-food",
     submenu: [],
   },
 ]

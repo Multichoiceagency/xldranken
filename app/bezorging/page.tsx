@@ -183,19 +183,14 @@ export default function BezorgingPage() {
                     </thead>
                     <tbody className="divide-y">
                       <tr>
-                        <td className="px-4 py-3 text-sm text-gray-700">Tot €75</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">€5,95</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">€9,95</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 text-sm text-gray-700">€75 tot €750</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">€5,95</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">€9,95</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">Tot €750</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">€49.95</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">€89.95</td>
                       </tr>
                       <tr>
                         <td className="px-4 py-3 text-sm text-gray-700">Vanaf €750</td>
                         <td className="px-4 py-3 text-sm text-gray-700">Gratis</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">Gratis</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">Vanaf €900 gratis</td>
                       </tr>
                     </tbody>
                   </table>
@@ -328,7 +323,7 @@ export default function BezorgingPage() {
               </div>
 
               <div className="mt-6 relative h-64 w-full rounded-lg overflow-hidden">
-                <Image src="/winkel/delivery-map.png" alt="XL Dranken bezorggebieden" fill className="object-cover" />
+                <Image src="/winkel/nl-kaart.png" alt="XL Dranken bezorggebieden" fill className="object-contain" />
               </div>
             </div>
           </div>

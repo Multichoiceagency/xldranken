@@ -39,11 +39,6 @@ export function AboutUsSection() {
                 voor zowel particulieren als bedrijven in de horeca- en retailsector.
               </p>
             </div>
-            <Link href="/assortiment">
-            <Button className="mt-6 bg-[#FF6B35] hover:bg-[#E85A24] text-white">
-              Ontdek ons assortiment
-            </Button>
-            </Link>
           </div>
           <div className="relative h-[700px] rounded-lg overflow-hidden">
             <Image

@@ -5,7 +5,7 @@ import { getProductsByFam2ID } from "@/lib/api"
 import { InstallApp } from "../components/install-app"
 
 // Dynamically import components with lazy loading
-const PromoGrid = dynamic(() => import("@/components/promo-carousel").then((mod) => mod.PromoGrid), {
+const PromoGrid = dynamic(() => import("@/components/promo-carousel").then((mod) => mod), {
   loading: () => <PromoGridSkeleton />,
 })
 

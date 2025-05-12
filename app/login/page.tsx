@@ -29,42 +29,46 @@ export default function LoginPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setIsLoading(true)
 
-    try {
-      const result = await signIn("credentials", {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-      })
+  // Debug logging
+  console.log("🔐 Attempting login with email:", formData.email)
 
-      if (result?.error) {
-        toast({
-          title: "Inloggen mislukt",
-          description: "Ongeldige e-mail of wachtwoord. Probeer het opnieuw.",
-          variant: "destructive",
-        })
-      } else {
-        toast({
-          title: "Succesvol ingelogd",
-          description: "Welkom terug!",
-          variant: "default",
-        })
-        router.push("/account")
-      }
-    } catch (error) {
-      console.error("Login error:", error)
+  try {
+    const result = await signIn("credentials", {
+      email: formData.email,
+      password: formData.password,
+      redirect: false,
+    })
+
+    if (result?.error) {
       toast({
         title: "Inloggen mislukt",
-        description: "Er is een fout opgetreden tijdens het inloggen. Probeer het opnieuw.",
+        description: "Ongeldige e-mail of wachtwoord. Probeer het opnieuw.",
         variant: "destructive",
       })
-    } finally {
-      setIsLoading(false)
+    } else {
+      toast({
+        title: "Succesvol ingelogd",
+        description: "Welkom terug!",
+        variant: "default",
+      })
+      router.push("/account")
     }
+  } catch (error) {
+    console.error("Login error:", error)
+    toast({
+      title: "Inloggen mislukt",
+      description: "Er is een fout opgetreden tijdens het inloggen. Probeer het opnieuw.",
+      variant: "destructive",
+    })
+  } finally {
+    setIsLoading(false)
   }
+}
+
 
   return (
     <div className="min-h-screen flex flex-col relative">

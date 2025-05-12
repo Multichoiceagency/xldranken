@@ -1,16 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ProductProps } from "@/types/product";
 import ProductCard from "./product-card";
 import Link from "next/link";
+import { Spinner } from "@/components/ui/spinner";
 
 interface Props {
   initialProducts: ProductProps[];
   basePath: string;
-  fam2id: string; // Preserved in case of future use
+  fam2id: string;
 }
+
 
 export default function ProductsGridClient({ initialProducts, basePath }: Props) {
   const searchParams = useSearchParams();
@@ -22,16 +24,25 @@ export default function ProductsGridClient({ initialProducts, basePath }: Props)
 
   const totalPages = Math.ceil(initialProducts.length / productsPerPage);
 
-  const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * productsPerPage;
-    return initialProducts.slice(start, start + productsPerPage);
+  const [paginatedProducts, setPaginatedProducts] = useState<ProductProps[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+
+    const timeout = setTimeout(() => {
+      const start = (currentPage - 1) * productsPerPage;
+      setPaginatedProducts(initialProducts.slice(start, start + productsPerPage));
+      setIsLoading(false);
+    }, 300); // Simuleer laadtijd
+
+    return () => clearTimeout(timeout);
   }, [initialProducts, currentPage, productsPerPage]);
 
   const createURL = (key: string, value: string | number) => {
     const params = new URLSearchParams(query.toString());
     params.set(key, value.toString());
 
-    // Reset page when changing limit or view
     if (key === "limit" || key === "view") {
       params.set("page", "1");
     }
@@ -57,29 +68,34 @@ export default function ProductsGridClient({ initialProducts, basePath }: Props)
           ))}
         </div>
 
-        {/* Grid toggle */}
-        <div className="flex space-x-2">
-        </div>
+        {/* Grid toggle (optioneel uit te breiden) */}
+        <div className="flex space-x-2" />
       </div>
 
-      {/* Product Grid */}
-      <div
-        className={`grid gap-6 ${
-          gridView === "grid2"
-            ? "grid-cols-1 sm:grid-cols-2"
-            : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-        }`}
-      >
-        {paginatedProducts.length > 0 ? (
-          paginatedProducts.map((product) => (
-            <ProductCard key={product.arcleunik} product={product} />
-          ))
-        ) : (
-          <div className="col-span-full text-center py-10">
-            <p className="text-lg font-medium">Geen producten gevonden</p>
-          </div>
-        )}
-      </div>
+      {/* Product Grid or Spinner */}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <Spinner size="large" className="text-[#E2B505]" />
+        </div>
+      ) : (
+        <div
+          className={`grid gap-6 ${
+            gridView === "grid2"
+              ? "grid-cols-1 sm:grid-cols-2"
+              : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          }`}
+        >
+          {paginatedProducts.length > 0 ? (
+            paginatedProducts.map((product) => (
+              <ProductCard key={product.arcleunik} product={product} />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10">
+              <p className="text-lg font-medium">Geen producten gevonden</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Pagination */}
       <div className="flex justify-center items-center gap-4 mt-8">

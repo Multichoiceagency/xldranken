@@ -31,6 +31,7 @@ const nextConfig = {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
+      scrollRestoration: true,
   },
   // Add CORS and OneSignal service worker configuration
   async headers() {

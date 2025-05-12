@@ -1,10 +1,4 @@
-import type { Metadata } from "next"
-
-export const metadata: Metadata = {
-  title: "Algemene Voorwaarden | XL Groothandel",
-  description:
-    "Lees de algemene voorwaarden van XL Groothandel BV. Deze voorwaarden zijn van toepassing op alle aanbiedingen, bestellingen en overeenkomsten.",
-}
+import React from "react"
 
 export default function AlgemeneVoorwaardenPage() {
   return (

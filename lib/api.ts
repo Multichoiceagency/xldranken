@@ -8,7 +8,7 @@ const API_KEY = process.env.NEXT_PUBLIC_API_KEY
 export const menuItemsList = [
   {
     name: "ALCOHOL",
-    href: "/categorie/spirits",
+    href: "/categorie/alcohol",
     submenu: [
       {
         name: "STERKE DRANK",

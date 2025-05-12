@@ -1,6 +1,5 @@
 import Image from "next/image"
 import Link from "next/link"
-import type { Metadata } from "next"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
   faTruck,
@@ -17,11 +16,6 @@ import {
   faInfoCircle, // Added import for faInfoCircle
 } from "@fortawesome/free-solid-svg-icons"
 
-export const metadata: Metadata = {
-  title: "Bezorging | XL Dranken",
-  description:
-    "Informatie over onze bezorgdienst, bezorgkosten, levertijden en bezorggebieden. Bestel eenvoudig online en laat uw dranken thuisbezorgen.",
-}
 
 // Delivery time slots
 const timeSlots = [

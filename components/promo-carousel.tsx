@@ -46,7 +46,7 @@ const promos = [
   },
 ]
 
-export function PromoSection() {
+export default function PromoSection() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null)
@@ -174,7 +174,7 @@ export function PromoSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Column - Text Content (completely separate from images) */}
           <div className="space-y-6 max-w-xl mx-auto lg:mx-0">
-            <div className="inline-block bg-[#E2B505] text-white px-3 py-1 text-sm font-medium rounded-md shadow-md">
+            <div className="inline-block bg-[#BEA46A] text-white px-3 py-1 text-sm font-medium rounded-md shadow-md">
               {promos[currentSlide].discount || "WEBSHOP*"}
             </div>
 
@@ -184,7 +184,7 @@ export function PromoSection() {
 
             <div className="pt-4">
               <Link href={promos[currentSlide].href}>
-                <Button className="bg-[#E2B505] hover:bg-[#E2B505]/90 transform hover:scale-105 transition-all duration-300 hover:shadow-lg active:scale-95 text-white font-medium px-6 py-2.5 rounded-md">
+                <Button className="bg-[#BEA46A] hover:bg-[#BEA46A]/90 transform hover:scale-105 transition-all duration-300 hover:shadow-lg active:scale-95 text-white font-medium px-6 py-2.5 rounded-md">
                   {promos[currentSlide].buttonText}
                 </Button>
               </Link>
@@ -197,7 +197,7 @@ export function PromoSection() {
                   key={index}
                   onClick={() => goToSlide(index)}
                   className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index === currentSlide ? "bg-[#E2B505] w-8" : "bg-gray-300 hover:bg-gray-400"
+                    index === currentSlide ? "bg-[#BEA46A] w-8" : "bg-gray-300 hover:bg-gray-400"
                   }`}
                   aria-label={`Go to slide ${index + 1}`}
                 />

@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,7 +8,6 @@ import { signOut } from "next-auth/react"
 import { Trash2, Edit, Save, LogOut } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import LogoutPage from "../logout/page"
 
 interface CustomerData {
   clcleunik: string
@@ -44,7 +41,6 @@ export default function AccountDetails({ customerData }: { customerData: Custome
     cellphone: customerData.cellphone || "",
   })
 
-  // Check if this is a test account (email contains "test")
   const isTestAccount =
     customerData.email.includes("test") ||
     customerData.login.includes("test") ||
@@ -70,76 +66,73 @@ export default function AccountDetails({ customerData }: { customerData: Custome
 
       toast({
         title: "Success",
-        description: "Account information updated successfully.",
+        description: "Accountinformatie is succesvol bijgewerkt.",
         variant: "default",
       })
 
       setIsEditing(false)
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update account information.",
+        title: "Fout",
+        description: "Bijwerken mislukt. Probeer het opnieuw.",
         variant: "destructive",
       })
     }
   }
 
   const handleDeleteAccount = async () => {
-    if (!confirm("Are you sure you want to delete this account? This action cannot be undone.")) {
-      return
-    }
+    if (!confirm("Weet je zeker dat je dit account wilt verwijderen?")) return
 
     try {
       const response = await fetch(`/api/account/delete?id=${customerData.clcleunik}`, {
         method: "DELETE",
       })
 
-      if (!response.ok) throw new Error("Failed to delete account")
+      if (!response.ok) throw new Error("Verwijderen mislukt")
 
       toast({
-        title: "Success",
-        description: "Account deleted successfully.",
-        variant: "default",
+        title: "Verwijderd",
+        description: "Account is verwijderd.",
       })
 
-      // Sign out the user after account deletion
-      signOut({ callbackUrl: "/" })
+      await signOut({ callbackUrl: "/" })
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete account.",
+        title: "Fout",
+        description: "Account verwijderen mislukt.",
         variant: "destructive",
       })
     }
   }
 
   const handleCleanTestData = async () => {
-    if (!confirm("Are you sure you want to clean test data from this account?")) {
-      return
-    }
+    if (!confirm("Testdata van dit account verwijderen?")) return
 
     try {
       const response = await fetch(`/api/account/clean-test-data?id=${customerData.clcleunik}`, {
         method: "POST",
       })
 
-      if (!response.ok) throw new Error("Failed to clean test data")
+      if (!response.ok) throw new Error("Cleanen mislukt")
 
       toast({
         title: "Success",
-        description: "Test data cleaned successfully.",
-        variant: "default",
+        description: "Testdata verwijderd.",
       })
 
-      // Refresh the page to show updated data
       window.location.reload()
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to clean test data.",
+        title: "Fout",
+        description: "Verwijderen van testdata is mislukt.",
         variant: "destructive",
       })
     }
+  }
+
+  const handleLogout = async () => {
+    toast({ title: "Je wordt uitgelogd..." })
+    await signOut({ callbackUrl: "/" })
   }
 
   return (
@@ -155,21 +148,22 @@ export default function AccountDetails({ customerData }: { customerData: Custome
             ) : (
               <Button variant="outline" onClick={() => setIsEditing(true)}>
                 <Edit className="h-4 w-4 mr-2" />
-                Edit
+                Bewerken
               </Button>
             )}
             {isTestAccount && (
               <Button variant="destructive" onClick={handleCleanTestData}>
                 <Trash2 className="h-4 w-4 mr-2" />
-                Clean Test Data
+                Verwijder Testdata
               </Button>
             )}
           </div>
         </CardHeader>
+
         <CardContent>
           {isTestAccount && (
             <div className="mb-4 p-3 bg-amber-100 border border-amber-300 rounded-md text-amber-800">
-              This appears to be a test account. You can clean test data or update information as needed.
+              Dit lijkt een testaccount. Je kunt testdata verwijderen of bewerken.
             </div>
           )}
 
@@ -302,12 +296,10 @@ export default function AccountDetails({ customerData }: { customerData: Custome
 
             {isEditing && (
               <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </Button>
+                <Button variant="outline" onClick={() => setIsEditing(false)}>Annuleren</Button>
                 <Button onClick={handleSave}>
                   <Save className="h-4 w-4 mr-2" />
-                  Save Changes
+                  Opslaan
                 </Button>
               </div>
             )}
@@ -315,11 +307,10 @@ export default function AccountDetails({ customerData }: { customerData: Custome
         </CardContent>
       </Card>
 
-          <Button variant="default" onClick={LogoutPage}>
-            <Trash2 className="h-4 w-4 mr-2" />
-            Uitloggen
-          </Button>
+      <Button variant="destructive" onClick={handleLogout}>
+        <LogOut className="h-4 w-4 mr-2" />
+        Uitloggen
+      </Button>
     </div>
   )
 }
-

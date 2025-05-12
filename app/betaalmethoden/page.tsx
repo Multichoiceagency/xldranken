@@ -1,9 +1,4 @@
-import type { Metadata } from "next"
-
-export const metadata: Metadata = {
-  title: "Betaalmethoden | XL Groothandel",
-  description: "Overzicht van beschikbare betaalmethoden en betalingsvoorwaarden bij XL Groothandel BV.",
-}
+import React from "react"
 
 export default function BetaalmethodenPage() {
   return (

@@ -13,6 +13,7 @@ import { faCreditCard } from "@fortawesome/free-solid-svg-icons"
 import Link from "next/link"
 import Image from "next/image"
 import { Textarea } from "@/components/ui/textarea"
+import { useRouter } from "next/navigation"
 
 // Free shipping threshold and shipping cost constants - same as cart page
 const FREE_SHIPPING_THRESHOLD = 750
@@ -39,6 +40,7 @@ const getDeliveryDates = () => {
 const deliveryDates = getDeliveryDates()
 
 export default function CheckoutPage({ customerData }: any) {
+  const router = useRouter()
   const [deliveryOption, setDeliveryOption] = useState<"delivery" | "pickup">("delivery")
   const [selectedDate, setSelectedDate] = useState(deliveryDates[0])
   const [deliveryComment, setDeliveryComment] = useState("")
@@ -70,12 +72,18 @@ export default function CheckoutPage({ customerData }: any) {
 
       // Simulate a successful order
       setTimeout(() => {
+        const orderNumber = "TEST-" + Math.floor(Math.random() * 10000)
+
         setOrderStatus({
           success: true,
-          message: "Bestelling succesvol geplaatst! (Test modus)",
-          orderNumber: "TEST-" + Math.floor(Math.random() * 10000),
+          message: "Bestelling succesvol geplaatst!",
+          orderNumber: orderNumber,
         })
+
         setIsSubmitting(false)
+
+        // Redirect to thank you page with order details
+        router.push(`/thank-you?orderNumber=${orderNumber}&total=${total.toFixed(2)}`)
       }, 1500)
     } catch (error) {
       console.error("Error:", error)

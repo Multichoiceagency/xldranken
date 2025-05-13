@@ -61,6 +61,7 @@
     "nodemailer": "^6.10.1",
     "or": "^0.2.0",
     "react": "^18.2.0",
+    "react-confetti": "^6.4.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.54.1",
     "react-icons": "^5.5.0",

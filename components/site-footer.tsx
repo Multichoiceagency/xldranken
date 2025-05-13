@@ -111,28 +111,34 @@ export function SiteFooter() {
             <h3 className="font-bold mb-4">QUICK LINKS</h3>
             <ul className="space-y-2 text-sm">
               <li>
+                                <Link href="/account" className="hover:text-[#d0c298]">
+                  Mijn account
+                </Link>
+
+              </li>
+              <li>
                 <Link href="/bier" className="hover:text-[#d0c298]">
                   Winkelmand
                 </Link>
               </li>
               <li>
-                <Link href="/alcoholvrij" className="hover:text-[#d0c298]">
-                  Mijn account
+                <Link href="/account/gegevens" className="hover:text-[#d0c298]">
+                  Acccountgegevens
                 </Link>
               </li>
               <li>
-                <Link href="/cadeau" className="hover:text-[#d0c298]">
+                <Link href="/bestellingen" className="hover:text-[#d0c298]">
                   Mijn bestellingen
                 </Link>
               </li>
             </ul>
 
             {/* Service Section */}
-            <h3 className="font-bold mb-4 mt-6">SERVICE</h3>
+            <h3 className="font-bold mb-4 mt-6">Registreren & Klantenservice</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/zakelijk" className="hover:text-[#d0c298]">
-                  Zakelijk
+                  Registreren
                 </Link>
               </li>
               <li>
@@ -141,8 +147,8 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/mijn-account" className="hover:text-[#d0c298]">
-                  Mijn account
+                <Link href="/klantenservice" className="hover:text-[#d0c298]">
+                  Klantenservice
                 </Link>
               </li>
             </ul>
@@ -221,11 +227,11 @@ export function SiteFooter() {
                 Algemene voorwaarden
               </Link>
               <span>-</span>
-              <Link href="/privacybeleid" className="hover:text-[#d0c298]">
+              <Link href="/privacy-beleid" className="hover:text-[#d0c298]">
                 Privacybeleid
               </Link>
               <span>-</span>
-              <Link href="/cookiebeleid" className="hover:text-[#d0c298]">
+              <Link href="/cookie-beleid" className="hover:text-[#d0c298]">
                 Cookiebeleid
               </Link>
             </div>

@@ -171,7 +171,7 @@ export function SiteHeader() {
     <>
       <div className="bg-[#BEA46A] text-white py-2 text-sm px-4">
         <div className="container mx-auto flex justify-between">
-          <span>✓ Meer dan 4.000 dranken</span>
+          <span>✓ Meer dan 900+ dranken</span>
           <div className="hidden md:flex gap-4">
             <NoScrollLink href="/zakelijk" className="hover:underline">
               Registreren
@@ -205,20 +205,27 @@ export function SiteHeader() {
 
           <nav className="hidden lg:flex flex-1 justify-center gap-10 font-semibold">
             {menuItemsList.map((item) => (
-              <div key={item.name} className="relative" ref={(el) => { dropdownRefs.current[item.name] = el; }}>
+              <div
+                key={item.name}
+                className="relative"
+                ref={(el) => {
+                  dropdownRefs.current[item.name] = el
+                }}
+              >
                 {item.submenu?.length ? (
                   <>
-                    <button
-                      onClick={(e) => toggleDropdown(e, item.name)}
-                      className="hover:text-[#BEA46A] flex items-center gap-1 py-2"
-                    >
-                      {item.name}
-                      {openDropdown === item.name ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      )}
-                    </button>
+                    <div className="flex items-center">
+                      <NoScrollLink href={item.href} className="hover:text-[#BEA46A] py-2 mr-1">
+                        {item.name}
+                      </NoScrollLink>
+                      <button onClick={(e) => toggleDropdown(e, item.name)} className="hover:text-[#BEA46A] p-1">
+                        {openDropdown === item.name ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                     {openDropdown === item.name && (
                       <div className="absolute left-0 top-full bg-white shadow-lg rounded-md w-64 mt-1 z-50">
                         {item.submenu.map((sub) => (
@@ -260,11 +267,11 @@ export function SiteHeader() {
                         <NoScrollLink href="/account" className="block px-4 py-2 hover:bg-gray-100">
                           Mijn account
                         </NoScrollLink>
-                        <NoScrollLink href="/bestellingen" className="block px-4 py-2 hover:bg-gray-100">
+                        <NoScrollLink href="/account/bestellingen" className="block px-4 py-2 hover:bg-gray-100">
                           Bestellingen
                         </NoScrollLink>
-                        <NoScrollLink href="/gegevens" className="block px-4 py-2 hover:bg-gray-100">
-                          Gegevens
+                        <NoScrollLink href="/adressen/gegevens" className="block px-4 py-2 hover:bg-gray-100">
+                          Adressen
                         </NoScrollLink>
                         <button
                           onClick={handleLogout}
@@ -357,17 +364,22 @@ export function SiteHeader() {
                 <div key={item.name}>
                   {item.submenu?.length ? (
                     <>
-                      <button
-                        onClick={(e) => toggleDropdown(e, item.name)}
-                        className="font-medium flex items-center justify-between w-full text-left"
-                      >
-                        <span>{item.name}</span>
-                        {openDropdown === item.name ? (
-                          <ChevronUp className="w-4 h-4" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4" />
-                        )}
-                      </button>
+                      <div className="flex items-center justify-between w-full">
+                        <NoScrollLink
+                          href={item.href}
+                          className="font-medium"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          {item.name}
+                        </NoScrollLink>
+                        <button onClick={(e) => toggleDropdown(e, item.name)} className="p-1">
+                          {openDropdown === item.name ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
                       {openDropdown === item.name && (
                         <div className="mt-2 ml-4 space-y-2">
                           {item.submenu.map((sub) => (

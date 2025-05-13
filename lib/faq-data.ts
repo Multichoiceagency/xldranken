@@ -47,7 +47,7 @@ export const faqData = [
       {
         question: "Wat zijn de bezorgkosten?",
         answer:
-          "Voor bestellingen onder €75 rekenen wij €5,95 bezorgkosten. Bestellingen boven €75 worden gratis bezorgd in heel Nederland. Voor zakelijke klanten gelden speciale voorwaarden.",
+          "Voor bestellingen onder €750 rekenen wij €69.95 bezorgkosten. Bestellingen boven €750 worden gratis bezorgd in heel Nederland. Voor zakelijke klanten gelden speciale voorwaarden.",
       },
       {
         question: "Hoe lang duurt de levering?",

@@ -9,6 +9,7 @@ export const menuItemsList = [
   {
     name: "ALCOHOL",
     href: "/categorie/sterke-drank",
+    id: "16",
     submenu: [
       {
         name: "STERKE DRANK",
@@ -30,11 +31,12 @@ export const menuItemsList = [
   {
     name: "WIJN",
     href: "/categorie/wijn",
-    id: "18",
+    id: "13",
     submenu: [],
   },
   {
     name: "BIER",
+    id: "5",
     href: "/categorie/bier",
     submenu: [
       {
@@ -57,6 +59,7 @@ export const menuItemsList = [
   {
     name: "FRISDRANKEN",
     href: "/categorie/frisdranken",
+    id: "6",
     submenu: [
       {
         name: "FRISDRANKEN",
@@ -76,7 +79,7 @@ export const menuItemsList = [
       {
         name: "WATER PL",
         href: "/categorie/water-pl",
-        id: "12",
+        id: "18",
       },
       {
         name: "KOFFIE THEE",
@@ -88,13 +91,13 @@ export const menuItemsList = [
   {
     name: "FOOD",
     href: "/categorie/food",
-    id: "14",
+    id: "22",
     submenu: [],
   },
   {
     name: "NON-FOOD",
     href: "/categorie/non-food",
-    id: "21",
+    id: "22",
     submenu: [
       {
         name: "SCHOONMAAK",
@@ -104,7 +107,7 @@ export const menuItemsList = [
       {
         name: "HOUTSKOOL",
         href: "/categorie/houtskool",
-        id: "19",
+        id: "20",
       },
     ],
   },

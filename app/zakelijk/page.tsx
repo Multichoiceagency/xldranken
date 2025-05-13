@@ -286,7 +286,7 @@ export default function ZakelijkAccountPage() {
                       <h4 className="font-medium">E-mail</h4>
                       <p className="text-gray-600 text-sm">Reactie binnen 24 uur</p>
                       <a href="mailto:zakelijk@xldranken.nl" className="text-[#0F3059] hover:underline">
-                        zakelijk@xldranken.nl
+                        info@xldranken.nl
                       </a>
                     </div>
                   </div>

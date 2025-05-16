@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +16,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Textarea } from "@/components/ui/textarea"
 import { useRouter } from "next/navigation"
+import { useToast } from "@/hooks/use-toast"
 
 // Free shipping threshold and shipping cost constants - same as cart page
 const FREE_SHIPPING_THRESHOLD = 750
@@ -39,13 +42,31 @@ const getDeliveryDates = () => {
 
 const deliveryDates = getDeliveryDates()
 
-export default function CheckoutPage({ customerData }: any) {
+export default function CheckoutPage({ customerData }: { customerData: any }) {
   const router = useRouter()
+  const { toast } = useToast()
   const [deliveryOption, setDeliveryOption] = useState<"delivery" | "pickup">("delivery")
   const [selectedDate, setSelectedDate] = useState(deliveryDates[0])
   const [deliveryComment, setDeliveryComment] = useState("")
-  const { cart, getCartTotal, updateQuantity } = useCart()
+  const { cart, getCartTotal, updateQuantity, clearCart } = useCart()
   const { totalItems, totalPrice, totalPriceExclVAT } = getCartTotal()
+
+  // Form state for customer data with better fallbacks
+  const [formData, setFormData] = useState({
+    firstName: customerData?.firstName || "",
+    lastName: customerData?.lastName || "",
+    address: customerData?.address || "",
+    zipcode: customerData?.zipcode || "",
+    city: customerData?.city || "",
+    email: customerData?.email || "",
+    phone: customerData?.phone || "",
+  })
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   // Use the same shipping cost logic as the cart page
   const shippingCost = totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
@@ -64,33 +85,137 @@ export default function CheckoutPage({ customerData }: any) {
     setIsSubmitting(true)
 
     try {
-      // Just log order information without sending to API
-      console.log("Order would be placed with delivery option:", deliveryOption)
-      console.log("Selected delivery date:", selectedDate)
-      console.log("Total items:", totalItems)
-      console.log("Total price:", total)
+      // Validate cart
+      if (cart.length === 0) {
+        throw new Error("Je winkelwagen is leeg")
+      }
 
-      // Simulate a successful order
-      setTimeout(() => {
-        const orderNumber = "TEST-" + Math.floor(Math.random() * 10000)
+      // Validate customer data for delivery option
+      if (deliveryOption === "delivery") {
+        if (!formData.address || !formData.zipcode || !formData.city) {
+          throw new Error("Vul alle verplichte adresgegevens in")
+        }
+      }
 
-        setOrderStatus({
-          success: true,
-          message: "Bestelling succesvol geplaatst!",
-          orderNumber: orderNumber,
+      // Step 1: Create an empty order
+      console.log("Creating empty order for customer:", customerData.clcleunik || customerData.id)
+      const createOrderUrl = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${process.env.NEXT_PUBLIC_API_KEY}`
+
+      const createOrderResponse = await fetch(createOrderUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clcleunik: customerData.clcleunik || customerData.id,
+          use: "clcleunik",
+        }),
+      })
+
+      if (!createOrderResponse.ok) {
+        throw new Error(`Failed to create order: ${createOrderResponse.status}`)
+      }
+
+      const orderData = await createOrderResponse.json()
+      if (!orderData.success) {
+        throw new Error(orderData.message || "Failed to create order")
+      }
+
+      const orderGuid = orderData.result?.guid || orderData.guid
+      console.log("Created empty order with GUID:", orderGuid)
+
+      // Step 2: Add each item to the order
+      for (const item of cart) {
+        console.log(`Adding item ${item.id} to order ${orderGuid}`)
+        const addLineUrl = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${process.env.NEXT_PUBLIC_API_KEY}`
+
+        const addLineResponse = await fetch(addLineUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            guid: orderGuid,
+            arcleunik: item.id,
+            qty: item.quantity,
+            data: `${item.id}_${item.quantity}`,
+          }),
         })
 
-        setIsSubmitting(false)
+        if (!addLineResponse.ok) {
+          throw new Error(`Failed to add item ${item.id} to order: ${addLineResponse.status}`)
+        }
 
-        // Redirect to thank you page with order details
-        router.push(`/thank-you?orderNumber=${orderNumber}&total=${total.toFixed(2)}`)
-      }, 1500)
+        const lineData = await addLineResponse.json()
+        if (!lineData.success) {
+          throw new Error(lineData.message || `Failed to add item ${item.id} to order`)
+        }
+      }
+
+      // Step 3: Send the order to Megawin
+      console.log("Sending order to Megawin:", orderGuid)
+      const sendOrderUrl = `${process.env.NEXT_PUBLIC_ORDERS_SEND_TO_MEGAWIN_URL}apikey=${process.env.NEXT_PUBLIC_API_KEY}`
+
+      const sendOrderResponse = await fetch(sendOrderUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          guid: orderGuid,
+          deliveryOption: deliveryOption === "delivery" ? "1" : "2",
+          deliveryDate: selectedDate.fullDate.toISOString(),
+          deliveryComment,
+          customerData: formData,
+        }),
+      })
+
+      if (!sendOrderResponse.ok) {
+        throw new Error(`Failed to send order to Megawin: ${sendOrderResponse.status}`)
+      }
+
+      const result = await sendOrderResponse.json()
+      if (!result.success) {
+        throw new Error(result.message || "Failed to send order to Megawin")
+      }
+
+      const orderNumber = result.result?.orderNumber || orderGuid
+
+      // Order successfully placed
+      setOrderStatus({
+        success: true,
+        message: "Bestelling succesvol geplaatst!",
+        orderNumber: orderNumber,
+      })
+
+      // Show success toast
+      toast({
+        title: "Bestelling geplaatst",
+        description: `Je bestelling #${orderNumber} is succesvol geplaatst.`,
+      })
+
+      // Clear the cart after successful order
+      clearCart()
+
+      // Redirect to thank you page with order details
+      router.push(`/thank-you?orderNumber=${orderNumber}&total=${total.toFixed(2)}`)
     } catch (error) {
-      console.error("Error:", error)
+      console.error("Error placing order:", error)
+
+      // Show error toast
+      toast({
+        title: "Fout bij bestellen",
+        description:
+          error instanceof Error ? error.message : "Er is een fout opgetreden bij het plaatsen van de bestelling.",
+        variant: "destructive",
+      })
+
       setOrderStatus({
         success: false,
-        message: "Er is een fout opgetreden bij het plaatsen van de bestelling.",
+        message:
+          error instanceof Error ? error.message : "Er is een fout opgetreden bij het plaatsen van de bestelling.",
       })
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -127,18 +252,48 @@ export default function CheckoutPage({ customerData }: any) {
                         <div className="mt-4 space-y-4">
                           <div>
                             <Label>MIJN ADRES</Label>
+                            <p className="text-xs text-gray-500 mb-2">Vul je adresgegevens in</p>
                             <div className="grid grid-cols-2 gap-2 mt-1">
-                              <Input defaultValue={customerData?.firstName || ""} placeholder="Voornaam" />
-                              <Input defaultValue={customerData?.lastName || ""} placeholder="Achternaam" />
+                              <Input
+                                name="firstName"
+                                value={formData.firstName}
+                                onChange={handleInputChange}
+                                placeholder="Voornaam"
+                                required={false}
+                                className="w-full"
+                              />
+                              <Input
+                                name="lastName"
+                                value={formData.lastName}
+                                onChange={handleInputChange}
+                                placeholder="Achternaam"
+                                required={false}
+                                className="w-full"
+                              />
                             </div>
                             <Input
-                              defaultValue={customerData?.address || ""}
+                              name="address"
+                              value={formData.address}
+                              onChange={handleInputChange}
                               placeholder="Straat en huisnummer"
                               className="mt-2"
+                              required={deliveryOption === "delivery"}
                             />
                             <div className="grid grid-cols-2 gap-2 mt-2">
-                              <Input defaultValue={customerData?.zipcode || ""} placeholder="Postcode" />
-                              <Input defaultValue={customerData?.city || ""} placeholder="Plaats" />
+                              <Input
+                                name="zipcode"
+                                value={formData.zipcode}
+                                onChange={handleInputChange}
+                                placeholder="Postcode"
+                                required={deliveryOption === "delivery"}
+                              />
+                              <Input
+                                name="city"
+                                value={formData.city}
+                                onChange={handleInputChange}
+                                placeholder="Plaats"
+                                required={deliveryOption === "delivery"}
+                              />
                             </div>
                           </div>
                         </div>
@@ -161,8 +316,8 @@ export default function CheckoutPage({ customerData }: any) {
                             <Store className="w-5 h-5 mt-0.5 text-gray-700" />
                             <div>
                               <p className="font-medium">XL Groothandel B.V.</p>
-                              <p className="text-sm text-gray-600">Industrieweg 10</p>
-                              <p className="text-sm text-gray-600">1234 AB Amsterdam</p>
+                              <p className="text-sm text-gray-600">Turfschipper 116</p>
+                              <p className="text-sm text-gray-600">2292 JB Wateringen</p>
                               <p className="text-sm text-gray-600 mt-1">Openingstijden: Ma-Vr 9:00-17:00</p>
                             </div>
                           </div>
@@ -384,7 +539,7 @@ export default function CheckoutPage({ customerData }: any) {
               <Button
                 className="w-full mt-6 bg-[#FF6B35] hover:bg-[#E85A24] text-white"
                 onClick={handlePlaceOrder}
-                disabled={isSubmitting}
+                disabled={isSubmitting || cart.length === 0}
               >
                 {isSubmitting ? "BESTELLING WORDT GEPLAATST..." : "BESTELLING PLAATSEN"}
               </Button>

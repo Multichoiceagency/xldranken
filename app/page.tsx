@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import dynamic from "next/dynamic"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getProductsByFam2ID } from "@/lib/api"
-import { useAuthContext } from '@/context/AuthContext';
+import { InstallApp } from "../components/install-app"
 
 // Dynamically import components with lazy loading
 const PromoGrid = dynamic(() => import("@/components/promo-carousel").then((mod) => mod.PromoGrid), {
@@ -84,7 +84,6 @@ function LovkaProductsectionSkeleton() {
   )
 }
 
-
 function AboutUsSectionSkeleton() {
   return (
     <div className="w-full py-10 px-4 bg-[#0F3059]">
@@ -104,7 +103,26 @@ function AboutUsSectionSkeleton() {
   )
 }
 
-
+function InstallAppSkeleton() {
+  return (
+    <div className="w-full py-10 px-4 bg-gradient-to-r from-[#2D1B69] to-[#5D4A9C]">
+      <div className="container mx-auto">
+        <Skeleton className="h-8 w-64 mb-4 bg-gray-700" />
+        <div className="grid md:grid-cols-2 gap-8">
+          <div>
+            <Skeleton className="h-4 w-full mb-2 bg-gray-700" />
+            <Skeleton className="h-4 w-full mb-2 bg-gray-700" />
+            <Skeleton className="h-4 w-full mb-2 bg-gray-700" />
+            <Skeleton className="h-4 w-3/4 mb-2 bg-gray-700" />
+          </div>
+          <div className="flex justify-center">
+            <Skeleton className="h-[560px] w-[280px] rounded-[36px] bg-gray-700" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default async function Home() {
   // Fetch data with suspense boundaries
@@ -135,6 +153,11 @@ export default async function Home() {
         <LovkaProductsection />
       </Suspense>
 
+      {/* Install App Section - Added before About Us */}
+      <Suspense fallback={<InstallAppSkeleton />}>
+        <InstallApp />
+      </Suspense>
+
       <Suspense fallback={<AboutUsSectionSkeleton />}>
         <AboutUsSection />
       </Suspense>
@@ -144,23 +167,21 @@ export default async function Home() {
 
 // DRANKEN - IKRAT / BLIK (ID: 23)
 async function IkratBlikSection() {
-  const ikratBlikProducts = await getProductsByFam2ID("4", 10,1 ).catch(() => [])
+  const ikratBlikProducts = await getProductsByFam2ID("4", 10, 1).catch(() => [])
 
   return (
     <FeaturedProductsCarousel
       title="POOLS BIER BLIK"
       subtitle="Dranken in kratten en blikken"
       products={ikratBlikProducts}
-      viewAllLink="/dranken/ikrat-blik"
+      viewAllLink="//ikrat-blik"
       backgroundColor="#0F3059"
-      titleColor="#D0C298"
+      titleColor="#bea46a"
       subtitleColor="white"
-      linkColor="#D0C298"
+      linkColor="#bea46a"
     />
   )
 }
-
-
 
 // DRANKEN - FRISDRANKEN (ID: 6)
 async function FrisdrankenSection() {
@@ -182,7 +203,7 @@ async function FrisdrankenSection() {
 
 // DRANKEN - LIMONADEN (ID: 1)
 async function LimonadenSection() {
-  const limonadenProducts = await getProductsByFam2ID("1", 10,1).catch(() => [])
+  const limonadenProducts = await getProductsByFam2ID("1", 10, 1).catch(() => [])
 
   return (
     <FeaturedProductsCarousel

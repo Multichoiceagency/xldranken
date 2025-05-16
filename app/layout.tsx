@@ -1,6 +1,6 @@
 import type React from "react"
 import type {Metadata} from "next"
-import {Poppins} from "next/font/google"
+import { Poppins } from 'next/font/google'
 import "./globals.css"
 import {SiteHeader} from "@/components/site-header"
 import {SiteFooter} from "@/components/site-footer"
@@ -16,7 +16,7 @@ import {AuthProvider} from '@/context/AuthContext';
 // Voeg alle beschikbare gewichten toe
 const poppins = Poppins({
     subsets: ["latin-ext"],
-    weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+    weight: ["400", "500", "600", "700", "800", "900"],
 })
 
 export const metadata: Metadata = {
@@ -29,6 +29,9 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
         <AuthProvider>
             <html lang="en">
             <head>
+                {/* Viewport meta tag for proper mobile rendering */}
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+                
                 {/* Manifest voor PWA */}
                 <link rel="manifest" href="/manifest.json"/>
 
@@ -45,7 +48,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
                 <meta name="apple-mobile-web-app-title" content="XL Dranken"/>
             </head>
-            <body className={`${poppins.className} overflow-x-hidden`}>
+            <body className={`${poppins.className} bg-background text-text`}>
             <AgeVerificationPopup/>
             <ProductProvider>
                 <CartProvider>
@@ -62,6 +65,6 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
             </ProductProvider>
             </body>
             </html>
-        </AuthProvider>
+            </AuthProvider>
     )
 }

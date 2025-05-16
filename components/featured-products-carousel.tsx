@@ -24,9 +24,8 @@ export function FeaturedProductsCarousel({
   products,
   viewAllLink = "/products",
   backgroundColor = "#002B7F",
-  titleColor = "#D0C298",
+  titleColor = "#bea46a",
   subtitleColor = "white",
-  linkColor = "#D0C298",
 }: FeaturedProductsCarouselProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
@@ -82,11 +81,6 @@ export function FeaturedProductsCarousel({
               </p>
             )}
           </div>
-          {viewAllLink && (
-            <Link href={viewAllLink} className="text-sm font-medium hover:underline" style={{ color: linkColor }}>
-              Alles bekijken
-            </Link>
-          )}
         </div>
 
         {/* Carousel */}

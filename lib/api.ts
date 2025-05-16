@@ -66,7 +66,7 @@ export const menuItemsList = [
         href: "/categorie/frisdranken",
         id: "6",
       },
-            {
+      {
         name: "KRATTEN",
         href: "/categorie/krat",
         id: "23",
@@ -81,7 +81,7 @@ export const menuItemsList = [
         href: "/categorie/water-nl",
         id: "7",
       },
-            {
+      {
         name: "PETFLESSEN",
         href: "/categorie/poolse",
         id: "2",
@@ -93,12 +93,11 @@ export const menuItemsList = [
     href: "/categorie/food",
     id: "20",
     submenu: [
-            {
+      {
         name: "FOOD",
         href: "/categorie/food",
         id: "20",
       },
-
     ],
   },
   {
@@ -107,11 +106,11 @@ export const menuItemsList = [
     id: "21",
     submenu: [
       {
-            name: "NON-FOOD",
-    href: "/categorie/non-food",
-    id: "21",
+        name: "NON-FOOD",
+        href: "/categorie/non-food",
+        id: "21",
       },
-            {
+      {
         name: "KOFFIE THEE",
         href: "/categorie/koffie-thee",
         id: "18",
@@ -121,13 +120,12 @@ export const menuItemsList = [
         href: "/categorie/houtskool",
         id: "19",
       },
-            {
+      {
         name: "SCHOONMAAK",
         href: "/categorie/schoonmaak",
         id: "22",
       },
     ],
-    
   },
 ]
 
@@ -137,7 +135,7 @@ const sleep = (ms: number): Promise<void> => {
 }
 
 // Helper function to construct API URL with parameters
-function constructApiUrl(endpoint: string, params: Record<string, string>, isCustomerEndpoint = false) {
+export function constructApiUrl(endpoint: string, params: Record<string, string>, isCustomerEndpoint = false) {
   // Validate environment variables before making the request
   if (!PRODUCT_API_URL) {
     console.error("NEXT_PUBLIC_API_URL is not defined")
@@ -193,7 +191,7 @@ export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[
 }
 
 // Updated to handle larger batch sizes
-export async function getProductsByFam2ID(fam2ID: string, limit: number, page: number): Promise<ProductProps[]> {
+export async function getProductsByFam2ID(fam2ID: string, limit = 100, page = 1): Promise<ProductProps[]> {
   try {
     const url = `${process.env.NEXT_PUBLIC_API_URL}?apikey=${API_KEY}&fam2ID=${fam2ID}&limit=${limit}&page=${page}`
 
@@ -387,13 +385,34 @@ export async function getCustomerById(id: string) {
 
     const response = await fetch(url)
 
+    // Log the response status for debugging
+    console.log(`Customer API response status: ${response.status} ${response.statusText}`)
+
     if (!response.ok) {
+      // Instead of throwing immediately, log more details
+      console.error(`Customer API error: ${response.status} ${response.statusText}`)
+      console.error(`Customer ID: ${customerId}`)
+      console.error(`API URL: ${url}`)
+
+      // Try to get error details from response body
+      try {
+        const errorData = await response.json()
+        console.error("Error response:", errorData)
+      } catch (e) {
+        console.error("Could not parse error response")
+      }
+
+      // Now throw the error
       throw new Error(`API Error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
 
-    if (data.success !== "true" || !data.result.customer || data.result.customer.length === 0) {
+    // Log the response data for debugging
+    console.log("Customer API response data:", data)
+
+    if (!data.success || !data.result?.customer || data.result.customer.length === 0) {
+      console.error("Customer not found in API response:", data)
       throw new Error("Customer not found")
     }
 
@@ -548,11 +567,104 @@ export async function getCustomerOrderDetails(guid: string) {
 }
 
 // BESTELLINGEN AANMAKEN
-export function addLinesToOeder(orderLines: any) {
+export async function addLinesToOrder(orderGuid: string, item: any) {
+  try {
+    const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINE_URL}apikey=${process.env.NEXT_PUBLIC_API_KEY}`
+
+    console.log(`Adding item ${item.id} to order ${orderGuid}`)
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        guid: orderGuid,
+        arcleunik: item.id,
+        qty: item.quantity,
+        data: `${item.id}_${item.quantity}`,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to add item to order: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (!data.success) {
+      throw new Error(data.message || `Failed to add item ${item.id} to order`)
+    }
+
+    return data
+  } catch (error) {
+    console.error("Error adding line to order:", error)
+    throw error
+  }
+}
+
+// Legacy function - kept for backward compatibility
+export async function addLinesToOeder(orderLines: any) {
+  console.log("Warning: Using deprecated function addLinesToOeder. Please use addLinesToOrder instead.")
   console.log(orderLines)
 }
 
+// Legacy function for adding multiple lines at once
+export async function addLinesToOrderBatch(orderID: any, orderLines: any[]) {
+  console.log("Adding order lines for order: ", orderID)
+  for (const orderLine of orderLines) {
+    const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}
+    &arcleunik=${orderLine.volume}
+    &guid=${orderID}
+    &qty=${orderLine.quantity}`
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+      })
+      const data = await res.json()
+      console.log("Added line:", data)
+    } catch (error) {
+      console.error("Error adding line to order:", error)
+    }
+  }
+}
+
+export async function createEmptyOrder(customerID: string) {
+  try {
+    const url = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${process.env.NEXT_PUBLIC_API_KEY}`
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        clcleunik: customerID,
+        use: "clcleunik",
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to create empty order: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (!data.success) {
+      throw new Error(data.message || "Failed to create empty order")
+    }
+
+    return data.result?.guid || data.guid
+  } catch (error) {
+    console.error("Error creating empty order:", error)
+    throw error
+  }
+}
+
+// Legacy function - kept for backward compatibility
 export async function createEmptyORder(customerID: string) {
+  console.log("Warning: Using deprecated function createEmptyORder. Please use createEmptyOrder instead.")
   const url = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${API_KEY}`
 
   const response = await fetch(url, {
@@ -572,14 +684,129 @@ export async function createEmptyORder(customerID: string) {
   return order_guid
 }
 
+export async function sendOrderToMegawin(orderGuid: string, deliveryData: any) {
+  try {
+    const url = `${process.env.NEXT_PUBLIC_ORDERS_SEND_TO_MEGAWIN_URL}apikey=${process.env.NEXT_PUBLIC_API_KEY}`
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        guid: orderGuid,
+        ...deliveryData,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to send order to Megawin: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (!data.success) {
+      throw new Error(data.message || "Failed to send order to Megawin")
+    }
+
+    return data
+  } catch (error) {
+    console.error("Error sending order to Megawin:", error)
+    throw error
+  }
+}
+
+// Legacy function - kept for backward compatibility
+export async function sendToMegawin(orderID: any) {
+  console.log("Warning: Using deprecated function sendToMegawin. Please use sendOrderToMegawin instead.")
+  console.log("Sending order to megawin....")
+  const url = `${process.env.NEXT_PUBLIC_ORDERS_SEND_TO_MEGAWIN_URL}apikey=${API_KEY}
+  &guid=${orderID}
+  &modeLivraison=1
+  &deliverydate=2025-05-01
+  &deliverycomment=TEST-API-DIAZ`
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+    })
+    const data = await res.json()
+    return data
+  } catch (error) {
+    console.error("Error adding line to order:", error)
+    throw error
+  }
+}
+
+export async function handleOrder(cart: any[], customerData: any, deliveryData: any) {
+  console.log("Processing order with items:", cart.length)
+
+  try {
+    // Step 1: Create an empty order
+    const orderGuid = await createEmptyOrder(customerData.clcleunik || customerData.id)
+    console.log("Created empty order with GUID:", orderGuid)
+
+    // Step 2: Add each item to the order
+    for (const item of cart) {
+      await addLinesToOrder(orderGuid, item)
+      console.log(`Added item ${item.id} to order`)
+    }
+
+    // Step 3: Send the order to Megawin
+    const result = await sendOrderToMegawin(orderGuid, deliveryData)
+    console.log("Order sent to Megawin successfully")
+
+    return {
+      success: true,
+      orderNumber: result.result?.orderNumber || orderGuid,
+      orderData: result.result,
+    }
+  } catch (error) {
+    console.error("Error processing order:", error)
+    throw error
+  }
+}
+
+// Legacy function - kept for backward compatibility
 export async function handleOrders(orderData: any, customerID: any) {
+  console.log("Warning: Using deprecated function handleOrders. Please use handleOrder instead.")
   console.log("order data: ", orderData)
-  console.log("customer id: ", customerID)
+  console.log("customer id: ", customerID.clcleunik)
   try {
     const orderID = await createEmptyORder(customerID.clcleunik)
+    const fullOrder = await addLinesToOrderBatch(orderID.result.guid, orderData)
+    const completeOrder = await sendToMegawin(orderID.result.guid)
 
-    console.log(orderID)
+    console.log(orderID.result.guid)
+    console.log(fullOrder)
+    console.log(completeOrder)
+
+    return {
+      success: true,
+      orderNumber: orderID.result.guid,
+    }
   } catch (error) {
     console.log(error)
+    throw error
+  }
+}
+
+// GET ORDER TOTAL FROM MEGAWIN
+export async function getOrderTotal(orderID: any) {
+  try {
+    console.log("Getting order total: ", orderID)
+    const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}&guid=${orderID}`
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    return data.result.total
+  } catch (error) {
+    console.error("Error fetching order details:", error)
+    throw error
   }
 }

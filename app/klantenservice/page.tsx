@@ -73,8 +73,8 @@ export default function KlantenservicePage() {
                   </div>
                   <h3 className="font-semibold mb-2">E-mail</h3>
                   <p className="text-gray-600 mb-3">We reageren binnen 24 uur op uw bericht</p>
-                  <a href="mailto:info@xldranken.nl" className="text-[#0F3059] font-medium hover:underline">
-                    info@xldranken.nl
+                  <a href="mailto:info@xlgroothandelbv.nl" className="text-[#0F3059] font-medium hover:underline">
+                    info@xlgroothandelbv.nl
                   </a>
                 </div>
 

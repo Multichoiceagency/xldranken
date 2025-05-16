@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -11,45 +13,47 @@ import {
   faShieldAlt,
   faLock,
 } from "@fortawesome/free-solid-svg-icons"
+import { useAuthContext } from "@/context/AuthContext"
+import { useCart } from "@/lib/cart-context"
 
 // Menu structure with submenus
 const menuItems = [
   {
-    name: "ALCOHOL",
-    href: "/alcohol",
-    submenu: [
-    ],
+    name: "Alcohol",
+    href: "categorie/sterke-drank",
+    submenu: [],
   },
   {
-    name: "WIJN",
+    name: "Wijn",
     href: "/categorie/wijn",
     submenu: [],
   },
   {
-    name: "BIER",
+    name: "Bier",
     href: "/categorie/bier",
-    submenu: [
-    ],
+    submenu: [],
   },
   {
-    name: "FRISDRANKEN",
+    name: "Frisdranken",
     href: "/categorie/frisdranken",
-    submenu: [
-    ],
+    submenu: [],
   },
   {
-    name: "FOOD",
+    name: "Food",
     href: "/categorie/food",
     submenu: [],
   },
   {
-    name: "NON-FOOD",
+    name: "Non-Food",
     href: "/categorie/non-food",
     submenu: [],
   },
 ]
 
 export function SiteFooter() {
+  const { isLoggedIn } = useAuthContext()
+  const { totalItems } = useCart().getCartTotal()
+
   return (
     <footer className="bg-indigo-950 text-white pt-12 pb-24 md:pb-12">
       <div className="container mx-auto px-4">
@@ -61,16 +65,21 @@ export function SiteFooter() {
             <ul className="space-y-3 text-sm">
               <li>
                 <Link
-                  href="mailto:info@xlgroothandelbv.nl"
+                  href="https://www.google.com/maps/search/?api=1&query=Turfschipper+116,+2292+JB+Wateringen"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="font-bold hover:text-[#d0c298] flex items-center"
                 >
-                  <FontAwesomeIcon icon={faEnvelope} className="mr-2 w-4 h-4" />
+                  <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 w-4 h-4" />
                   Turfschipper 116, 2292 JB Wateringen
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="font-bold hover:text-[#d0c298] flex items-center">
-                  <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 w-4 h-4" />
+                <Link
+                  href="mailto:info@xlgroothandelbv.nl"
+                  className="font-bold hover:text-[#d0c298] flex items-center"
+                >
+                  <FontAwesomeIcon icon={faEnvelope} className="mr-2 w-4 h-4" />
                   info@xlgroothandelbv.nl
                 </Link>
               </li>
@@ -81,7 +90,10 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="https://wa.me/31618495949" className="text-green-600 font-bold hover:text-[#d0c298] flex items-center">
+                <Link
+                  href="https://wa.me/31618495949"
+                  className="text-green-600 font-bold hover:text-[#d0c298] flex items-center"
+                >
                   <FontAwesomeIcon icon={faWhatsapp} className="mr-2 w-4 h-4" />
                   Whatsapp bericht versturen
                 </Link>
@@ -106,35 +118,46 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Quick Links Column */}
+          {/* Account links - Dynamic based on login status */}
           <div>
-            <h3 className="font-bold mb-4">QUICK LINKS</h3>
+            <h3 className="font-bold mb-4">{isLoggedIn ? "MIJN ACCOUNT" : "INLOGGEN"}</h3>
             <ul className="space-y-2 text-sm">
-              <li>
-                                <Link href="/account" className="hover:text-[#d0c298]">
-                  Mijn account
-                </Link>
-
-              </li>
-              <li>
-                <Link href="/bier" className="hover:text-[#d0c298]">
-                  Winkelmand
-                </Link>
-              </li>
-              <li>
-                <Link href="/account/gegevens" className="hover:text-[#d0c298]">
-                  Acccountgegevens
-                </Link>
-              </li>
-              <li>
-                <Link href="/bestellingen" className="hover:text-[#d0c298]">
-                  Mijn bestellingen
-                </Link>
-              </li>
+              {isLoggedIn ? (
+                <>
+                  <li>
+                    <Link href="/account" className="hover:text-[#d0c298]">
+                      Mijn account
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/account/gegevens" className="hover:text-[#d0c298]">
+                      Accountgegevens
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/account/bestellingen" className="hover:text-[#d0c298]">
+                      Mijn bestellingen
+                    </Link>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link href="/login" className="hover:text-[#d0c298]">
+                      Inloggen
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/zakelijk" className="hover:text-[#d0c298]">
+                      Registreren
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
 
             {/* Service Section */}
-            <h3 className="font-bold mb-4 mt-6">Registreren & Klantenservice</h3>
+            <h3 className="font-bold mb-4 mt-6">KLANTENSERVICE</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/zakelijk" className="hover:text-[#d0c298]">
@@ -160,7 +183,7 @@ export function SiteFooter() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/over-ons" className="hover:text-[#d0c298]">
-                  Over XL Dranken
+                  Over XL Groothandel B.V.
                 </Link>
               </li>
             </ul>
@@ -221,7 +244,9 @@ export function SiteFooter() {
           {/* Copyright and Legal */}
           <div className="mt-6 flex flex-col md:flex-row space-between justify-center items-center text-sm text-white">
             <div className="flex flex-wrap items-center gap-2 justify-center md:justify-center">
-              <span>Gebouwd met NextJS door Multichoiceagency en YX Digital © 2025 XL Dranken - Megawin Kassasysteem</span>
+              <span>
+                Gebouwd met NextJS door Multichoiceagency en YX Digital © 2025 XL Dranken - Megawin Kassasysteem
+              </span>
               <span>|</span>
               <Link href="/algemene-voorwaarden" className="hover:text-[#d0c298]">
                 Algemene voorwaarden
@@ -241,4 +266,3 @@ export function SiteFooter() {
     </footer>
   )
 }
-

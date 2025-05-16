@@ -171,8 +171,8 @@ export default function OverOnsPage() {
                   </a>
                   <br />
                   Email:{" "}
-                  <a href="mailto:info@xldranken.nl" className="text-[#0F3059] hover:underline">
-                    info@xldranken.nl
+                  <a href="mailto:info@xlgroothandelbv.nl" className="text-[#0F3059] hover:underline">
+                    info@xlgroothandelbv.nl
                   </a>
                 </p>
               </div>

@@ -62,8 +62,6 @@ export default function VerzendbeleidPage() {
           </p>
           <p className="mb-4">
             Voor bestellingen boven €750,- (exclusief BTW) binnen Nederland bieden wij gratis verzending aan.
-                      Voor bestellingen boven €900,- (exclusief BTW) buiten Belgie bieden wij gratis verzending aan.
-
           </p>
           <p className="mb-4">
             Voor spoedbestellingen en express leveringen gelden aanvullende kosten. Deze worden tijdens het bestelproces
@@ -72,8 +70,7 @@ export default function VerzendbeleidPage() {
 
           <h2 className="text-xl font-semibold text-[#0F3059] mt-6 mb-3">4. Bezorggebied</h2>
           <p className="mb-4">
-            XL Groothandel BV levert primair in Nederland. Voor leveringen naar België en Duitsland gelden aangepaste
-            tarieven en levertijden. Voor andere internationale leveringen kunt u contact opnemen met onze
+            XL Groothandel BV levert primair in Nederland. Voor andere internationale leveringen kunt u contact opnemen met onze
             klantenservice voor een offerte op maat.
           </p>
           <p className="mb-4">Onze eigen bezorgdienst is beschikbaar in de volgende regio's:</p>

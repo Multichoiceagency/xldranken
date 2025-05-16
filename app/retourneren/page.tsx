@@ -60,7 +60,7 @@ export default function RetournerenPage() {
         <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/50 to-background"></div>
         <div className="absolute inset-0 z-0">
           <Image
-            src="/winkel/return-hero.png"
+            src="/winkel/winkel1.png"
             alt="XL Dranken retourneren"
             fill
             className="h-full w-full object-cover"
@@ -366,20 +366,14 @@ export default function RetournerenPage() {
                     <div>
                       <h4 className="font-medium">E-mail</h4>
                       <p className="text-gray-600 text-sm">Reactie binnen 24 uur</p>
-                      <a href="mailto:retouren@xldranken.nl" className="text-[#0F3059] hover:underline">
-                        retouren@xldranken.nl
+                      <a href="mailto:info@xlgroothandelbv.nl" className="text-[#0F3059] hover:underline">
+                        info@xlgroothandelbv.nl
                       </a>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="md:w-1/3 relative h-48 md:h-auto w-full rounded-lg overflow-hidden">
-                <Image
-                  src="/winkel/customer-service.png"
-                  alt="XL Dranken klantenservice"
-                  fill
-                  className="object-cover"
-                />
               </div>
             </div>
           </div>

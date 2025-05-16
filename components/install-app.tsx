@@ -13,7 +13,7 @@ export function InstallApp() {
             <div className="inline-block bg-[#7A6B44] text-white px-3 py-1 text-sm font-medium rounded-md mb-2">
               DOWNLOAD NU
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">XL Dranken App - Bestel Eenvoudig</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">XL Groothandel B.V. App - Bestel Eenvoudig</h2>
             <p className="text-lg mb-6 text-white/90 max-w-xl">
               Ontdek het gemak van mobiel bestellen en krijg direct toegang tot ons volledige assortiment via onze
               gebruiksvriendelijke app. Geniet van exclusieve app-only aanbiedingen en snellere checkout.

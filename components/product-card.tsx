@@ -20,6 +20,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [inCartInfo, setInCartInfo] = useState({ inCart: false, quantity: 0 })
+  const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
     if (!product) return
@@ -33,17 +34,29 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
   if (!product) return <p className="text-gray-500">Product niet beschikbaar</p>
 
-  const imageSrc = product.photo1_base64
-    ? product.photo1_base64.startsWith("data:image")
-      ? product.photo1_base64
-      : `data:image/jpeg;base64,${product.photo1_base64}`
-    : "/placeholder.svg"
+  // Replace the getImageSrc function with this simpler version that focuses on base64 handling
+  const getImageSrc = () => {
+    // If we have a photo1_base64 field
+    if (product.photo1_base64) {
+      // Check if it's already a complete data URL
+      if (product.photo1_base64.startsWith("data:image")) {
+        return product.photo1_base64
+      }
 
+      // Otherwise, assume it's a base64 string without the prefix
+      return `data:image/jpeg;base64,${product.photo1_base64}`
+    }
+
+    // Fallback to placeholder
+    return "/placeholder.svg"
+  }
+
+  const imageSrc = getImageSrc()
   const regularPrice = Number(product.prix_vente_groupe) || 0
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
-    const quantity = Math.max(1, parseInt(quantityInput) || 1)
+    const quantity = Math.max(1, Number.parseInt(quantityInput) || 1)
 
     setIsAnimating(true)
     addToCart({
@@ -86,11 +99,12 @@ export default function ProductCard({ product }: { product: ProductProps }) {
         onClick={navigateToProductPage}
       >
         <Image
-          src={imageSrc}
+          src={imageError ? "/placeholder.svg" : imageSrc}
           alt={product.title}
           fill
           className={`object-contain transition-transform duration-500 ${isAnimating ? "scale-110" : "group-hover:scale-75"}`}
           unoptimized
+          onError={() => setImageError(true)}
         />
         {isAnimating && (
           <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 animate-pulse">
@@ -117,7 +131,9 @@ export default function ProductCard({ product }: { product: ProductProps }) {
               {regularPrice > 0 ? `€ ${regularPrice.toFixed(2).replace(".", ",")}` : "Prijs onbekend"}
             </span>
           ) : (
-            <span className="text-gray-600 text-sm font-normal hover:font-bold hover:text-green-700">Log in om prijzen te zien</span>
+            <span className="text-gray-600 text-sm font-normal hover:font-bold hover:text-green-700">
+              Log in om prijzen te zien
+            </span>
           )}
 
           {isLoggedIn && inCartInfo.inCart && (
@@ -156,10 +172,10 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                 size="icon"
                 className="h-8 w-8 p-0"
                 onClick={() => {
-                  const val = Math.max(0, parseInt(quantityInput) - 1)
+                  const val = Math.max(0, Number.parseInt(quantityInput) - 1)
                   handleQuantityChange(val)
                 }}
-                disabled={parseInt(quantityInput) <= 0}
+                disabled={Number.parseInt(quantityInput) <= 0}
               >
                 <Minus className="h-3 w-3" />
               </Button>
@@ -171,7 +187,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                 onChange={(e) => {
                   if (/^\d*$/.test(e.target.value)) setQuantityInput(e.target.value)
                 }}
-                onBlur={() => handleQuantityChange(parseInt(quantityInput))}
+                onBlur={() => handleQuantityChange(Number.parseInt(quantityInput))}
                 onKeyDown={(e) => e.key === "Enter" && inputRef.current?.blur()}
                 className="w-8 text-center text-sm font-medium border-0 focus:ring-0"
                 aria-label="Aantal"
@@ -182,7 +198,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                 size="icon"
                 className="h-8 w-8 p-0"
                 onClick={() => {
-                  const val = Math.max(0, parseInt(quantityInput) + 1)
+                  const val = Math.max(0, Number.parseInt(quantityInput) + 1)
                   handleQuantityChange(val)
                 }}
               >

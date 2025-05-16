@@ -17,8 +17,8 @@ const promos = [
       type: "video",
       src: "/videos/lovka.mp4",
     },
-    buttonText: "Ontdek Lovka",
-    href: "/products/lovka",
+    buttonText: "Bezoek Lovka",
+    href: "https://lovkadrinks.com/",
   },
   {
     title: "XL Dranken - Uw Dranken Specialist",
@@ -29,8 +29,8 @@ const promos = [
       type: "image",
       src: "/winkel/winkel2.jpeg",
     },
-    buttonText: "Bekijk Deals",
-    href: "/assortiment",
+    buttonText: "Bekijk Sterke Dranken",
+    href: "http://localhost:3000/categorie/sterke-drank",
   },
   {
     title: "XL Dranken Premium Collectie",
@@ -41,8 +41,8 @@ const promos = [
       type: "image",
       src: "/winkel/winkel3.jpeg",
     },
-    buttonText: "Verken Collectie",
-    href: "/assortiment",
+    buttonText: " Bekijk Cocktails",
+    href: "http://localhost:3000/categorie/cocktails",
   },
 ]
 

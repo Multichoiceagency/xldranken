@@ -222,7 +222,7 @@ async function LimonadenSection() {
 
 // DRANKEN - POOLS (ID: 2)
 async function PoolsDrankenSection() {
-  const poolsDrankenProducts = await getProductsByFam2ID("10", 10, 1).catch(() => [])
+  const poolsDrankenProducts = await getProductsByFam2ID("21", 10, 1).catch(() => [])
 
   return (
     <FeaturedProductsCarousel

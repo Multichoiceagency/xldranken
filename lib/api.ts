@@ -36,8 +36,8 @@ export const menuItemsList = [
   },
   {
     name: "BIER",
-    id: "5",
-    href: "/categorie/bier",
+    href: "/categorie/poolse-bier-blik",
+    id: "1",
     submenu: [
       {
         name: "POOLSE BIER BLIK",
@@ -52,7 +52,7 @@ export const menuItemsList = [
       {
         name: "NL BIER",
         href: "/categorie/bier",
-        id: "5",
+        id: "4",
       },
     ],
   },
@@ -66,56 +66,69 @@ export const menuItemsList = [
         href: "/categorie/frisdranken",
         id: "6",
       },
+            {
+        name: "KRATTEN",
+        href: "/categorie/krat",
+        id: "23",
+      },
       {
         name: "LIMONADEN",
         href: "/categorie/limonaden",
         id: "1",
       },
       {
-        name: "WATER NL",
+        name: "WATER",
         href: "/categorie/water-nl",
         id: "7",
       },
-      {
-        name: "WATER PL",
-        href: "/categorie/water-pl",
-        id: "18",
-      },
-      {
-        name: "KOFFIE THEE",
-        href: "/categorie/koffie-thee",
-        id: "18",
+            {
+        name: "PETFLESSEN",
+        href: "/categorie/poolse",
+        id: "2",
       },
     ],
   },
   {
     name: "FOOD",
     href: "/categorie/food",
-    id: "22",
-    submenu: [],
+    id: "20",
+    submenu: [
+            {
+        name: "FOOD",
+        href: "/categorie/food",
+        id: "20",
+      },
+
+    ],
   },
   {
     name: "NON-FOOD",
     href: "/categorie/non-food",
-    id: "22",
+    id: "21",
     submenu: [
       {
-        name: "SCHOONMAAK",
-        href: "/categorie/schoonmaak",
-        id: "22",
+            name: "NON-FOOD",
+    href: "/categorie/non-food",
+    id: "21",
+      },
+            {
+        name: "KOFFIE THEE",
+        href: "/categorie/koffie-thee",
+        id: "18",
       },
       {
         name: "HOUTSKOOL",
         href: "/categorie/houtskool",
-        id: "20",
+        id: "19",
+      },
+            {
+        name: "SCHOONMAAK",
+        href: "/categorie/schoonmaak",
+        id: "22",
       },
     ],
+    
   },
-  // {
-  //     name: "ACTIES",
-  //     href: "/acties",
-  //     submenu: []
-  // },
 ]
 
 // Helper function to create a delay

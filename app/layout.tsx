@@ -16,8 +16,8 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: "XL Dranken",
-  description: "Your one-stop shop for all beverages",
+  title: "XL Groothandel B.V.",
+  description: "De groothandel in al uw dranken",
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

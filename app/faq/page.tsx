@@ -101,7 +101,7 @@ export default function FaqPage() {
                     Bel Klantenservice
                   </a>
                   <a
-                    href="mailto:info@xldranken.nl"
+                    href="mailto:info@xlgroothandelbv.nl"
                     className="inline-flex items-center justify-center px-5 py-2.5 border border-white text-white rounded-md hover:bg-white/10 transition-colors"
                   >
                     E-mail Ons

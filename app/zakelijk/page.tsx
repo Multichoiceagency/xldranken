@@ -52,74 +52,6 @@ export default function ZakelijkAccountPage() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
-          {/* Business Benefits */}
-          <div className="mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-[#BEA46A]">Voordelen van een Zakelijk Account</h2>
-            <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
-                    <FontAwesomeIcon icon={faPercent} className="text-[#0F3059] w-8 h-8" />
-                  </div>
-                  <h3 className="font-semibold mb-2">Groothandelsprijzen</h3>
-                  <p className="text-gray-600">
-                    Profiteer van aantrekkelijke kortingen en speciale prijzen voor zakelijke afnemers.
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
-                    <FontAwesomeIcon icon={faFileInvoiceDollar} className="text-[#0F3059] w-8 h-8" />
-                  </div>
-                  <h3 className="font-semibold mb-2">Betaling op Factuur</h3>
-                  <p className="text-gray-600">
-                    Na goedkeuring kunt u bestellen en betalen op factuur met een betalingstermijn van 14 dagen.
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
-                    <FontAwesomeIcon icon={faTruck} className="text-[#0F3059] w-8 h-8" />
-                  </div>
-                  <h3 className="font-semibold mb-2">Flexibele Levering</h3>
-                  <p className="text-gray-600">
-                    Kies voor reguliere levering of plan een specifiek tijdslot dat past bij uw bedrijfsuren.
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
-                    <FontAwesomeIcon icon={faUserTie} className="text-[#0F3059] w-8 h-8" />
-                  </div>
-                  <h3 className="font-semibold mb-2">Persoonlijke Accountmanager</h3>
-                  <p className="text-gray-600">
-                    Een vast aanspreekpunt voor al uw vragen, bestellingen en speciale wensen.
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
-                    <FontAwesomeIcon icon={faHandshake} className="text-[#0F3059] w-8 h-8" />
-                  </div>
-                  <h3 className="font-semibold mb-2">Maatwerk Assortiment</h3>
-                  <p className="text-gray-600">
-                    Mogelijkheid tot het samenstellen van een op maat gemaakt assortiment voor uw bedrijf.
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
-                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
-                    <FontAwesomeIcon icon={faBuilding} className="text-[#0F3059] w-8 h-8" />
-                  </div>
-                  <h3 className="font-semibold mb-2">Zakelijk Dashboard</h3>
-                  <p className="text-gray-600">
-                    Toegang tot een uitgebreid dashboard met bestelhistorie, facturen en aangepaste prijslijsten.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Registration Form and Info */}
           <div className="grid md:grid-cols-3 gap-8 mb-16">
             {/* Left Column - Form */}
@@ -200,6 +132,74 @@ export default function ZakelijkAccountPage() {
                       Nee, het aanmaken en gebruiken van een zakelijk account is volledig kosteloos.
                     </p>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Business Benefits */}
+          <div className="mb-16">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-[#BEA46A]">Voordelen van een Zakelijk Account</h2>
+            <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
+                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
+                    <FontAwesomeIcon icon={faPercent} className="text-[#0F3059] w-8 h-8" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Groothandelsprijzen</h3>
+                  <p className="text-gray-600">
+                    Profiteer van aantrekkelijke kortingen en speciale prijzen voor zakelijke afnemers.
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
+                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
+                    <FontAwesomeIcon icon={faFileInvoiceDollar} className="text-[#0F3059] w-8 h-8" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Betaling op Factuur</h3>
+                  <p className="text-gray-600">
+                    Na goedkeuring kunt u bestellen en betalen op factuur met een betalingstermijn van 14 dagen.
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
+                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
+                    <FontAwesomeIcon icon={faTruck} className="text-[#0F3059] w-8 h-8" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Flexibele Levering</h3>
+                  <p className="text-gray-600">
+                    Kies voor reguliere levering of plan een specifiek tijdslot dat past bij uw bedrijfsuren.
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
+                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
+                    <FontAwesomeIcon icon={faUserTie} className="text-[#0F3059] w-8 h-8" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Persoonlijke Accountmanager</h3>
+                  <p className="text-gray-600">
+                    Een vast aanspreekpunt voor al uw vragen, bestellingen en speciale wensen.
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
+                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
+                    <FontAwesomeIcon icon={faHandshake} className="text-[#0F3059] w-8 h-8" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Maatwerk Assortiment</h3>
+                  <p className="text-gray-600">
+                    Mogelijkheid tot het samenstellen van een op maat gemaakt assortiment voor uw bedrijf.
+                  </p>
+                </div>
+
+                <div className="flex flex-col items-center text-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
+                  <div className="w-16 h-16 mb-4 flex items-center justify-center bg-[#0F3059]/10 rounded-full">
+                    <FontAwesomeIcon icon={faBuilding} className="text-[#0F3059] w-8 h-8" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Zakelijk Dashboard</h3>
+                  <p className="text-gray-600">
+                    Toegang tot een uitgebreid dashboard met bestelhistorie, facturen en aangepaste prijslijsten.
+                  </p>
                 </div>
               </div>
             </div>
@@ -286,7 +286,7 @@ export default function ZakelijkAccountPage() {
                       <h4 className="font-medium">E-mail</h4>
                       <p className="text-gray-600 text-sm">Reactie binnen 24 uur</p>
                       <a href="mailto:zakelijk@xldranken.nl" className="text-[#0F3059] hover:underline">
-                        info@xldranken.nl
+                        info@xlgroothandelbv.nl
                       </a>
                     </div>
                   </div>

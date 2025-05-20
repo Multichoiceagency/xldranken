@@ -9,6 +9,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { NotificationPopup } from "@/components/notification-popup"
 import { AgeVerificationPopup } from "@/components/AgeVerificationPopup"
 import { Providers } from "./providers" // <== import new wrapper
+import ScrollReset from "@/components/ScrollReset"
+import InstallPrompt from "@/components/InstallPrompt"
 
 const poppins = Poppins({
   subsets: ["latin-ext"],
@@ -35,7 +37,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-title" content="XL Dranken" />
       </head>
       <body className={`${poppins.className} bg-background text-text`}>
+        <ScrollReset />
         <Providers>
+          <InstallPrompt />
           <AgeVerificationPopup />
           <SiteHeader />
           <main className="min-h-screen w-screen pb-16 md:pb-0">

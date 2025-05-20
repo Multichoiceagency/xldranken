@@ -142,24 +142,7 @@ export function ProductPage({ productId }: ProductPageProps) {
   const generateBreadcrumbs = () => {
     const breadcrumbs = [
       { name: "Home", href: "/" },
-      { name: "Catalogus", href: "/catalogus" },
     ]
-
-    // Add category if available
-    if (product.category) {
-      breadcrumbs.push({
-        name: product.category,
-        href: `/catalogus/${product.category.toLowerCase().replace(/\s+/g, "-")}`,
-      })
-    }
-
-    // Add subcategory if available (this is hypothetical, adjust based on your data structure)
-    if (product.subcategory) {
-      breadcrumbs.push({
-        name: product.subcategory,
-        href: `/catalogus/${product.category?.toLowerCase().replace(/\s+/g, "-")}/${product.subcategory.toLowerCase().replace(/\s+/g, "-")}`,
-      })
-    }
 
     // Add product name as the final breadcrumb (not clickable)
     breadcrumbs.push({ name: product.title, href: "#" })

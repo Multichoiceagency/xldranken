@@ -566,159 +566,74 @@ export async function getCustomerOrderDetails(guid: string) {
   }
 }
 
-// BESTELLINGEN AANMAKEN
-export async function addLinesToOrder(orderGuid: string, item: any) {
-  try {
-    const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINE_URL}apikey=${process.env.NEXT_PUBLIC_API_KEY}`
 
-    console.log(`Adding item ${item.id} to order ${orderGuid}`)
+// BESTELLINGEN AANMAKEN //DIAZ CODE
+export async function createEmptyORder(customerID: string){
+  const url = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${API_KEY}`
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        guid: orderGuid,
-        arcleunik: item.id,
-        qty: item.quantity,
-        data: `${item.id}_${item.quantity}`,
-      }),
-    })
-
-    if (!response.ok) {
-      throw new Error(`Failed to add item to order: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    if (!data.success) {
-      throw new Error(data.message || `Failed to add item ${item.id} to order`)
-    }
-
-    return data
-  } catch (error) {
-    console.error("Error adding line to order:", error)
-    throw error
-  }
-}
-
-// Legacy function - kept for backward compatibility
-export async function addLinesToOeder(orderLines: any) {
-  console.log("Warning: Using deprecated function addLinesToOeder. Please use addLinesToOrder instead.")
-  console.log(orderLines)
-}
-
-// Legacy function for adding multiple lines at once
-export async function addLinesToOrderBatch(orderID: any, orderLines: any[]) {
-  console.log("Adding order lines for order: ", orderID)
-  for (const orderLine of orderLines) {
-    const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}
-    &arcleunik=${orderLine.volume}
-    &guid=${orderID}
-    &qty=${orderLine.quantity}`
-
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-      })
-      const data = await res.json()
-      console.log("Added line:", data)
-    } catch (error) {
-      console.error("Error adding line to order:", error)
-    }
-  }
-}
-
-export async function createEmptyOrder(customerID: string) {
-  try {
-    const url = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${process.env.NEXT_PUBLIC_API_KEY}`
-
-    const response = await fetch(url, {
+   const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         clcleunik: customerID,
-        use: "clcleunik",
+        use: "clcleunik"
       }),
     })
 
-    if (!response.ok) {
-      throw new Error(`Failed to create empty order: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    if (!data.success) {
-      throw new Error(data.message || "Failed to create empty order")
-    }
-
-    return data.result?.guid || data.guid
-  } catch (error) {
-    console.error("Error creating empty order:", error)
-    throw error
-  }
-}
-
-// Legacy function - kept for backward compatibility
-export async function createEmptyORder(customerID: string) {
-  console.log("Warning: Using deprecated function createEmptyORder. Please use createEmptyOrder instead.")
-  const url = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${API_KEY}`
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      clcleunik: customerID,
-      use: "clcleunik",
-    }),
-  })
-
-  const order_guid = await response.json()
+  const order_guid = await  response.json()
   console.log(order_guid)
 
   return order_guid
+
 }
 
-export async function sendOrderToMegawin(orderGuid: string, deliveryData: any) {
-  try {
-    const url = `${process.env.NEXT_PUBLIC_ORDERS_SEND_TO_MEGAWIN_URL}apikey=${process.env.NEXT_PUBLIC_API_KEY}`
+export async function addLinesToOrder(orderID: any, orderLines: any[]) {
+  console.log("adding order lines for order: ", orderID);
+  for (const orderLine of orderLines) {
+    const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}
+    &arcleunik=${orderLine.volume}
+    &guid=${orderID}
+    &qty=${orderLine.quantity}`;
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        guid: orderGuid,
-        ...deliveryData,
-      }),
-    })
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+      });
+      const data = await res.json();
+      console.log("Added line:", data);
+    } catch (error) {
+      console.error("Error adding line to order:", error);
+    }
+  }
+
+}
+
+// GET ORDER TOTAL FORM MEGAWIN
+// TODO: cannot upadte the order total after the order is created, and order is not automatically calculated
+export async  function getOrderTotal(orderID: any) {
+  try {
+
+    console.log("Getting order total: ", orderID);
+    const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}&guid=${orderID}`
+
+    const response = await fetch(url)
 
     if (!response.ok) {
-      throw new Error(`Failed to send order to Megawin: ${response.status}`)
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
-
-    if (!data.success) {
-      throw new Error(data.message || "Failed to send order to Megawin")
-    }
-
-    return data
+    return (data.result.total)
   } catch (error) {
-    console.error("Error sending order to Megawin:", error)
+    console.error("Error fetching order details:", error)
     throw error
   }
+
 }
 
-// Legacy function - kept for backward compatibility
 export async function sendToMegawin(orderID: any) {
-  console.log("Warning: Using deprecated function sendToMegawin. Please use sendOrderToMegawin instead.")
   console.log("Sending order to megawin....")
   const url = `${process.env.NEXT_PUBLIC_ORDERS_SEND_TO_MEGAWIN_URL}apikey=${API_KEY}
   &guid=${orderID}
@@ -729,84 +644,27 @@ export async function sendToMegawin(orderID: any) {
   try {
     const res = await fetch(url, {
       method: "POST",
-    })
-    const data = await res.json()
-    return data
+    });
+    const data = await res.json();
   } catch (error) {
-    console.error("Error adding line to order:", error)
-    throw error
+    console.error("Error adding line to order:", error);
   }
 }
 
-export async function handleOrder(cart: any[], customerData: any, deliveryData: any) {
-  console.log("Processing order with items:", cart.length)
-
-  try {
-    // Step 1: Create an empty order
-    const orderGuid = await createEmptyOrder(customerData.clcleunik || customerData.id)
-    console.log("Created empty order with GUID:", orderGuid)
-
-    // Step 2: Add each item to the order
-    for (const item of cart) {
-      await addLinesToOrder(orderGuid, item)
-      console.log(`Added item ${item.id} to order`)
-    }
-
-    // Step 3: Send the order to Megawin
-    const result = await sendOrderToMegawin(orderGuid, deliveryData)
-    console.log("Order sent to Megawin successfully")
-
-    return {
-      success: true,
-      orderNumber: result.result?.orderNumber || orderGuid,
-      orderData: result.result,
-    }
-  } catch (error) {
-    console.error("Error processing order:", error)
-    throw error
-  }
-}
-
-// Legacy function - kept for backward compatibility
 export async function handleOrders(orderData: any, customerID: any) {
-  console.log("Warning: Using deprecated function handleOrders. Please use handleOrder instead.")
   console.log("order data: ", orderData)
   console.log("customer id: ", customerID.clcleunik)
   try {
     const orderID = await createEmptyORder(customerID.clcleunik)
-    const fullOrder = await addLinesToOrderBatch(orderID.result.guid, orderData)
+    const fullOrder = await addLinesToOrder(orderID.result.guid, orderData)
     const completeOrder = await sendToMegawin(orderID.result.guid)
 
     console.log(orderID.result.guid)
     console.log(fullOrder)
     console.log(completeOrder)
-
-    return {
-      success: true,
-      orderNumber: orderID.result.guid,
-    }
   } catch (error) {
     console.log(error)
-    throw error
   }
-}
 
-// GET ORDER TOTAL FROM MEGAWIN
-export async function getOrderTotal(orderID: any) {
-  try {
-    console.log("Getting order total: ", orderID)
-    const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}&guid=${orderID}`
 
-    const response = await fetch(url)
-
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    return data.result.total
-  } catch (error) {
-    console.error("Error fetching order details:", error)
-    throw error
-  }
 }

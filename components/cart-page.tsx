@@ -1,78 +1,20 @@
 "use client"
-
-import { useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Minus, Plus, ChevronLeft, ChevronRight, Truck, Clock } from "lucide-react"
+import { Minus, Plus, Truck, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useCart } from "@/lib/cart-context"
-import useEmblaCarousel from "embla-carousel-react"
-import Autoplay from "embla-carousel-autoplay"
 import { useRouter } from "next/navigation"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faCcVisa, faCcMastercard, faCcPaypal } from "@fortawesome/free-brands-svg-icons"
 import { faCreditCard } from "@fortawesome/free-solid-svg-icons"
 
-const recommendedProducts = [
-  {
-    id: "2",
-    name: "Singleton of Dufftown 12Y",
-    price: 39.99,
-    image:
-      "https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    rating: 4.5,
-    category: "Whisky",
-    status: "Online op voorraad",
-  },
-  {
-    id: "3",
-    name: "Vaco Vin Kurkentrekker 15T",
-    price: 6.99,
-    image:
-      "https://images.pexels.com/photos/1089930/pexels-photo-1089930.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    rating: 4.0,
-    category: "Accessoires",
-    status: "Online op voorraad",
-  },
-  {
-    id: "4",
-    name: "Grolsch Blik 6X33CL",
-    price: 6.49,
-    image:
-      "https://images.pexels.com/photos/5947019/pexels-photo-5947019.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    rating: 4.3,
-    category: "Bier",
-    status: "Online op voorraad",
-  },
-  {
-    id: "5",
-    name: "Hendrick's Gin",
-    price: 32.99,
-    image:
-      "https://images.pexels.com/photos/3019019/pexels-photo-3019019.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    rating: 4.7,
-    category: "Gin",
-    status: "Online op voorraad",
-  },
-  {
-    id: "6",
-    name: "Moët & Chandon Brut Impérial",
-    price: 49.99,
-    image:
-      "https://images.pexels.com/photos/1283219/pexels-photo-1283219.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    rating: 4.8,
-    category: "Champagne",
-    status: "Online op voorraad",
-  },
-]
-
 // Free shipping threshold and shipping cost constants
 const FREE_SHIPPING_THRESHOLD = 750
 const SHIPPING_COST = 69.95
 
-export function CartPage() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay()])
+export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, getCartTotal } = useCart()
   const { totalItems, totalPrice } = getCartTotal()
   const router = useRouter()
@@ -80,14 +22,6 @@ export function CartPage() {
   const shippingCost = totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
   const total = totalPrice + shippingCost
   const remainingForFreeShipping = FREE_SHIPPING_THRESHOLD - totalPrice
-
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev()
-  }, [emblaApi])
-
-  const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext()
-  }, [emblaApi])
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -125,14 +59,20 @@ export function CartPage() {
             <div className="space-y-6">
               {cart.map((item) => (
                 <div key={item.id} className="flex gap-4 pb-6 border-b">
-                  <div className="relative w-20 h-[120px]">
+                  <Link
+                    href={`/product/${item.arcleunik || item.id}`}
+                    className="relative w-20 h-[120px] flex-shrink-0"
+                  >
                     <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-contain" />
-                  </div>
+                  </Link>
                   <div className="flex-1">
                     <div className="flex justify-between">
                       <div>
-                        <h3 className="font-medium">{item.name}</h3>
+                        <Link href={`/product/${item.arcleunik || item.id}`} className="hover:text-primary">
+                          <h3 className="font-medium">{item.name}</h3>
+                        </Link>
                         <p className="text-sm text-muted-foreground">{item.volume}</p>
+                        {item.arcleunik && <p className="text-xs text-muted-foreground">Art.nr: {item.arcleunik}</p>}
                       </div>
                       <div className="text-right">
                         <div className="flex items-center gap-2">
@@ -175,65 +115,6 @@ export function CartPage() {
                   </div>
                 </div>
               ))}
-            </div>
-
-            {/* Recommendations Carousel */}
-            <div className="mt-12">
-              <h2 className="font-bold mb-4">HEB JE HIER AL AAN GEDACHT?</h2>
-              <div className="relative">
-                <div className="overflow-hidden" ref={emblaRef}>
-                  <div className="flex">
-                    {recommendedProducts.map((product) => (
-                      <div
-                        key={product.id}
-                        className="flex-[0_0_100%] min-w-0 sm:flex-[0_0_50%] md:flex-[0_0_33.33%] p-2"
-                      >
-                        <div className="border rounded-lg p-4 h-full flex flex-col">
-                          <div className="relative h-40 mb-4">
-                            <Image
-                              src={product.image || "/placeholder.svg"}
-                              alt={product.name}
-                              fill
-                              className="object-contain"
-                            />
-                          </div>
-                          <div className="space-y-2 flex-grow flex flex-col justify-between">
-                            <div>
-                              <h3 className="font-medium">{product.name}</h3>
-                              <p className="text-sm text-muted-foreground">{product.category}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground mb-2">{product.status}</p>
-                              <div className="flex items-center justify-between">
-                                <span className="font-bold">€{product.price.toFixed(2)}</span>
-                                <Button variant="default" size="sm">
-                                  TOEVOEGEN
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10"
-                  onClick={scrollPrev}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10"
-                  onClick={scrollNext}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
           </div>
 

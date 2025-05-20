@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useRef, useState, useCallback } from "react"
 import type Link from "next/link"
 import Image from "next/image"
@@ -18,13 +17,11 @@ import { useScrollLock } from "@/lib/useScrollLock"
 // Custom Link component that prevents scroll reset
 const NoScrollLink = ({ href, children, className, onClick, ...props }: React.ComponentProps<typeof Link>) => {
   const router = useRouter()
-
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     if (onClick) onClick(e)
     router.push(href.toString(), { scroll: false })
   }
-
   return (
     <a href={href.toString()} onClick={handleClick} className={className} {...props}>
       {children}
@@ -44,40 +41,29 @@ export function SiteHeader() {
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null)
   const [showSearchResults, setShowSearchResults] = useState(false)
+  const [showMobileSearch, setShowMobileSearch] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
+  const mobileSearchRef = useRef<HTMLDivElement>(null)
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
   useScrollLock(isCartOpen || isMobileMenuOpen)
 
-  // Prevent default on all button clicks to avoid scroll reset
-  const handleButtonClick = useCallback((e: React.MouseEvent, callback: () => void) => {
-    e.preventDefault()
-    e.stopPropagation()
-    callback()
-  }, [])
+  // --- Dropdown logic for desktop ---
+  const handleDropdownToggle = useCallback(
+    (e: React.MouseEvent, menuName: string) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setOpenDropdown((prev) => (prev === menuName ? null : menuName))
+    },
+    []
+  )
 
-  // Toggle user menu
-  const toggleUserMenu = useCallback(() => {
-    setIsUserMenuOpen((prev) => !prev)
-  }, [])
-
-  // Toggle cart
-  const toggleCart = useCallback(() => {
-    setIsCartOpen((prev) => !prev)
-  }, [])
-
-  // Toggle mobile menu
-  const toggleMobileMenu = useCallback(() => {
-    setIsMobileMenuOpen((prev) => !prev)
-  }, [])
-
-  // Toggle dropdown menu
-  const toggleDropdown = useCallback((e: React.MouseEvent, menuName: string) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setOpenDropdown((prev) => (prev === menuName ? null : menuName))
+  // --- Dropdown logic for mobile ---
+  const handleMobileDropdownToggle = useCallback((menuName: string) => {
+    setOpenMobileDropdown((prev) => (prev === menuName ? null : menuName))
   }, [])
 
   // Close dropdown when clicking outside
@@ -91,7 +77,6 @@ export function SiteHeader() {
         setOpenDropdown(null)
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [openDropdown])
@@ -107,24 +92,28 @@ export function SiteHeader() {
     return () => document.removeEventListener("mousedown", listener)
   }, [])
 
-  // Close search results when clicking outside
+  // --- MOBILE SEARCH: close dropdown when clicking outside
   useEffect(() => {
+    if (!showMobileSearch) return
     const listener = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(event.target as Node)) {
+        setShowMobileSearch(false)
         setShowSearchResults(false)
       }
     }
     document.addEventListener("mousedown", listener)
     return () => document.removeEventListener("mousedown", listener)
-  }, [])
+  }, [showMobileSearch])
 
-  // Search functionality
+  // Search functionality (shared for desktop & mobile)
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
       if (searchQuery.length > 2) {
         try {
           const res = await fetch(
-            `https://api.megawin.be/product/list/?apikey=YIwYR3LZbNXllabpGviSnXBHvtqfPAIN&id_membre=1&rechercher_mot_cle=${encodeURIComponent(searchQuery)}`,
+            `https://api.megawin.be/product/list/?apikey=YIwYR3LZbNXllabpGviSnXBHvtqfPAIN&id_membre=1&rechercher_mot_cle=${encodeURIComponent(
+              searchQuery
+            )}`
           )
           const data = await res.json()
           setSearchResults(data.result?.product || [])
@@ -138,21 +127,32 @@ export function SiteHeader() {
         setShowSearchResults(false)
       }
     }, 300)
-
     return () => clearTimeout(delayDebounce)
   }, [searchQuery])
 
-  // Handle search submission
+  // --- Handlers ---
+  const handleButtonClick = useCallback((e: React.MouseEvent, callback: () => void) => {
+    e.preventDefault()
+    e.stopPropagation()
+    callback()
+  }, [])
+
+  const toggleUserMenu = useCallback(() => setIsUserMenuOpen((prev) => !prev), [])
+  const toggleCart = useCallback(() => setIsCartOpen((prev) => !prev), [])
+  const toggleMobileMenu = useCallback(() => setIsMobileMenuOpen((prev) => !prev), [])
+
+  // Search submit (desktop & mobile)
   const handleSearchSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
       if (searchQuery.trim()) {
         router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`, { scroll: false })
         setShowSearchResults(false)
+        setShowMobileSearch(false)
         setIsMobileMenuOpen(false)
       }
     },
-    [router, searchQuery],
+    [router, searchQuery]
   )
 
   // Handle logout
@@ -163,7 +163,7 @@ export function SiteHeader() {
       await signOut({ redirect: false })
       router.push("/", { scroll: false })
     },
-    [router],
+    [router]
   )
 
   // Handle navigation to product page from search results
@@ -172,8 +172,9 @@ export function SiteHeader() {
       e.preventDefault()
       router.push(`/product/${productId}`, { scroll: false })
       setShowSearchResults(false)
+      setShowMobileSearch(false)
     },
-    [router],
+    [router]
   )
 
   return (
@@ -201,7 +202,6 @@ export function SiteHeader() {
             <button onClick={(e) => handleButtonClick(e, toggleMobileMenu)} className="lg:hidden">
               <Menu className="w-6 h-6" />
             </button>
-
             <NoScrollLink href="/">
               <Image
                 src="/logos/logo-xlgroothandelbv.png"
@@ -214,6 +214,7 @@ export function SiteHeader() {
             </NoScrollLink>
           </div>
 
+          {/* Desktop nav */}
           <nav className="hidden lg:flex flex-1 justify-center gap-10 font-semibold">
             {menuItemsList.map((item) => (
               <div
@@ -229,7 +230,7 @@ export function SiteHeader() {
                       <NoScrollLink href={item.href} className="hover:text-[#BEA46A] py-2 mr-1">
                         {item.name}
                       </NoScrollLink>
-                      <button onClick={(e) => toggleDropdown(e, item.name)} className="hover:text-[#BEA46A] p-1">
+                      <button onClick={(e) => handleDropdownToggle(e, item.name)} className="hover:text-[#BEA46A] p-1">
                         {openDropdown === item.name ? (
                           <ChevronUp className="w-4 h-4" />
                         ) : (
@@ -288,7 +289,7 @@ export function SiteHeader() {
                     <a
                       key={product.arcleunik}
                       href={`/product/${product.arcleunik}`}
-                      onClick={(e) => handleProductClick(e, product.arcleunik)}
+                      onClick={e => handleProductClick(e, product.arcleunik)}
                       className="block border-t border-gray-100 px-3 py-2 text-sm hover:bg-gray-50"
                     >
                       {product.title || product.megatech_Titre_lib_web_nl}
@@ -308,15 +309,84 @@ export function SiteHeader() {
             )}
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Mobile Search Icon */}
+          {/* MOBILE SEARCH ICON & DROPDOWN */}
+          <div className="md:hidden relative">
             <button
-              onClick={(e) => handleButtonClick(e, () => router.push("/search"))}
-              className="md:hidden text-[#BEA46A]"
+              onClick={() => setShowMobileSearch((v) => !v)}
+              className="text-[#BEA46A]"
+              aria-label="Zoeken"
             >
               <Search className="w-5 h-5" />
             </button>
+            {showMobileSearch && (
+              <div
+                ref={mobileSearchRef}
+                className="absolute top-full right-0 mt-2 w-[90vw] max-w-xs sm:max-w-sm bg-white shadow-lg rounded-md z-50 p-4"
+              >
+                <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+                  <Input
+                    autoFocus
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Zoek producten..."
+                    className="flex-1 py-2"
+                  />
+                  <button
+                    type="submit"
+                    className="text-gray-400 hover:text-[#BEA46A]"
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    className="ml-1 text-gray-400 hover:text-[#BEA46A]"
+                    onClick={() => {
+                      setShowMobileSearch(false)
+                      setShowSearchResults(false)
+                    }}
+                    aria-label="Sluit zoekvenster"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </form>
+                {showSearchResults && (
+                  <div className="mt-2 max-h-60 overflow-y-auto -mx-4">
+                    {searchResults.length > 0 ? (
+                      searchResults.map((product) => (
+                        <a
+                          key={product.arcleunik}
+                          href={`/product/${product.arcleunik}`}
+                          onClick={e => handleProductClick(e, product.arcleunik)}
+                          className="block border-t border-gray-100 px-4 py-2 text-sm hover:bg-gray-50"
+                        >
+                          {product.title || product.megatech_Titre_lib_web_nl}
+                        </a>
+                      ))
+                    ) : searchQuery.length > 2 ? (
+                      <div className="px-4 py-4 text-sm text-gray-500 text-center">
+                        Geen resultaten gevonden
+                      </div>
+                    ) : null}
+                    <div className="border-t border-gray-100 px-4 py-2">
+                      <NoScrollLink
+                        href={`/search?q=${encodeURIComponent(searchQuery)}`}
+                        className="block text-center text-sm text-[#BEA46A] hover:underline py-1"
+                        onClick={() => {
+                          setShowSearchResults(false)
+                          setShowMobileSearch(false)
+                        }}
+                      >
+                        Bekijk alle resultaten
+                      </NoScrollLink>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
+          {/* User & cart */}
+          <div className="flex items-center gap-4">
             <div className="relative" ref={userMenuRef}>
               <button onClick={(e) => handleButtonClick(e, toggleUserMenu)}>
                 <User className="w-6 h-6" />
@@ -356,7 +426,6 @@ export function SiteHeader() {
                 </div>
               )}
             </div>
-
             <button onClick={(e) => handleButtonClick(e, toggleCart)} className="relative">
               <ShoppingCart className="w-6 h-6" />
               {totalItems > 0 && (
@@ -385,12 +454,6 @@ export function SiteHeader() {
           <div className="flex items-center justify-between p-4 border-b">
             <Image src="/logos/logo-xlgroothandelbv.png" alt="XL Logo" width={160} height={48} />
             <div className="flex items-center gap-3">
-              <button
-                onClick={(e) => handleButtonClick(e, () => router.push("/search"))}
-                className="text-[#BEA46A] p-2"
-              >
-                <Search className="w-5 h-5" />
-              </button>
               <button onClick={(e) => handleButtonClick(e, toggleMobileMenu)}>
                 <X className="w-6 h-6" />
               </button>
@@ -406,22 +469,25 @@ export function SiteHeader() {
                         <NoScrollLink
                           href={item.href}
                           className="font-bold text-lg py-2 hover:text-[#BEA46A] transition-colors"
-                          onClick={() => setIsMobileMenuOpen(false)}
+                          onClick={() => {
+                            setIsMobileMenuOpen(false)
+                            setOpenMobileDropdown(null)
+                          }}
                         >
                           {item.name}
                         </NoScrollLink>
                         <button
-                          onClick={(e) => toggleDropdown(e, item.name)}
+                          onClick={() => handleMobileDropdownToggle(item.name)}
                           className="p-2 hover:text-[#BEA46A] transition-colors"
                         >
-                          {openDropdown === item.name ? (
+                          {openMobileDropdown === item.name ? (
                             <ChevronUp className="w-5 h-5" />
                           ) : (
                             <ChevronDown className="w-5 h-5" />
                           )}
                         </button>
                       </div>
-                      {openDropdown === item.name && (
+                      {openMobileDropdown === item.name && (
                         <div className="mt-2 ml-4 space-y-3">
                           {item.submenu.map((sub) => (
                             <NoScrollLink
@@ -429,7 +495,7 @@ export function SiteHeader() {
                               href={sub.href}
                               className="block text-base font-semibold text-gray-600 hover:text-[#BEA46A] transition-colors py-2"
                               onClick={() => {
-                                setOpenDropdown(null)
+                                setOpenMobileDropdown(null)
                                 setIsMobileMenuOpen(false)
                               }}
                             >
@@ -464,7 +530,6 @@ export function SiteHeader() {
                   <User className="w-6 h-6" />
                   <span>Inloggen</span>
                 </NoScrollLink>
-
                 <button
                   onClick={(e) => {
                     handleButtonClick(e, () => {
@@ -482,7 +547,6 @@ export function SiteHeader() {
                     </span>
                   )}
                 </button>
-
                 <NoScrollLink
                   href="/account"
                   className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-[#BEA46A] hover:text-white rounded-md transition-colors"

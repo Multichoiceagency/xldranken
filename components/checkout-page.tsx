@@ -15,6 +15,7 @@ import {PaymentMethodsPage} from "./payment-methods-page";
 import {createEmptyORder, getCustomerById, handleOrders} from "@/lib/api";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "@/app/api/auth/[...nextauth]/route";
+import CheckoutCompletePage from "@/app/checkout/complete/page";
 
 const getDeliveryDates = () => {
     const dates = [];
@@ -57,7 +58,7 @@ export default function CheckoutPage({ customerData }: any) {
 
     const handleContinue = () => handleOrders(cart, customerData);
     const handleBack = () => setStep('delivery');
-    const handleComplete = () => console.log('Checkout completed');
+    const handleComplete = () => CheckoutCompletePage;
 
     if (step === 'payment') {
         return <PaymentMethodsPage onBack={handleBack} onComplete={handleComplete}/>;

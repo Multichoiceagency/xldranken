@@ -216,7 +216,7 @@ export function SiteFooter() {
 
             {/* Security Badge */}
             <div className="flex items-center">
-              <FontAwesomeIcon icon={faShieldAlt} className="text-green-500 w-8 h-8 mr-2" />
+              <FontAwesomeIcon icon={faShieldAlt} className="text-green-500 w-8 h-8 mr-2" style={{height: 40}}/>
               <div className="text-sm">
                 <p className="font-bold">Veilig winkelen</p>
                 <p>SSL Beveiligde betaling</p>

@@ -7,13 +7,12 @@ import Image from "next/image"
 import { ChevronDown, Menu, Search, ShoppingCart, User, X } from "lucide-react"
 import { useCart } from "@/lib/cart-context"
 import { SideCart } from "./side-cart"
-import { menuItemsList } from "@/lib/api"
+import { menuItemsList } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 export function SiteHeader() {
   const { totalItems } = useCart().getCartTotal()
   const router = useRouter()
-
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMenuClosing, setIsMenuClosing] = useState(false)
@@ -21,9 +20,6 @@ export function SiteHeader() {
   const [isScrollingDown, setIsScrollingDown] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [mobileSearchQuery, setMobileSearchQuery] = useState("")
-
-  const lastScrollY = useRef(0)
-  const ticking = useRef(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const mobileSearchInputRef = useRef<HTMLInputElement>(null)
 
@@ -39,32 +35,6 @@ export function SiteHeader() {
       document.body.style.overflow = ""
     }
   }, [isMobileMenuOpen])
-
-  // Show/hide header on scroll (mobile only)
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          if (window.innerWidth < 1024) {
-            const currentScrollY = window.scrollY
-            if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-              setIsScrollingDown(true)
-            } else {
-              setIsScrollingDown(false)
-            }
-            lastScrollY.current = currentScrollY > 0 ? currentScrollY : 0
-          } else {
-            setIsScrollingDown(false)
-          }
-          ticking.current = false
-        })
-        ticking.current = true
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
 
   // Focus search input when mobile menu opens
   useEffect(() => {
@@ -97,6 +67,7 @@ export function SiteHeader() {
     setIsMobileMenuOpen(true)
   }, [])
 
+  // TODO: add api call for search
   const handleSearch = useCallback(
     (e: React.FormEvent, query: string) => {
       e.preventDefault()
@@ -138,155 +109,152 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Main header - sticky */}
-      <header
-        className={`sticky top-0 bg-white z-50 shadow-md transition-transform duration-300 will-change-transform ${
-          isScrollingDown ? "lg:translate-y-0 -translate-y-full" : ""
-        }`}
-      >
-        <div className="container mx-auto px-4">
-          <div className="flex items-center h-24 justify-between relative">
-            {/* Mobile Menu Button */}
-            <div className="lg:hidden">
-              <button
-                onClick={openMobileMenu}
-                aria-label="Open mobiel menu"
-                className="p-2 hover:text-[#E2B505]"
-                type="button"
-              >
-                <Menu className="h-6 w-6" />
-              </button>
-            </div>
-
-            {/* Logo */}
-            <div className="lg:mr-8">
-              <Link href="/" className="flex items-center" aria-label="Ga naar de homepage">
-                <Image
-                  src="/logos/logo-xlgroothandelbv.png"
-                  alt="XL Groothandel B.V. logo"
-                  width={700}
-                  height={48}
-                  className="object-contain w-[200px]"
-                  priority
-                />
-              </Link>
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-6 font-bold">
-              {menuItemsList.map((item) => (
-                <div key={item.name} className="relative group">
-                  <Link
-                    href={item.href}
-                    className="px-2 py-1 hover:bg-[#E2B505] rounded-md hover:text-white transition-colors flex items-center"
-                  >
-                    {item.name}
-                    {item.submenu?.length > 0 && <ChevronDown className="ml-1 h-4 w-4" />}
-                  </Link>
-
-                  {/* CSS-only dropdown */}
-                  {item.submenu?.length > 0 && (
-                    <div className="absolute left-0 mt-1 w-64 bg-white shadow-lg rounded-md overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
-                      <div className="py-2">
-                        {item.submenu.map((sub) => (
-                          <Link
-                            key={sub.name}
-                            href={sub.href}
-                            className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
-                          >
-                            {sub.name}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </nav>
-
-            {/* Desktop Search Bar */}
-            <div className="hidden lg:flex flex-1 max-w-md mx-4 rounded-md">
-              <form onSubmit={(e) => handleSearch(e, searchQuery)} className="w-full relative">
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Zoek naar het gewenste product..."
-                  className="w-full py-2 px-4 pr-10 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#E2B505]"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+        {/* Main header - sticky */}
+        <header className={`sticky top-0 bg-white z-50 shadow-md transition-transform duration-300 will-change-transform ${
+            isScrollingDown ? "hidden" : ""
+          }`}
+        >
+          <div className="container mx-auto px-4">
+            <div className="flex items-center h-20 justify-between relative">
+              {/* Mobile Menu Button */}
+              <div className="lg:hidden">
                 <button
-                  type="submit"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#E2B505]"
+                  onClick={openMobileMenu}
+                  aria-label="Open mobiel menu"
+                  className="p-2 hover:text-[#E2B505]"
+                  type="button"
                 >
-                  <Search className="h-5 w-5" />
+                  <Menu className="h-6 w-6" />
                 </button>
-              </form>
-            </div>
+              </div>
 
-            {/* User & Cart Icons */}
-            <div className="flex items-center gap-2">
-              <div className="relative group">
-                <button className="p-2 hover:text-[#E2B505]" aria-label="Account" type="button">
-                  <User className="h-6 w-6" />
-                </button>
+              {/* Logo */}
+              <div className="lg:mr-8">
+                <Link href="/" className="flex items-center" aria-label="Ga naar de homepage">
+                  <Image
+                    src="/logos/logo-xlgroothandelbv.png"
+                    alt="XL Groothandel B.V. logo"
+                    width={700}
+                    height={48}
+                    className="object-contain w-[200px]"
+                    priority
+                  />
+                </Link>
+              </div>
 
-                {/* CSS-only User Dropdown */}
-                <div className="absolute right-0 mt-1 w-48 bg-white shadow-lg rounded-md overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
-                  <div className="py-2">
+              {/* Desktop Navigation */}
+              <nav className="hidden lg:flex items-center gap-6 font-bold">
+                {menuItemsList.map((item) => (
+                  <div key={item.name} className="relative group">
                     <Link
-                      href="/account"
-                      className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                      href={item.href}
+                      className="px-2 py-1 hover:bg-[#E2B505] rounded-md hover:text-white transition-colors flex items-center"
                     >
-                      Mijn Account
+                      {item.name}
+                      {item.submenu?.length > 0 && <ChevronDown className="ml-1 h-4 w-4" />}
                     </Link>
-                    <Link
-                      href="/bestellingen"
-                      className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
-                    >
-                      Mijn Bestellingen
-                    </Link>
-                    <Link
-                      href="/gegevens"
-                      className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
-                    >
-                      Instellingen
-                    </Link>
-                    <div className="border-t border-gray-100 my-1"></div>
-                    <Link
-                      href="/logout"
-                      className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
-                    >
-                      Uitloggen
-                    </Link>
+
+                    {/* CSS-only dropdown */}
+                    {item.submenu?.length > 0 && (
+                      <div className="absolute left-0 mt-1 w-64 bg-white shadow-lg rounded-md overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
+                        <div className="py-2">
+                          {item.submenu.map((sub) => (
+                            <Link
+                              key={sub.name}
+                              href={sub.href}
+                              className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                            >
+                              {sub.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </nav>
+
+              {/* Desktop Search Bar */}
+              <div className="hidden lg:flex flex-1 max-w-md mx-4 rounded-md">
+                <form onSubmit={(e) => handleSearch(e, searchQuery)} className="w-full relative">
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Zoek naar het gewenste product..."
+                    className="w-full py-2 px-4 pr-10 border rounded-md focus:outline-none focus:ring-1 focus:ring-[#E2B505]"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#E2B505]"
+                  >
+                    <Search className="h-5 w-5" />
+                  </button>
+                </form>
+              </div>
+
+              {/* User & Cart Icons */}
+              <div className="flex items-center gap-2">
+                <div className="relative group">
+                  <button className="p-2 hover:text-[#E2B505]" aria-label="Account" type="button">
+                    <User className="h-6 w-6" />
+                  </button>
+
+                  {/* CSS-only User Dropdown */}
+                  <div className="absolute right-0 mt-1 w-48 bg-white shadow-lg rounded-md overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none group-hover:pointer-events-auto">
+                    <div className="py-2">
+                      <Link
+                        href="/account"
+                        className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                      >
+                        Mijn Account
+                      </Link>
+                      <Link
+                        href="/bestellingen"
+                        className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                      >
+                        Mijn Bestellingen
+                      </Link>
+                      <Link
+                        href="/gegevens"
+                        className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                      >
+                        Instellingen
+                      </Link>
+                      <div className="border-t border-gray-100 my-1"></div>
+                      <Link
+                        href="/logout"
+                        className="block px-4 py-2 text-sm hover:bg-[#E2B505] hover:text-white transition-colors"
+                      >
+                        Uitloggen
+                      </Link>
+                    </div>
                   </div>
                 </div>
+                <button
+                  onClick={() => setIsCartOpen(true)}
+                  className="p-2 relative"
+                  aria-label="Open winkelmand"
+                  type="button"
+                >
+                  <ShoppingCart className="h-6 w-6" />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                      {totalItems}
+                    </span>
+                  )}
+                </button>
               </div>
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className="p-2 relative"
-                aria-label="Open winkelmand"
-                type="button"
-              >
-                <ShoppingCart className="h-6 w-6" />
-                {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                    {totalItems}
-                  </span>
-                )}
-              </button>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Fullscreen Mobile Menu - Optimized for better fit */}
-      <div
-        className={`fixed inset-0 bg-white z-[100] transition-all duration-300 ${
-          isMobileMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-        }`}
-        aria-hidden={!isMobileMenuOpen}
-      >
+        {/* Fullscreen Mobile Menu - Optimized for better fit */}
+        <div className={`fixed inset-0 bg-white z-[100] transition-all duration-300 ${
+            isMobileMenuOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+          }`} aria-hidden={!isMobileMenuOpen}>
+
         {/* Mobile Menu Header */}
         <div className="flex items-center justify-between p-3 border-b border-gray-200">
           <div className="flex items-center">
@@ -294,7 +262,7 @@ export function SiteHeader() {
               src="/logos/logo-xlgroothandelbv.png"
               alt="XL Groothandel B.V. logo"
               width={220}
-              height={44}
+              height={34}
               className="object-contain"
             />
           </div>

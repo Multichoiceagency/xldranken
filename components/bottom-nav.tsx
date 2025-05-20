@@ -26,16 +26,6 @@ export function BottomNav() {
       const windowHeight = window.innerHeight
       const scrolledToBottom = currentScrollY + windowHeight >= documentHeight - 50
 
-      if (currentScrollY <= 0 || scrolledToBottom) {
-        // Always show nav at the top of the page or near the bottom
-        setIsNavVisible(true)
-      } else if (currentScrollY > lastScrollY.current) {
-        // Scrolling down - hide nav
-        setIsNavVisible(false)
-      } else {
-        // Scrolling up - show nav
-        setIsNavVisible(true)
-      }
 
       lastScrollY.current = currentScrollY
     }

@@ -53,7 +53,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
             <ProductProvider>
                 <CartProvider>
                     <SiteHeader/>
-                    <main className="min-h-screen w-screen pb-16 md:pb-0">
+                    <main className="min-h-screen w-full pb-16 md:pb-0">
                         {children}
                         <Toaster/>
                     </main>

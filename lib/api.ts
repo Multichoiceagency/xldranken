@@ -1,119 +1,11 @@
 import type { ProductProps } from "@/types/product"
+import {sleep} from "@ionic/utils-process";
 
 // Get environment variables
 const PRODUCT_API_URL = process.env.NEXT_PUBLIC_API_URL
 const CUSTOMER_API_URL = process.env.NEXT_PUBLIC_CUSTOMER_API_URL
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY
 
-export const menuItemsList = [
-  {
-    name: "ALCOHOL",
-    href: "/categorie/spirits",
-    submenu: [
-      {
-        name: "STERKE DRANK",
-        href: "/categorie/sterke-drank",
-        id: "16",
-      },
-      {
-        name: "MIX DRANK",
-        href: "/categorie/mix-drank",
-        id: "5",
-      },
-      {
-        name: "COCKTAILS",
-        href: "/categorie/cocktails",
-        id: "10",
-      },
-    ],
-  },
-  {
-    name: "WIJN",
-    href: "/categorie/wijn",
-    id: "18",
-    submenu: [],
-  },
-  {
-    name: "BIER",
-    href: "/categorie/bier",
-    submenu: [
-      {
-        name: "POOLSE BIER BLIK",
-        href: "/categorie/poolse-bier-blik",
-        id: "4",
-      },
-      {
-        name: "POOLSE BIER FLES",
-        href: "/categorie/poolse-bier-fles",
-        id: "3",
-      },
-      {
-        name: "NL BIER",
-        href: "/categorie/bier",
-        id: "5",
-      },
-    ],
-  },
-  {
-    name: "FRISDRANKEN",
-    href: "/categorie/frisdranken",
-    submenu: [
-      {
-        name: "FRISDRANKEN",
-        href: "/categorie/frisdranken",
-        id: "6",
-      },
-      {
-        name: "LIMONADEN",
-        href: "/categorie/limonaden",
-        id: "1",
-      },
-      {
-        name: "WATER NL",
-        href: "/categorie/water-nl",
-        id: "7",
-      },
-      {
-        name: "WATER PL",
-        href: "/categorie/water-pl",
-        id: "12",
-      },
-      {
-        name: "KOFFIE THEE",
-        href: "/categorie/koffie-thee",
-        id: "18",
-      },
-    ],
-  },
-  {
-    name: "FOOD",
-    href: "/categorie/food",
-    id: "14",
-    submenu: [],
-  },
-  {
-    name: "NON-FOOD",
-    href: "/categorie/non-food",
-    id: "21",
-    submenu: [
-      {
-        name: "SCHOONMAAK",
-        href: "/categorie/schoonmaak",
-        id: "22",
-      },
-      {
-        name: "HOUTSKOOL",
-        href: "/categorie/houtskool",
-        id: "19",
-      },
-    ],
-  },
-  // {
-  //     name: "ACTIES",
-  //     href: "/acties",
-  //     submenu: []
-  // },
-]
 
 // Helper function to construct API URL with parameters
 function constructApiUrl(endpoint: string, params: Record<string, string>, isCustomerEndpoint = false) {
@@ -149,13 +41,14 @@ function constructApiUrl(endpoint: string, params: Record<string, string>, isCus
   return `${PRODUCT_API_URL}?${queryParams}`
 }
 
-export async function getProductsByFam2ID(fam2ID: string): Promise<ProductProps[]> {
+export async function getProductsByFam2ID(fam2ID: string, limit: number, page: number): Promise<ProductProps[]> {
   try {
-    // Construct the URL for products
-    const url = constructApiUrl("", { fam2ID }, false)
-    console.log("Fetching products from URL:", url) // Debug log
+    const url = `${process.env.NEXT_PUBLIC_API_URL}?apikey=${API_KEY}&fam2ID=${fam2ID}&limit=${limit}&page=${page}`
 
-    const response = await fetch(url)
+    // Log the final URL with all parameters
+    console.log("Fetching products from URL:", url)
+
+    const response = await fetch(url.toString())
 
     if (!response.ok) {
       throw new Error(`API Error: ${response.status} ${response.statusText}`)
@@ -164,7 +57,11 @@ export async function getProductsByFam2ID(fam2ID: string): Promise<ProductProps[
     const data = await response.json()
 
     // Ensure products is always an array
-    return Array.isArray(data.result?.product) ? data.result.product : []
+    const products = Array.isArray(data.result?.product) ? data.result.product : []
+
+    // Return products without adding any additional fields
+    // We'll use arcleunik as the unique identifier
+    return products
   } catch (error) {
     console.error("Error fetching products:", error)
     return []

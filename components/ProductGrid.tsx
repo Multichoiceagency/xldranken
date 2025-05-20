@@ -3,13 +3,13 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import ProductCard from "@/components/product-card"
-import { ProductProps } from "@/types/product" // ✅ Import Product interface
+import { ProductProps } from "@/types/product"
 
 export function ProductGrid({ fam2ID = "6" }: { fam2ID?: string }) {
   const [products, setProducts] = React.useState<ProductProps[]>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
-  const [showRelevant, setShowRelevant] = React.useState(false) // ✅ Toggle state
+  const [showRelevant, setShowRelevant] = React.useState(false)
 
   if (loading)
     return (

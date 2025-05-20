@@ -1,4 +1,4 @@
-import { menuItemsList } from "@/lib/api";
+import { menuItemsList } from "@/lib/utils";
 import { getProductsByFam2ID } from "@/lib/api";
 import ProductsGridClient from "@/components/product-grid-client";
 import Hero from "@/components/Hero";
@@ -8,8 +8,7 @@ import { Spinner } from "@/components/Spinner";
 export default async function CategoryPage({ params }: { params: { slug: string } }) {
   const slug = decodeURIComponent(params.slug);
 
-  // Indien menuItemsList async is:
-  // const menuItems = await menuItemsList();
+  // Use menuItemsList directly, as it is an array
   const flatMenuItems = menuItemsList.flatMap((item) => {
     if (item.submenu?.length) return item.submenu;
     return item.id ? [item] : [];

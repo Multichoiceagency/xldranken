@@ -2,10 +2,11 @@ import { Suspense } from "react"
 import dynamic from "next/dynamic"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getProductsByFam2ID } from "@/lib/api"
-import { InstallApp } from "../components/install-app"
+import { InstallApp } from "@/components/install-app"
 
 // Dynamically import components with lazy loading
-const PromoGrid = dynamic(() => import("@/components/promo-carousel").then((mod) => mod.PromoGrid), {
+const PromoGrid = dynamic(
+    () => import("@/components/promo-carousel").then((mod) => mod), {
   loading: () => <PromoGridSkeleton />,
 })
 
@@ -153,14 +154,15 @@ export default async function Home() {
         <LovkaProductsection />
       </Suspense>
 
+      <Suspense fallback={<AboutUsSectionSkeleton />}>
+        <AboutUsSection />
+      </Suspense>
+
       {/* Install App Section - Added before About Us */}
       <Suspense fallback={<InstallAppSkeleton />}>
         <InstallApp />
       </Suspense>
 
-      <Suspense fallback={<AboutUsSectionSkeleton />}>
-        <AboutUsSection />
-      </Suspense>
     </div>
   )
 }
@@ -207,8 +209,8 @@ async function LimonadenSection() {
 
   return (
     <FeaturedProductsCarousel
-      title="LIMONADEN"
-      subtitle="Verfrissende limonades voor elke gelegenheid"
+      title="Frisdranken"
+      subtitle="Verfrissende frisdranken voor elke gelegenheid"
       products={limonadenProducts}
       viewAllLink="/dranken/limonaden"
       backgroundColor="#0F3059"
@@ -221,7 +223,7 @@ async function LimonadenSection() {
 
 // DRANKEN - POOLS (ID: 2)
 async function PoolsDrankenSection() {
-  const poolsDrankenProducts = await getProductsByFam2ID("1", 10, 1).catch(() => [])
+  const poolsDrankenProducts = await getProductsByFam2ID("21", 10, 1).catch(() => [])
 
   return (
     <FeaturedProductsCarousel

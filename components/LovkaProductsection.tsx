@@ -36,11 +36,11 @@ function LovkaProductsection() {
             </ul>
           </div>
           <div className="flex space-x-4">
-            <Link className='display:none' href='www.lovkadrinks.com'>
+            <a className='display:none' href='https://lovkadrinks.com/'>
             <Button className="bg-[#E2B505] hover:bg-[#E2B505]/90 transform hover:scale-105 transition-all duration-300 hover:shadow-lg active:scale-95">
-              Bestel Lovka
+              Bezoek Lovka
             </Button>
-            </Link>
+            </a>
           </div>
         </div>
         <div className="order-1 md:order-2 flex justify-center">
@@ -51,7 +51,7 @@ function LovkaProductsection() {
               fill
               className="object-contain"
             />
-            <div className="absolute -bottom-6 -right-6 bg-[#E2B505] text-white text-xl font-bold p-4 rounded-full transform rotate-12 shadow-lg">
+            <div className="absolute -right-6 bg-[#E2B505] text-white text-xl font-bold p-4 rounded-full transform rotate-12 shadow-lg">
               10% Vodka
             </div>
           </div>

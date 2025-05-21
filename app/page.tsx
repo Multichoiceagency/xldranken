@@ -2,11 +2,10 @@ import { Suspense } from "react"
 import dynamic from "next/dynamic"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getProductsByFam2ID } from "@/lib/api"
-import { InstallApp } from "@/components/install-app"
+import { InstallApp } from "../components/install-app"
 
 // Dynamically import components with lazy loading
-const PromoGrid = dynamic(
-    () => import("@/components/promo-carousel").then((mod) => mod), {
+const PromoGrid = dynamic(() => import("@/components/promo-carousel").then((mod) => mod), {
   loading: () => <PromoGridSkeleton />,
 })
 

@@ -5,7 +5,6 @@ const sidebarItems = [
   { href: "/account", label: "Mijn Account" },
   { href: "/account/bestellingen", label: "Bestellingen" },
   { href: "/account/adressen", label: "Adressen" },
-  { href: "/account/gegevens", label: "Accountgegevens" },
 ]
 
 export default function AccountLayout({

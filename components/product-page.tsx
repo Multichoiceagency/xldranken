@@ -10,6 +10,7 @@ import { useCart } from "@/lib/cart-context"
 import type { ProductProps } from "@/types/product"
 import { Spinner } from "./Spinner"
 import { FaSearch } from "react-icons/fa"
+import { useSession } from "next-auth/react"
 
 interface ProductPageProps {
   productId: string
@@ -24,29 +25,12 @@ export function ProductPage({ productId }: ProductPageProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const { addToCart } = useCart()
   const router = useRouter()
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { data: session, status } = useSession()
+  const isLoggedIn = status === "authenticated"
 
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  useEffect(() => {
-    // This is a placeholder - replace with your actual auth check
-    const checkAuthStatus = async () => {
-      try {
-        // Example: const user = await getUser() or check localStorage/cookies
-        // For demo purposes, we're just setting a mock value
-        const userLoggedIn = localStorage.getItem("isLoggedIn") === "true"
-        setIsLoggedIn(userLoggedIn)
-      } catch (error) {
-        console.error("Error checking authentication status:", error)
-        setIsLoggedIn(false)
-      }
-    }
-
-    checkAuthStatus()
-  }, [])
-
-  // Prevent scrolling when lightbox is open
   useEffect(() => {
     if (lightboxOpen) {
       document.body.style.overflow = "hidden"
@@ -146,9 +130,11 @@ export function ProductPage({ productId }: ProductPageProps) {
       name: product.title,
       price: currentPrice,
       image: imageSrc,
-      volume: product.arcleunik,
-      arcleunik: product.productCode,
+      volume: product.volume || "",
+      productCode: product.productCode || "",
+      arcleunik: product.arcleunik || "",
       quantity,
+      tauxTvaArticleEcommerce: product.tauxTvaArticleEcommerce || "21", // Default to 21% if not available
     })
   }
 
@@ -156,24 +142,7 @@ export function ProductPage({ productId }: ProductPageProps) {
   const generateBreadcrumbs = () => {
     const breadcrumbs = [
       { name: "Home", href: "/" },
-      { name: "Catalogus", href: "/catalogus" },
     ]
-
-    // Add category if available
-    if (product.category) {
-      breadcrumbs.push({
-        name: product.category,
-        href: `/catalogus/${product.category.toLowerCase().replace(/\s+/g, "-")}`,
-      })
-    }
-
-    // Add subcategory if available (this is hypothetical, adjust based on your data structure)
-    if (product.subcategory) {
-      breadcrumbs.push({
-        name: product.subcategory,
-        href: `/catalogus/${product.category?.toLowerCase().replace(/\s+/g, "-")}/${product.subcategory.toLowerCase().replace(/\s+/g, "-")}`,
-      })
-    }
 
     // Add product name as the final breadcrumb (not clickable)
     breadcrumbs.push({ name: product.title, href: "#" })
@@ -240,12 +209,6 @@ export function ProductPage({ productId }: ProductPageProps) {
               <FaSearch className="h-5 w-5 text-gray-500 hover:text-[#0F3059]" />
             </div>
           </div>
-          <div className="mt-4">
-            <label className="flex items-center text-sm text-gray-600">
-              <input type="checkbox" className="mr-2" />
-              Vergelijken
-            </label>
-          </div>
         </div>
 
         {/* Product info - sticky en bordered */}
@@ -290,16 +253,15 @@ export function ProductPage({ productId }: ProductPageProps) {
                   </div>
                   <div className="flex items-center mb-4">
                     <span className="text-sm bg-gray-100 px-2 py-1 rounded">
-                      {product.tax_rate ? `Incl. ${product.tax_rate}% BTW` : "Incl. BTW"}
+                      {product.tax_rate ? `Excl. ${product.tax_rate}% BTW` : "Excl. BTW"}
                     </span>
-                    <Button className="ml-3 bg-[#0A5741] hover:bg-[#074835] text-white text-sm py-1 px-3 rounded">
-                      PRIJZEN ZIEN? KLIK HIER!
-                    </Button>
                   </div>
                 </>
               ) : (
                 <div className="bg-gray-100 p-4 rounded-md">
-                  <p className="font-medium mb-2">Prijzen zijn alleen zichtbaar voor ingelogde gebruikers</p>
+                  <p className="font-medium mb-2">
+                    Prijzen zijn alleen zichtbaar voor ingelogde gebruikers (excl. BTW)
+                  </p>
                   <div className="flex space-x-2">
                     <Button
                       className="bg-[#0F3059] hover:bg-[#0A2547]"

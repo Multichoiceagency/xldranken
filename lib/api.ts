@@ -1,14 +1,141 @@
 import type { ProductProps } from "@/types/product"
-import {sleep} from "@ionic/utils-process";
 
 // Get environment variables
 const PRODUCT_API_URL = process.env.NEXT_PUBLIC_API_URL
 const CUSTOMER_API_URL = process.env.NEXT_PUBLIC_CUSTOMER_API_URL
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY
 
+export const menuItemsList = [
+  {
+    name: "ALCOHOL",
+    href: "/categorie/sterke-drank",
+    id: "16",
+    submenu: [
+      {
+        name: "STERKE DRANK",
+        href: "/categorie/sterke-drank",
+        id: "16",
+      },
+      {
+        name: "MIX DRANK",
+        href: "/categorie/mix-drank",
+        id: "5",
+      },
+      {
+        name: "COCKTAILS",
+        href: "/categorie/cocktails",
+        id: "10",
+      },
+    ],
+  },
+  {
+    name: "WIJN",
+    href: "/categorie/wijn",
+    id: "13",
+    submenu: [],
+  },
+  {
+    name: "BIER",
+    href: "/categorie/poolse-bier-blik",
+    id: "1",
+    submenu: [
+      {
+        name: "POOLSE BIER BLIK",
+        href: "/categorie/poolse-bier-blik",
+        id: "4",
+      },
+      {
+        name: "POOLSE BIER FLES",
+        href: "/categorie/poolse-bier-fles",
+        id: "3",
+      },
+      {
+        name: "NL BIER",
+        href: "/categorie/bier",
+        id: "4",
+      },
+    ],
+  },
+  {
+    name: "FRISDRANKEN",
+    href: "/categorie/frisdranken",
+    id: "6",
+    submenu: [
+      {
+        name: "FRISDRANKEN",
+        href: "/categorie/frisdranken",
+        id: "6",
+      },
+      {
+        name: "KRATTEN",
+        href: "/categorie/krat",
+        id: "23",
+      },
+      {
+        name: "LIMONADEN",
+        href: "/categorie/limonaden",
+        id: "1",
+      },
+      {
+        name: "WATER",
+        href: "/categorie/water-nl",
+        id: "7",
+      },
+      {
+        name: "PETFLESSEN",
+        href: "/categorie/poolse",
+        id: "2",
+      },
+    ],
+  },
+  {
+    name: "FOOD",
+    href: "/categorie/food",
+    id: "20",
+    submenu: [
+      {
+        name: "FOOD",
+        href: "/categorie/food",
+        id: "20",
+      },
+    ],
+  },
+  {
+    name: "NON-FOOD",
+    href: "/categorie/non-food",
+    id: "21",
+    submenu: [
+      {
+        name: "NON-FOOD",
+        href: "/categorie/non-food",
+        id: "21",
+      },
+      {
+        name: "KOFFIE THEE",
+        href: "/categorie/koffie-thee",
+        id: "18",
+      },
+      {
+        name: "HOUTSKOOL",
+        href: "/categorie/houtskool",
+        id: "19",
+      },
+      {
+        name: "SCHOONMAAK",
+        href: "/categorie/schoonmaak",
+        id: "22",
+      },
+    ],
+  },
+]
+
+// Helper function to create a delay
+const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 // Helper function to construct API URL with parameters
-function constructApiUrl(endpoint: string, params: Record<string, string>, isCustomerEndpoint = false) {
+export function constructApiUrl(endpoint: string, params: Record<string, string>, isCustomerEndpoint = false) {
   // Validate environment variables before making the request
   if (!PRODUCT_API_URL) {
     console.error("NEXT_PUBLIC_API_URL is not defined")
@@ -41,12 +168,38 @@ function constructApiUrl(endpoint: string, params: Record<string, string>, isCus
   return `${PRODUCT_API_URL}?${queryParams}`
 }
 
-export async function getProductsByFam2ID(fam2ID: string, limit: number, page: number): Promise<ProductProps[]> {
+export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[]> {
+  try {
+    // Construct the URL for products
+    const url = constructApiUrl("", { fam1ID }, false)
+    console.log("Fetching products by fam1ID from URL:", url) // Debug log
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    // Ensure products is always an array
+    return Array.isArray(data.result?.product) ? data.result.product : []
+  } catch (error) {
+    console.error("Error fetching products by fam1ID:", error)
+    return []
+  }
+}
+
+// Updated to handle larger batch sizes
+export async function getProductsByFam2ID(fam2ID: string, limit = 100, page = 1): Promise<ProductProps[]> {
   try {
     const url = `${process.env.NEXT_PUBLIC_API_URL}?apikey=${API_KEY}&fam2ID=${fam2ID}&limit=${limit}&page=${page}`
 
     // Log the final URL with all parameters
     console.log("Fetching products from URL:", url)
+
+    // Add a delay before fetching (300ms)
+    await sleep(300)
 
     const response = await fetch(url.toString())
 
@@ -55,6 +208,9 @@ export async function getProductsByFam2ID(fam2ID: string, limit: number, page: n
     }
 
     const data = await response.json()
+
+    // Add a delay after fetching (200ms)
+    await sleep(200)
 
     // Ensure products is always an array
     const products = Array.isArray(data.result?.product) ? data.result.product : []
@@ -65,6 +221,156 @@ export async function getProductsByFam2ID(fam2ID: string, limit: number, page: n
   } catch (error) {
     console.error("Error fetching products:", error)
     return []
+  }
+}
+
+// Update the searchProducts function to ensure it's properly searching through the fields in ProductProps
+export async function searchProducts(query: string): Promise<ProductProps[]> {
+  try {
+    if (!query || query.trim().length < 2) {
+      return []
+    }
+
+    // Clean and prepare the search query
+    const searchQuery = query.trim().toLowerCase()
+    console.log(`[searchProducts] Searching for: "${searchQuery}"`)
+
+    // First try to search using the API's search parameter
+    const url = constructApiUrl("", { search: searchQuery }, false)
+    console.log("[searchProducts] Searching products from URL:", url)
+
+    // Add a small delay to prevent too many rapid requests
+    await sleep(100)
+
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      console.error(`[searchProducts] API Error: ${response.status} ${response.statusText}`)
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    console.log("[searchProducts] API response:", data)
+
+    // Get products from API response
+    let products = Array.isArray(data.result?.product) ? data.result.product : []
+    console.log(`[searchProducts] Found ${products.length} products from API`)
+
+    // If no products found or very few, try to get all products and filter client-side
+    if (products.length < 3) {
+      console.log("[searchProducts] Few results from API search, trying client-side filtering")
+
+      // Get a larger set of products to search through
+      const allProductsUrl = constructApiUrl("", { limit: "100" }, false)
+      console.log("[searchProducts] Fetching all products from:", allProductsUrl)
+
+      const allProductsResponse = await fetch(allProductsUrl)
+
+      if (allProductsResponse.ok) {
+        const allProductsData = await allProductsResponse.json()
+        const allProducts = Array.isArray(allProductsData.result?.product) ? allProductsData.result.product : []
+        console.log(`[searchProducts] Fetched ${allProducts.length} products for client-side filtering`)
+
+        // Filter products by title, arcleunik, and productCode only
+        const filteredProducts = allProducts.filter((product: ProductProps) => {
+          if (!product) return false
+
+          // Convert all values to lowercase strings for case-insensitive comparison
+          const title = String(product.title || "").toLowerCase()
+          const arcleunik = String(product.arcleunik || "").toLowerCase()
+          const productCode = String(product.productCode || "").toLowerCase()
+
+          // Check if any of these fields contain the search query
+          const matchesTitle = title.includes(searchQuery)
+          const matchesArcleunik = arcleunik.includes(searchQuery)
+          const matchesProductCode = productCode.includes(searchQuery)
+
+          const matches = matchesTitle || matchesArcleunik || matchesProductCode
+
+          if (matches) {
+            console.log(`[searchProducts] Match found: ${product.title} (${product.arcleunik})`)
+          }
+
+          return matches
+        })
+
+        console.log(`[searchProducts] Client-side filtering found ${filteredProducts.length} products`)
+
+        // If we found more products with client-side filtering, use those results
+        if (filteredProducts.length > products.length) {
+          products = filteredProducts
+        }
+      } else {
+        console.error("[searchProducts] Failed to fetch all products for client-side filtering")
+      }
+    }
+
+    // Log the number of products found
+    console.log(`[searchProducts] Final result: Found ${products.length} products matching "${searchQuery}"`)
+
+    // Log the first product for debugging if any were found
+    if (products.length > 0) {
+      console.log("[searchProducts] First matching product:", {
+        title: products[0].title,
+        arcleunik: products[0].arcleunik,
+        productCode: products[0].productCode,
+      })
+    } else {
+      console.log("[searchProducts] No products found")
+    }
+
+    return products
+  } catch (error) {
+    console.error("[searchProducts] Error searching products:", error)
+    return []
+  }
+}
+
+// Add this new function to get the total count of products for a category
+export async function getProductsCount(fam2ID: string): Promise<number> {
+  try {
+    // Get the base URL from constructApiUrl with the fam2ID parameter
+    const baseUrl = constructApiUrl("", { fam2ID }, false)
+
+    // Create URL object to easily add parameters
+    const url = new URL(baseUrl)
+
+    // Add count parameter to only get the count, not the actual products
+    url.searchParams.append("count", "true")
+
+    // Log the final URL with all parameters
+    console.log("Fetching product count from URL:", url.toString())
+
+    const response = await fetch(url.toString())
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    // Check if the API returns a count directly
+    if (data.count !== undefined) {
+      return Number(data.count)
+    }
+
+    // If not, try to get the total from the result
+    if (data.result?.total !== undefined) {
+      return Number(data.result.total)
+    }
+
+    // If the API doesn't provide a count, estimate based on the products returned
+    if (Array.isArray(data.result?.product)) {
+      // If we get all products at once, use the length
+      return data.result.product.length
+    }
+
+    // Default fallback - return a reasonable estimate
+    return 480
+  } catch (error) {
+    console.error("Error fetching product count:", error)
+    // Return a default estimate if count fetch fails
+    return 480
   }
 }
 
@@ -79,14 +385,34 @@ export async function getCustomerById(id: string) {
 
     const response = await fetch(url)
 
+    // Log the response status for debugging
+    console.log(`Customer API response status: ${response.status} ${response.statusText}`)
 
     if (!response.ok) {
+      // Instead of throwing immediately, log more details
+      console.error(`Customer API error: ${response.status} ${response.statusText}`)
+      console.error(`Customer ID: ${customerId}`)
+      console.error(`API URL: ${url}`)
+
+      // Try to get error details from response body
+      try {
+        const errorData = await response.json()
+        console.error("Error response:", errorData)
+      } catch (e) {
+        console.error("Could not parse error response")
+      }
+
+      // Now throw the error
       throw new Error(`API Error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
 
-    if (data.success !== "true" || !data.result.customer || data.result.customer.length === 0) {
+    // Log the response data for debugging
+    console.log("Customer API response data:", data)
+
+    if (!data.success || !data.result?.customer || data.result.customer.length === 0) {
+      console.error("Customer not found in API response:", data)
       throw new Error("Customer not found")
     }
 
@@ -198,7 +524,6 @@ export async function cleanTestData(id: string) {
 
 export async function getCustomerOrder(id: string) {
   try {
-
     // Use customer API URL for customer endpoints
     const url = `${process.env.NEXT_PUBLIC_CUSTOMER_ORDERS_API_URL}&clcleunik=${id}&apikey=${API_KEY}`
     console.log("Fetching customer orders from URL:", url) // Debug log
@@ -212,7 +537,6 @@ export async function getCustomerOrder(id: string) {
     const data = await response.json()
     console.log(data.result.order)
 
-
     return data.result.order
   } catch (error) {
     console.error("Error fetching customer orders:", error)
@@ -221,8 +545,7 @@ export async function getCustomerOrder(id: string) {
 }
 
 export async function getCustomerOrderDetails(guid: string) {
-    try {
-
+  try {
     // Use customer API URL for customer endpoints
     const url = `${process.env.NEXT_PUBLIC_CUSTOMER_ORDER_DETAILS_API_URL}apikey=${API_KEY}&guid=${guid}`
     console.log("Fetching order details from URL:", url) // Debug log
@@ -236,7 +559,6 @@ export async function getCustomerOrderDetails(guid: string) {
     const data = await response.json()
     console.log(data.result.order)
 
-
     return data.result.order
   } catch (error) {
     console.error("Error fetching order details:", error)
@@ -244,7 +566,8 @@ export async function getCustomerOrderDetails(guid: string) {
   }
 }
 
-// BESTELLINGEN AANMAKEN
+
+// BESTELLINGEN AANMAKEN //DIAZ CODE
 export async function createEmptyORder(customerID: string){
   const url = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${API_KEY}`
 

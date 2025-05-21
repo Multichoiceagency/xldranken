@@ -1,23 +1,32 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from '@/lib/auth';
+import React, { createContext, useContext } from "react"
+import { useSession } from "next-auth/react"
 
-const AuthContext = createContext<any>(null);
+export interface AuthContextType {
+  isLoggedIn: boolean
+  user: any | null
+  loading: boolean
+}
+
+const AuthContext = createContext<AuthContextType>({
+  isLoggedIn: false,
+  user: null,
+  loading: true,
+})
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { isLoggedIn, username, companyName } = useAuth();
-  const [authState, setAuthState] = useState({ isLoggedIn, username, companyName });
+  const { data: session, status } = useSession()
 
-  useEffect(() => {
-    setAuthState({ isLoggedIn, username, companyName });
-  }, [isLoggedIn, username, companyName]);
+  const isLoggedIn = status === "authenticated"
+  const user = session?.user || null
+  const loading = status === "loading"
 
   return (
-    <AuthContext.Provider value={authState}>
+    <AuthContext.Provider value={{ isLoggedIn, user, loading }}>
       {children}
     </AuthContext.Provider>
-  );
-};
+  )
+}
 
-export const useAuthContext = () => useContext(AuthContext);
+export const useAuthContext = () => useContext(AuthContext)

@@ -1,6 +1,5 @@
 import Image from "next/image"
 import Link from "next/link"
-import type { Metadata } from "next"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import {
   faTruck,
@@ -17,11 +16,6 @@ import {
   faInfoCircle, // Added import for faInfoCircle
 } from "@fortawesome/free-solid-svg-icons"
 
-export const metadata: Metadata = {
-  title: "Bezorging | XL Dranken",
-  description:
-    "Informatie over onze bezorgdienst, bezorgkosten, levertijden en bezorggebieden. Bestel eenvoudig online en laat uw dranken thuisbezorgen.",
-}
 
 // Delivery time slots
 const timeSlots = [
@@ -34,14 +28,13 @@ const timeSlots = [
 const deliveryAreas = [
   { area: "Randstad (Amsterdam, Rotterdam, Den Haag, Utrecht)", time: "Volgende werkdag" },
   { area: "Overige gebieden in Nederland", time: "1-2 werkdagen" },
-  { area: "België", time: "2-3 werkdagen" },
   { area: "Waddeneilanden", time: "3-5 werkdagen" },
 ]
 
 // Delivery FAQ
 const deliveryFaq = [
   {
-    question: "Moet ik thuis zijn voor de bezorging?",
+    question: "Moet ik op de zaak zijn om de bestelling in ontvangst te nemen?",
     answer:
       "Ja, er moet iemand aanwezig zijn om de bestelling in ontvangst te nemen en te tekenen voor ontvangst. Bij alcoholische dranken controleren wij ook de leeftijd van de ontvanger.",
   },
@@ -51,7 +44,7 @@ const deliveryFaq = [
       "Ja, u kunt een ander bezorgadres opgeven dan uw factuuradres. Dit kunt u aangeven tijdens het bestelproces.",
   },
   {
-    question: "Wat gebeurt er als ik niet thuis ben tijdens de bezorging?",
+    question: "Wat gebeurt er als ik niet op de zaak ben tijdens de bezorging?",
     answer:
       "Als u niet thuis bent, laat de bezorger een bericht achter. U kunt dan contact opnemen om een nieuwe bezorgafspraak te maken. Na twee mislukte bezorgpogingen worden er extra bezorgkosten in rekening gebracht.",
   },
@@ -75,7 +68,7 @@ export default function BezorgingPage() {
         <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/50 to-background"></div>
         <div className="absolute inset-0 z-0">
           <Image
-            src="/winkel/delivery-hero.png"
+            src="/winkel/winkel1.png"
             alt="XL Dranken bezorgservice"
             fill
             className="h-full w-full object-cover"
@@ -176,26 +169,12 @@ export default function BezorgingPage() {
                         <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">
                           Bezorgkosten Nederland
                         </th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b">
-                          Bezorgkosten België
-                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
                       <tr>
-                        <td className="px-4 py-3 text-sm text-gray-700">Tot €75</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">€5,95</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">€9,95</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 text-sm text-gray-700">€75 tot €750</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">€5,95</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">€9,95</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3 text-sm text-gray-700">Vanaf €750</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">Gratis</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">Gratis</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">Tot €750</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">€49.95</td>
                       </tr>
                     </tbody>
                   </table>
@@ -218,204 +197,167 @@ export default function BezorgingPage() {
             </div>
           </div>
 
-          {/* Delivery Times */}
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            {/* Delivery Times */}
             <div>
               <h2 className="text-2xl font-bold mb-6 text-[#BEA46A] flex items-center">
-                <FontAwesomeIcon icon={faClock} className="mr-3 w-6 h-6" />
-                Levertijden
+              <FontAwesomeIcon icon={faClock} className="mr-3 w-6 h-6" />
+              Levertijden
               </h2>
               <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 h-full">
-                <p className="text-gray-700 mb-4">
-                  Wij streven ernaar om uw bestelling zo snel mogelijk te leveren. De levertijd is afhankelijk van het
-                  moment waarop u uw bestelling plaatst.
-                </p>
+              <p className="text-gray-700 mb-4">
+                Wij streven ernaar om uw bestelling zo snel mogelijk te leveren. De levertijd is afhankelijk van het
+                moment waarop u uw bestelling plaatst.
+              </p>
 
-                <div className="space-y-4 mb-6">
-                  <div className="flex items-start">
-                    <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Bestelling vóór 15:00 op werkdagen</p>
-                      <p className="text-sm text-gray-600">Levering volgende werkdag (afhankelijk van regio)</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Bestelling na 15:00 op werkdagen</p>
-                      <p className="text-sm text-gray-600">Levering binnen 2 werkdagen</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Bestelling in het weekend</p>
-                      <p className="text-sm text-gray-600">Verwerking op maandag, levering op dinsdag</p>
-                    </div>
-                  </div>
+              <div className="space-y-4 mb-6">
+                <div className="flex items-start">
+                <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
+                <div>
+                  <p className="font-medium">Bestelling vóór 15:00 op werkdagen</p>
+                  <p className="text-sm text-gray-600">Levering volgende werkdag (afhankelijk van regio)</p>
                 </div>
-
-                <div className="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <FontAwesomeIcon icon={faExclamationTriangle} className="h-5 w-5 text-yellow-500" />
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-yellow-700">
-                        Let op: tijdens feestdagen en drukte kunnen de levertijden afwijken. Houd onze website en
-                        e-mails in de gaten voor actuele informatie.
-                      </p>
-                    </div>
-                  </div>
+                </div>
+                <div className="flex items-start">
+                <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
+                <div>
+                  <p className="font-medium">Bestelling na 15:00 op werkdagen</p>
+                  <p className="text-sm text-gray-600">Levering binnen 2 werkdagen</p>
+                </div>
+                </div>
+                <div className="flex items-start">
+                <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
+                <div>
+                  <p className="font-medium">Bestelling in het weekend</p>
+                  <p className="text-sm text-gray-600">Verwerking op maandag, levering op dinsdag</p>
+                </div>
                 </div>
               </div>
-            </div>
 
-            <div>
-              <h2 className="text-2xl font-bold mb-6 text-[#BEA46A] flex items-center">
-                <FontAwesomeIcon icon={faCalendarAlt} className="mr-3 w-6 h-6" />
-                Bezorgtijdvakken
-              </h2>
-              <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 h-full">
-                <p className="text-gray-700 mb-4">
-                  Bij het afrekenen kunt u kiezen uit verschillende tijdvakken voor de bezorging. Zo weet u wanneer u
-                  thuis moet zijn om de bestelling in ontvangst te nemen.
-                </p>
-
-                <div className="space-y-4 mb-6">
-                  {timeSlots.map((slot, index) => (
-                    <div key={index} className="flex items-center p-3 bg-gray-50 rounded-md">
-                      <div className="w-10 h-10 flex items-center justify-center bg-[#0F3059] text-white rounded-full mr-3">
-                        <FontAwesomeIcon icon={faClock} className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{slot.time}</p>
-                        <p className="text-sm text-gray-600">{slot.label}</p>
-                      </div>
-                    </div>
-                  ))}
+              <div className="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+                <div className="flex">
+                <div className="flex-shrink-0">
+                  <FontAwesomeIcon icon={faExclamationTriangle} className="h-5 w-5 text-yellow-500" />
                 </div>
-
-                <p className="text-sm text-gray-600">
-                  Voor zakelijke klanten bieden wij meer flexibiliteit in bezorgtijden. Neem contact op met onze
-                  zakelijke afdeling voor de mogelijkheden.
-                </p>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                  Let op: tijdens feestdagen en drukte kunnen de levertijden afwijken. Houd onze website en
+                  e-mails in de gaten voor actuele informatie.
+                  </p>
+                </div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mt-6">
+                Voor zakelijke klanten bieden wij meer flexibiliteit in bezorgtijden. Neem contact op met onze
+                zakelijke afdeling voor de mogelijkheden.
+              </p>
               </div>
             </div>
-          </div>
+            </div>
 
-          {/* Delivery Areas */}
-          <div className="mb-16">
+            {/* Delivery Areas */}
+            <div className="mb-16">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-[#BEA46A] flex items-center">
               <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-3 w-6 h-6" />
               Bezorggebieden
             </h2>
             <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
               <p className="text-gray-700 mb-6">
-                Wij bezorgen in heel Nederland en België. De geschatte levertijd is afhankelijk van uw locatie.
+              Wij bezorgen in heel Nederland en België. De geschatte levertijd is afhankelijk van uw locatie.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {deliveryAreas.map((area, index) => (
-                  <div key={index} className="flex items-start p-4 border border-gray-100 rounded-lg">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} className="text-[#0F3059] w-5 h-5 mr-3 mt-0.5" />
-                    <div>
-                      <p className="font-medium">{area.area}</p>
-                      <p className="text-sm text-gray-600">Geschatte levertijd: {area.time}</p>
-                    </div>
-                  </div>
-                ))}
+              {deliveryAreas.map((area, index) => (
+                <div key={index} className="flex items-start p-4 border border-gray-100 rounded-lg">
+                <FontAwesomeIcon icon={faMapMarkerAlt} className="text-[#0F3059] w-5 h-5 mr-3 mt-0.5" />
+                <div>
+                  <p className="font-medium">{area.area}</p>
+                  <p className="text-sm text-gray-600">Geschatte levertijd: {area.time}</p>
+                </div>
+                </div>
+              ))}
               </div>
 
               <div className="mt-6 relative h-64 w-full rounded-lg overflow-hidden">
-                <Image src="/winkel/delivery-map.png" alt="XL Dranken bezorggebieden" fill className="object-cover" />
+              <Image src="/winkel/nl-kaart.png" alt="XL Dranken bezorggebieden" fill className="object-contain" />
               </div>
             </div>
-          </div>
+            </div>
 
-          {/* Business Delivery */}
-          <div className="mb-16">
+            {/* Business Delivery */}
+            <div className="mb-16">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-[#BEA46A] flex items-center">
               <FontAwesomeIcon icon={faBuilding} className="mr-3 w-6 h-6" />
               Zakelijke Bezorging
             </h2>
             <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
               <div className="flex flex-col md:flex-row gap-8">
-                <div className="md:w-2/3">
-                  <p className="text-gray-700 mb-4">
-                    Voor zakelijke klanten bieden wij speciale bezorgdiensten aan. Wij begrijpen dat betrouwbare en
-                    flexibele levering essentieel is voor uw bedrijf.
-                  </p>
+              <div className="md:w-2/3">
+                <p className="text-gray-700 mb-4">
+                Voor zakelijke klanten bieden wij speciale bezorgdiensten aan. Wij begrijpen dat betrouwbare en
+                flexibele levering essentieel is voor uw bedrijf.
+                </p>
 
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-start">
-                      <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
-                      <p className="text-gray-700">Vaste leverdagen en -tijden mogelijk</p>
-                    </div>
-                    <div className="flex items-start">
-                      <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
-                      <p className="text-gray-700">Bezorging op zaterdag mogelijk (tegen toeslag)</p>
-                    </div>
-                    <div className="flex items-start">
-                      <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
-                      <p className="text-gray-700">Speciale tarieven voor regelmatige bestellingen</p>
-                    </div>
-                    <div className="flex items-start">
-                      <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
-                      <p className="text-gray-700">Levering met laadklep voor grote bestellingen</p>
-                    </div>
-                    <div className="flex items-start">
-                      <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
-                      <p className="text-gray-700">Persoonlijke accountmanager voor uw leveringen</p>
-                    </div>
-                  </div>
+                <div className="space-y-3 mb-6">
+                <div className="flex items-start">
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
+                  <p className="text-gray-700">Vaste leverdagen en -tijden mogelijk</p>
+                </div>
+                <div className="flex items-start">
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
+                  <p className="text-gray-700">Bezorging op zaterdag mogelijk (tegen toeslag)</p>
+                </div>
+                <div className="flex items-start">
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
+                  <p className="text-gray-700">Speciale tarieven voor regelmatige bestellingen</p>
+                </div>
+                <div className="flex items-start">
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
+                  <p className="text-gray-700">Levering met laadklep voor grote bestellingen</p>
+                </div>
+                <div className="flex items-start">
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-[#0F3059] w-5 h-5 mr-2 mt-0.5" />
+                  <p className="text-gray-700">Persoonlijke accountmanager voor uw leveringen</p>
+                </div>
+                </div>
 
-                  <Link
-                    href="/zakelijk"
-                    className="inline-block bg-[#0F3059] text-white px-6 py-3 rounded-md hover:bg-[#0F3059]/90 transition-colors"
-                  >
-                    Meer over zakelijke accounts
-                  </Link>
-                </div>
-                <div className="md:w-1/3 relative h-48 md:h-auto w-full rounded-lg overflow-hidden">
-                  <Image
-                    src="/winkel/business-delivery.png"
-                    alt="XL Dranken zakelijke bezorging"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+                <Link
+                href="/zakelijk"
+                className="inline-block bg-[#0F3059] text-white px-6 py-3 rounded-md hover:bg-[#0F3059]/90 transition-colors"
+                >
+                Meer over zakelijke accounts
+                </Link>
+              </div>
               </div>
             </div>
-          </div>
+            </div>
 
-          {/* Delivery FAQ */}
-          <div className="mb-16">
+            {/* Delivery FAQ */}
+            <div className="mb-16">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-[#BEA46A] flex items-center">
               <FontAwesomeIcon icon={faQuestionCircle} className="mr-3 w-6 h-6" />
               Veelgestelde Vragen over Bezorging
             </h2>
             <div className="bg-white rounded-lg shadow-lg divide-y">
               {deliveryFaq.map((item, index) => (
-                <div key={index} className="p-6">
-                  <h3 className="font-semibold text-lg mb-2 flex items-center">
-                    <FontAwesomeIcon icon={faQuestionCircle} className="text-[#BEA46A] w-5 h-5 mr-2" />
-                    {item.question}
-                  </h3>
-                  <p className="text-gray-700">{item.answer}</p>
-                </div>
+              <div key={index} className="p-6">
+                <h3 className="font-semibold text-lg mb-2 flex items-center">
+                <FontAwesomeIcon icon={faQuestionCircle} className="text-[#BEA46A] w-5 h-5 mr-2" />
+                {item.question}
+                </h3>
+                <p className="text-gray-700">{item.answer}</p>
+              </div>
               ))}
             </div>
 
             <div className="mt-6 text-center">
               <Link
-                href="/faq#levering"
-                className="inline-block bg-[#0F3059] text-white px-6 py-3 rounded-md hover:bg-[#0F3059]/90 transition-colors"
+              href="/faq#levering"
+              className="inline-block bg-[#0F3059] text-white px-6 py-3 rounded-md hover:bg-[#0F3059]/90 transition-colors"
               >
-                Meer vragen over bezorging
+              Meer vragen over bezorging
               </Link>
             </div>
-          </div>
+            </div>
 
           {/* Delivery Guarantees */}
           <div className="bg-[#0F3059] text-white rounded-lg shadow-lg p-6 md:p-8 mb-16">
@@ -441,8 +383,8 @@ export default function BezorgingPage() {
                 </div>
                 <h3 className="font-semibold mb-2">Op Tijd Bezorgd</h3>
                 <p className="text-gray-100 text-sm">
-                  Wij streven ernaar om altijd binnen het gekozen tijdvak te bezorgen. Als we dit niet halen, ontvangt u
-                  een waardebon van €5 voor uw volgende bestelling.
+                  Wij streven ernaar om uw bestelling op het afgesproken tijdstip te bezorgen. Mocht er een vertraging
+                  zijn, dan houden we u hiervan op de hoogte.
                 </p>
               </div>
 
@@ -492,17 +434,11 @@ export default function BezorgingPage() {
                 </div>
               </div>
               <div className="md:w-1/3 relative h-48 md:h-auto w-full rounded-lg overflow-hidden">
-                <Image
-                  src="/winkel/customer-service.jpg"
-                  alt="XL Dranken klantenservice"
-                  fill
-                  className="object-cover"
-                />
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+                </div>
+
   )
 }

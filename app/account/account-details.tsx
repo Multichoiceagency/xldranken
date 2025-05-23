@@ -183,32 +183,6 @@ export default function AccountDetails({ customerData }: { customerData: Custome
               {isEditing ? (
                 <>
                   <div>
-                    <Label htmlFor="firstName">Voornaam</Label>
-                    <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} />
-                  </div>
-                  <div>
-                    <Label htmlFor="lastName">Achternaam</Label>
-                    <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <Label>Voornaam</Label>
-                    <div className="p-2 border rounded-md bg-gray-50">{formData.firstName || "Niet ingesteld"}</div>
-                  </div>
-                  <div>
-                    <Label>Achternaam</Label>
-                    <div className="p-2 border rounded-md bg-gray-50">{formData.lastName || "Niet ingesteld"}</div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              {isEditing ? (
-                <>
-                  <div>
                     <Label htmlFor="address">Adres</Label>
                     <Input id="address" name="address" value={formData.address} onChange={handleChange} />
                   </div>

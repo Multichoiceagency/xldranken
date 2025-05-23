@@ -173,7 +173,7 @@ async function IkratBlikSection() {
   return (
     <FeaturedProductsCarousel
       title="POOLS BIER BLIK"
-      subtitle="Dranken in kratten en blikken"
+      subtitle="Dranken in blik voor elke gelegenheid"
       products={ikratBlikProducts}
       viewAllLink="//ikrat-blik"
       backgroundColor="#0F3059"

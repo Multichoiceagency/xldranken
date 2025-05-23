@@ -15,7 +15,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons"
 
 export const metadata: Metadata = {
-  title: "Klantenservice | XL Dranken",
+  title: "Klantenservice | XL Groothandel",
   description:
     "Vind antwoorden op uw vragen, bekijk onze leveringsvoorwaarden en neem contact op met onze klantenservice.",
 }
@@ -29,7 +29,7 @@ export default function KlantenservicePage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/winkel/winkel1.png"
-            alt="XL Dranken klantenservice"
+            alt="XL Groothandel klantenservice"
             fill
             className="h-full w-full object-cover"
             priority
@@ -220,7 +220,7 @@ export default function KlantenservicePage() {
                 </li>
                 <li className="flex items-start">
                   <span className="text-[#BEA46A] mr-2">✓</span>
-                  Track & trace van uw bestelling
+                  Bestellings bevestiging van uw levering
                 </li>
                 <li className="flex items-start">
                   <span className="text-[#BEA46A] mr-2">✓</span>
@@ -274,7 +274,7 @@ export default function KlantenservicePage() {
             <div className="flex flex-col md:flex-row gap-8">
               <div className="md:w-1/2">
                 <p className="text-gray-700 mb-4">
-                  XL Dranken is de ideale partner voor uw horecabedrijf, avondwinkel of supermarkt. Wij bieden speciale
+                  XL Groothandel is de ideale partner voor uw horecabedrijf, avondwinkel of supermarkt. Wij bieden speciale
                   voorwaarden voor zakelijke klanten, waaronder:
                 </p>
                 <ul className="space-y-2 text-gray-700 mb-6">
@@ -307,7 +307,7 @@ export default function KlantenservicePage() {
                 </Link>
               </div>
               <div className="md:w-1/2 relative h-64 md:h-auto w-full rounded-lg overflow-hidden">
-                <Image src="/winkel/winkel2.jpeg" alt="XL Dranken zakelijke service" fill className="object-cover" />
+                <Image src="/winkel/winkel2.jpeg" alt="XL Groothandel zakelijke service" fill className="object-cover" />
               </div>
             </div>
           </div>

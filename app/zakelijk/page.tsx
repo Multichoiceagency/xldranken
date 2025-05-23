@@ -16,9 +16,9 @@ import {
 import { ZakelijkRegistratieForm } from "@/components/zakelijk-registratie-form"
 
 export const metadata: Metadata = {
-  title: "Zakelijk Account Aanvragen | XL Dranken",
+  title: "Zakelijk Account Aanvragen | XL Groothandel",
   description:
-    "Registreer uw bedrijf voor een zakelijk account bij XL Dranken en profiteer van groothandelsprijzen, flexibele levering en meer voordelen.",
+    "Registreer uw bedrijf voor een zakelijk account bij XL Groothandel en profiteer van groothandelsprijzen, flexibele levering en meer voordelen.",
 }
 
 export default function ZakelijkAccountPage() {
@@ -30,7 +30,7 @@ export default function ZakelijkAccountPage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/winkel/winkel3.jpeg"
-            alt="XL Dranken zakelijk account"
+            alt="XL Groothandel zakelijk account"
             fill
             className="h-full w-full object-cover"
             priority
@@ -42,7 +42,7 @@ export default function ZakelijkAccountPage() {
               Zakelijk Account Aanvragen
             </h1>
             <p className="text-lg md:text-xl mb-8 text-white">
-              Registreer uw bedrijf bij XL Dranken en profiteer van exclusieve zakelijke voordelen, groothandelsprijzen
+              Registreer uw bedrijf bij XL Groothandel en profiteer van exclusieve zakelijke voordelen, groothandelsprijzen
               en persoonlijke service.
             </p>
           </div>
@@ -220,7 +220,7 @@ export default function ZakelijkAccountPage() {
                   </div>
                 </div>
                 <p className="text-gray-100 italic">
-                  "De persoonlijke service en flexibele leveringen maken XL Dranken de ideale partner voor onze
+                  "De persoonlijke service en flexibele leveringen maken XL Groothandel de ideale partner voor onze
                   horecazaak. De kwaliteit van de producten is uitstekend en de prijzen zijn zeer concurrerend."
                 </p>
               </div>
@@ -236,7 +236,7 @@ export default function ZakelijkAccountPage() {
                   </div>
                 </div>
                 <p className="text-gray-100 italic">
-                  "Als druk café hebben we een betrouwbare leverancier nodig. XL Dranken levert altijd op tijd en het
+                  "Als druk café hebben we een betrouwbare leverancier nodig. XL Groothandel levert altijd op tijd en het
                   online bestelsysteem werkt zeer efficiënt. De accountmanager denkt echt met ons mee."
                 </p>
               </div>
@@ -252,7 +252,7 @@ export default function ZakelijkAccountPage() {
                   </div>
                 </div>
                 <p className="text-gray-100 italic">
-                  "Voor onze evenementen hebben we vaak grote hoeveelheden drank nodig. XL Dranken biedt niet alleen
+                  "Voor onze evenementen hebben we vaak grote hoeveelheden drank nodig. XL Groothandel biedt niet alleen
                   scherpe prijzen, maar denkt ook mee over de juiste hoeveelheden en assortiment voor elk type event."
                 </p>
               </div>
@@ -293,7 +293,7 @@ export default function ZakelijkAccountPage() {
                 </div>
               </div>
               <div className="md:w-1/3 relative h-48 md:h-auto w-full rounded-lg overflow-hidden">
-                <Image src="/winkel/winkel2.jpeg" alt="XL Dranken zakelijk team" fill className="object-cover" />
+                <Image src="/winkel/winkel2.jpeg" alt="XL Groothandel zakelijk team" fill className="object-cover" />
               </div>
             </div>
           </div>

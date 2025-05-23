@@ -2,12 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== Custom Utilities ===== */
 @layer utilities {
   .text-balance {
-    text-wrap: balance;
+    /* Fallback voor text-wrap: balance */
+    text-align: center;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  .hardware-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+
+  .prevent-scroll-jump {
+    transform: translateZ(0);
+    will-change: transform;
   }
 }
 
+/* ===== Theme Variables ===== */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -35,6 +62,7 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -44,6 +72,7 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -69,6 +98,7 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -78,19 +108,18 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     overflow-x: hidden;
   }
 }
 
-/* Pure CSS sticky header */
+/* ===== Sticky Header ===== */
 .site-header {
   position: sticky;
   top: 0;
@@ -102,77 +131,43 @@
   -webkit-transform: translateZ(0);
 }
 
-/* Apply hardware acceleration to prevent scroll jumps */
 .site-header * {
   backface-visibility: hidden;
   -webkit-font-smoothing: subpixel-antialiased;
 }
 
-/* Prevent hover events from affecting scroll */
 .site-header:hover {
   pointer-events: auto;
 }
 
-/* Ensure dropdowns appear above other content */
 .site-header nav div {
   isolation: isolate;
 }
 
-/* Ensure smooth transitions */
 @media (prefers-reduced-motion: no-preference) {
   .site-header {
     transition: transform 0.3s ease;
   }
 }
 
-/* Hide header when scrolling down on mobile */
 @media (max-width: 1023px) {
   .site-header.hide {
     transform: translateY(-100%);
   }
 }
 
-/* Add hardware acceleration to prevent scroll jumps */
-@layer utilities {
-  .hardware-accelerated {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    -webkit-font-smoothing: subpixel-antialiased;
-  }
-
-  /* Prevent scroll jumps on hover */
-  .prevent-scroll-jump {
-    transform: translateZ(0);
-    will-change: transform;
-  }
-}
-
-/* Ensure smooth dropdown transitions */
+/* Dropdown delay transitions */
 @layer components {
   .group:hover .group-hover\:opacity-100 {
     transition-delay: 150ms;
   }
-  
+
   .group:hover .group-hover\:visible {
     transition-delay: 150ms;
   }
 }
 
-@layer utilities {
-  .animate-slide-in {
-    animation: slideIn 0.3s ease-out forwards;
-  }
-  
-  @keyframes slideIn {
-    from {
-      transform: translateX(-100%);
-    }
-    to {
-      transform: translateX(0);
-    }
-  }
-}
-/* Prevent hover events from affecting scroll */
+/* Extra isolation for scroll containment */
 header, nav, .dropdown-container {
   isolation: isolate;
   contain: layout;

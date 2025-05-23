@@ -40,7 +40,7 @@ export default function KlachtenregelingPage() {
               <strong>E-mail:</strong> Stuur een e-mail naar klachten@xlgroothandelbv.nl of info@xlgroothandelbv.nl
             </li>
             <li>
-              <strong>Telefoon:</strong> Bel onze klantenservice op +31 6 154 725 74 (bereikbaar op werkdagen van 08:30
+              <strong>Telefoon:</strong> Bel onze klantenservice op +31 6 184959494 725 74 (bereikbaar op werkdagen van 08:30
               tot 17:00 uur)
             </li>
             <li>
@@ -139,7 +139,7 @@ export default function KlachtenregelingPage() {
           </p>
           <ul className="list-disc pl-5 space-y-1 mb-4">
             <li>E-mail: info@xlgroothandelbv.nl</li>
-            <li>Telefoon: +31 6 154 725 74</li>
+            <li>Telefoon: +31 6 184959494 725 74</li>
             <li>Bereikbaar op werkdagen van 08:30 tot 17:00 uur</li>
           </ul>
 
@@ -155,7 +155,7 @@ export default function KlachtenregelingPage() {
               <br />
               BTW-nummer: [BTW-nummer]
               <br />
-              Klantenservice: +31 6 154 725 74
+              Klantenservice: +31 6 184959494 725 74
             </p>
           </div>
         </div>

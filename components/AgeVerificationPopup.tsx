@@ -76,7 +76,7 @@ export function AgeVerificationPopup() {
         <div className="p-6 md:p-8">
           <div className="mb-6 text-center">
             <p className="text-white text-lg mb-4">
-              Welkom bij XL Dranken. Om onze website te bezoeken moet je 18 jaar of ouder zijn.
+              Welkom bij XL Groothandel. Om onze website te bezoeken moet je 18 jaar of ouder zijn.
             </p>
             <p className="text-white text-sm mb-2">Ben je 18 jaar of ouder?</p>
             <div className="w-16 h-1 bg-[#E2B505] mx-auto"></div>

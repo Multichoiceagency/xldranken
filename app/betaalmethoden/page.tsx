@@ -101,7 +101,7 @@ export default function BetaalmethodenPage() {
           </p>
           <ul className="list-disc pl-5 space-y-1 mb-4">
             <li>E-mail: administratie@xlgroothandelbv.nl (of info@xlgroothandelbv.nl)</li>
-            <li>Telefoon: +31 6 154 725 74</li>
+            <li>Telefoon: +31 6 184959494 725 74</li>
             <li>Bereikbaar op werkdagen van 09:00 tot 16:30 uur</li>
           </ul>
 
@@ -117,7 +117,7 @@ export default function BetaalmethodenPage() {
               <br />
               BTW-nummer: [BTW-nummer]
               <br />
-              Klantenservice: +31 6 154 725 74
+              Klantenservice: +31 6 184959494 725 74
             </p>
           </div>
         </div>

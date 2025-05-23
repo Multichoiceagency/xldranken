@@ -84,9 +84,7 @@ export default function VerzendbeleidPage() {
 
           <h2 className="text-xl font-semibold text-[#0F3059] mt-6 mb-3">5. Track & Trace</h2>
           <p className="mb-4">
-            Na verzending van uw bestelling ontvangt u een e-mail met een Track & Trace code waarmee u de status van uw
-            zending kunt volgen. Voor bestellingen die met onze eigen bezorgdienst worden geleverd, ontvangt u een
-            e-mail met de geplande bezorgdatum en een geschat tijdvak.
+            Na verzending van uw bestelling ontvangt u een e-mail een bestelbevestiging met een aparte email met een factuur.
           </p>
 
           <h2 className="text-xl font-semibold text-[#0F3059] mt-6 mb-3">6. Bezorging en ontvangst</h2>
@@ -119,7 +117,7 @@ export default function VerzendbeleidPage() {
             klantenservice:
           </p>
           <ul className="list-disc pl-5 space-y-1 mb-4">
-            <li>Telefoon: +31 6 154 725 74</li>
+            <li>Telefoon: +31 6 184959494 725 74</li>
             <li>E-mail: info@xlgroothandelbv.nl</li>
             <li>Bereikbaar op werkdagen van 08:30 tot 17:00 uur</li>
           </ul>
@@ -136,7 +134,7 @@ export default function VerzendbeleidPage() {
               <br />
               BTW-nummer: [BTW-nummer]
               <br />
-              Klantenservice: +31 6 154 725 74
+              Klantenservice: +31 6 184959494 725 74
             </p>
           </div>
         </div>

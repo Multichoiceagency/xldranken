@@ -253,7 +253,7 @@ export default function AlgemeneVoorwaardenPage() {
               <br />
               E-mail: info@xlgroothandelbv.nl
               <br />
-              Klantenservice: +31 6 154 725 74
+              Klantenservice: +31 6 184959494 725 74
             </p>
           </div>
         </div>

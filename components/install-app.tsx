@@ -104,7 +104,7 @@ export function InstallApp() {
                 {/* App screenshot */}
                 <Image
                   src="/xl-dranken-app.png"
-                  alt="XL Dranken App Screenshot"
+                  alt="XL Groothandel App Screenshot"
                   width={264}
                   height={544}
                   className="object-cover"

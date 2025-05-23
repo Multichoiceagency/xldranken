@@ -51,7 +51,7 @@ const deliveryFaq = [
   {
     question: "Kan ik de bezorging volgen?",
     answer:
-      "Ja, u ontvangt een track & trace code waarmee u de status van uw bestelling kunt volgen. Op de dag van bezorging ontvangt u een bericht met een indicatie van het tijdstip van bezorging.",
+      "Ja, u ontvangt een bestellingsbevestiging waarmee u de status van uw bestelling kunt volgen. Op de dag van bezorging ontvangt u een bericht met een indicatie van het tijdstip van bezorging.",
   },
   {
     question: "Bezorgen jullie ook op zaterdag of zondag?",
@@ -69,7 +69,7 @@ export default function BezorgingPage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/winkel/winkel1.png"
-            alt="XL Dranken bezorgservice"
+            alt="XL Groothandel bezorgservice"
             fill
             className="h-full w-full object-cover"
             priority
@@ -122,10 +122,6 @@ export default function BezorgingPage() {
                     </div>
                     <div className="absolute top-4 left-full w-full h-0.5 bg-[#0F3059] hidden md:block"></div>
                   </div>
-                  <h3 className="font-semibold mb-2">Onderweg</h3>
-                  <p className="text-gray-600 text-sm">
-                    Uw bestelling is onderweg. U ontvangt een track & trace code om de bezorging te volgen.
-                  </p>
                 </div>
 
                 <div className="flex flex-col items-center text-center">
@@ -278,7 +274,7 @@ export default function BezorgingPage() {
               </div>
 
               <div className="mt-6 relative h-64 w-full rounded-lg overflow-hidden">
-              <Image src="/winkel/nl-kaart.png" alt="XL Dranken bezorggebieden" fill className="object-contain" />
+              <Image src="/winkel/nl-kaart.png" alt="XL Groothandel bezorggebieden" fill className="object-contain" />
               </div>
             </div>
             </div>
@@ -422,13 +418,6 @@ export default function BezorgingPage() {
                     </div>
                   </div>
                   <div className="flex items-start">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} className="text-[#0F3059] w-5 h-5 mr-3 mt-1" />
-                    <div>
-                      <h4 className="font-medium">Track & Trace</h4>
-                      <p className="text-gray-600 text-sm">Volg uw bestelling</p>
-                      <a href="/mijn-account/bestellingen" className="text-[#0F3059] hover:underline">
-                        Bekijk uw bestellingen
-                      </a>
                     </div>
                   </div>
                 </div>
@@ -438,7 +427,6 @@ export default function BezorgingPage() {
             </div>
           </div>
         </div>
-                </div>
 
   )
 }

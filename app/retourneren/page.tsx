@@ -13,9 +13,9 @@ import {
 import { RetourFormulier } from "@/components/retour-formulier"
 
 export const metadata: Metadata = {
-  title: "Retourneren | XL Dranken",
+  title: "Retourneren | XL Groothandel",
   description:
-    "Informatie over het retourneren van producten bij XL Dranken. Vul ons retourformulier in om uw retourzending te starten.",
+    "Informatie over het retourneren van producten bij XL Groothandel. Vul ons retourformulier in om uw retourzending te starten.",
 }
 
 // Return steps
@@ -61,7 +61,7 @@ export default function RetournerenPage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/winkel/winkel1.png"
-            alt="XL Dranken retourneren"
+            alt="XL Groothandel retourneren"
             fill
             className="h-full w-full object-cover"
             priority
@@ -88,7 +88,7 @@ export default function RetournerenPage() {
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-[#BEA46A]">Ons Retourbeleid</h2>
             <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
               <p className="text-gray-700 mb-6">
-                Bij XL Dranken streven we ernaar om u de beste producten en service te bieden. Mocht u toch niet
+                Bij XL Groothandel streven we ernaar om u de beste producten en service te bieden. Mocht u toch niet
                 tevreden zijn met uw aankoop, dan kunt u deze binnen 14 dagen na ontvangst retourneren.
               </p>
 

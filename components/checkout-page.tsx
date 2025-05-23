@@ -8,17 +8,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCart } from "@/lib/cart-context"
-import { Clock, Truck, Plus, Minus, Store } from "lucide-react"
+import { Clock, Plus, Minus, Store } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Textarea } from "@/components/ui/textarea"
 import { useRouter } from "next/navigation"
 import { handleOrders } from "@/lib/api"
 import { FaIdeal } from "react-icons/fa"
-
-// Free shipping threshold and shipping cost constants
-const FREE_SHIPPING_THRESHOLD = 750
-const SHIPPING_COST = 69.95
 
 const getDeliveryDates = () => {
   const dates = []
@@ -40,9 +36,7 @@ const getDeliveryDates = () => {
 
 const deliveryDates = getDeliveryDates()
 
-const deliveryTimes = [
-  { label: "Standaard levering (+ € 0.00)", value: "standard" },
-]
+const deliveryTimes = [{ label: "Standaard levering", value: "standard" }]
 
 export default function CheckoutPage({ customerData }: any) {
   const router = useRouter()
@@ -54,11 +48,8 @@ export default function CheckoutPage({ customerData }: any) {
   const { cart, getCartTotal, updateQuantity, clearCart } = useCart()
   const { totalItems, totalPrice, totalPriceExclVAT } = getCartTotal()
 
-  // Use the same shipping cost logic as the cart page
-  const shippingCost = totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
-  const total = totalPrice + shippingCost
-  const totalExclVAT = totalPriceExclVAT + shippingCost // Shipping has no VAT
-  const remainingForFreeShipping = FREE_SHIPPING_THRESHOLD - totalPrice
+  // No shipping costs - total is just the cart total
+  const total = totalPrice
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [orderStatus, setOrderStatus] = useState<{ success?: boolean; message?: string; orderNumber?: string } | null>(
@@ -125,17 +116,13 @@ export default function CheckoutPage({ customerData }: any) {
                       <Label htmlFor="delivery" className="font-medium">
                         Bezorgen
                       </Label>
-                      <div className="text-right text-primary font-medium">
-                        {shippingCost === 0 ? "Gratis" : `€ ${shippingCost.toFixed(2)}`}
-                      </div>
+                      <div className="text-right text-green-600 font-medium">Gratis</div>
 
                       {deliveryOption === "delivery" && (
                         <div className="mt-4 space-y-4">
                           <div>
-                            <Label>MIJN ADRES</Label>
+                            <Label>MIJN GEGEVENS</Label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                              <Input defaultValue={customerData?.firstName || ""} placeholder="Voornaam" />
-                              <Input defaultValue={customerData?.lastName || ""} placeholder="Achternaam" />
                             </div>
                             <Input
                               defaultValue={customerData?.address || ""}
@@ -407,46 +394,21 @@ export default function CheckoutPage({ customerData }: any) {
                 </div>
               </div>
 
-              {/* Free Shipping Progress - only show for delivery option */}
-              {deliveryOption === "delivery" && (
-                <div className="mb-6">
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-green-600 transition-all duration-300"
-                      style={{ width: `${Math.min((totalPrice / FREE_SHIPPING_THRESHOLD) * 100, 100)}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between items-center mt-2 text-sm">
-                    <div className="flex items-center gap-1 text-green-600">
-                      <Truck className="w-4 h-4" />
-                      <span>Gratis verzending vanaf € {FREE_SHIPPING_THRESHOLD.toFixed(2)}</span>
-                    </div>
-                    <span className="font-medium">
-                      {totalPrice >= FREE_SHIPPING_THRESHOLD
-                        ? "Behaald!"
-                        : `Nog € ${remainingForFreeShipping.toFixed(2)}`}
-                    </span>
-                  </div>
-                </div>
-              )}
-
               {/* Selected Delivery Method */}
               <div className="mb-4 p-3 bg-white rounded-md border border-gray-200">
                 <div className="flex items-center gap-2">
                   {deliveryOption === "delivery" ? (
-                    <Truck className="w-4 h-4 text-primary" />
+                    <Clock className="w-4 h-4 text-primary" />
                   ) : (
                     <Store className="w-4 h-4 text-primary" />
                   )}
                   <span className="font-medium">
                     {deliveryOption === "delivery" ? "Bezorgen" : "Afhalen in de winkel"}
                   </span>
+                  <span className="ml-auto text-green-600 font-medium">Gratis</span>
                 </div>
                 <div className="text-sm text-gray-600 mt-1">
                   {selectedDate.day} {selectedDate.date}
-                  {deliveryOption === "delivery" &&
-                    selectedTime !== "standard" &&
-                    ` - ${selectedTime === "morning" ? "Ochtend" : selectedTime === "afternoon" ? "Middag" : "Avond"}`}
                 </div>
               </div>
 
@@ -464,29 +426,10 @@ export default function CheckoutPage({ customerData }: any) {
                   <span className="font-bold">€ {totalPrice.toFixed(2)}</span>
                 </div>
 
-                {deliveryOption === "delivery" && (
-                  <div className="border-t border-dashed my-1 sm:my-2 pt-1 sm:pt-2">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Bezorgkosten:</span>
-                      <span className={shippingCost === 0 ? "text-green-600 font-bold" : "font-bold"}>
-                        {shippingCost === 0 ? "Gratis" : `€ ${shippingCost.toFixed(2)}`}
-                      </span>
-                    </div>
-                    {selectedTime !== "standard" && (
-                      <div className="flex justify-between mt-1">
-                        <span className="font-medium">Tijdvak toeslag:</span>
-                        <span className="font-bold">€ 2.00</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
                 <div className="border-t pt-2 sm:pt-3 mt-1 sm:mt-2">
                   <div className="flex justify-between text-base sm:text-lg">
                     <span className="font-bold">Totaal:</span>
-                    <span className="font-bold text-[#FF6B35]">
-                      € {(total + (selectedTime !== "standard" && deliveryOption === "delivery" ? 2 : 0)).toFixed(2)}
-                    </span>
+                    <span className="font-bold text-[#FF6B35]">€ {total.toFixed(2)}</span>
                   </div>
                   <div className="text-xs text-gray-500 text-right mt-1">Prijzen zijn inclusief BTW</div>
                 </div>

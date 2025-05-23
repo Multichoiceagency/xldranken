@@ -54,6 +54,7 @@
     "input-otp": "1.4.1",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.454.0",
+    "motion": "^12.12.1",
     "next": "^15.1.6",
     "next-auth": "^4.24.11",
     "next-pwa": "^5.6.0",

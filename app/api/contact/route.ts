@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     // Email options for admin notification
     const adminMailOptions = {
-      from: `"XL Dranken Website" <${process.env.EMAIL_FROM || "noreply@xlgroothandelbv.nl"}>`,
+      from: `"XL Groothandel Website" <${process.env.EMAIL_FROM || "noreply@xlgroothandelbv.nl"}>`,
       to: process.env.EMAIL_TO || "info@xlgroothandelbv.nl",
       replyTo: email,
       subject: `Contactformulier: ${onderwerp}`,
@@ -79,9 +79,9 @@ export async function POST(request: NextRequest) {
 
     // Email options for customer confirmation
     const customerMailOptions = {
-      from: `"XL Dranken" <${process.env.EMAIL_FROM || "noreply@xlgroothandelbv.nl"}>`,
+      from: `"XL Groothandel" <${process.env.EMAIL_FROM || "noreply@xlgroothandelbv.nl"}>`,
       to: email,
-      subject: `Bevestiging: Uw bericht aan XL Dranken`,
+      subject: `Bevestiging: Uw bericht aan XL Groothandel`,
       text: customerEmailContent.text,
       html: customerEmailContent.html,
     }
@@ -190,7 +190,7 @@ ${data.bericht}
     </div>
     
     <div class="footer">
-      <p>Dit bericht is automatisch gegenereerd vanaf de XL Dranken website.</p>
+      <p>Dit bericht is automatisch gegenereerd vanaf de XL Groothandel website.</p>
     </div>
   </div>
 </body>
@@ -212,7 +212,7 @@ function formatCustomerEmailContent(data: {
   const text = `
 Beste ${data.naam},
 
-Bedankt voor uw bericht aan XL Dranken. We hebben uw contactaanvraag in goede orde ontvangen.
+Bedankt voor uw bericht aan XL Groothandel. We hebben uw contactaanvraag in goede orde ontvangen.
 
 Hieronder vindt u een kopie van uw bericht:
 
@@ -224,7 +224,7 @@ ${data.bericht}
 We streven ernaar om binnen 1-2 werkdagen te reageren op uw bericht.
 
 Met vriendelijke groet,
-Het team van XL Dranken
+Het team van XL Groothandel
 
 Turfschipper 116
 2292 JB Wateringen
@@ -255,7 +255,7 @@ Website: www.xlgroothandelbv.nl
     
     <div class="section">
       <p>Beste ${data.naam},</p>
-      <p>Bedankt voor uw bericht aan XL Dranken. We hebben uw contactaanvraag in goede orde ontvangen.</p>
+      <p>Bedankt voor uw bericht aan XL Groothandel. We hebben uw contactaanvraag in goede orde ontvangen.</p>
       <p>Hieronder vindt u een kopie van uw bericht:</p>
       
       <div class="message-box">
@@ -267,7 +267,7 @@ Website: www.xlgroothandelbv.nl
     </div>
     
     <div class="footer">
-      <p>Met vriendelijke groet,<br>Het team van XL Dranken</p>
+      <p>Met vriendelijke groet,<br>Het team van XL Groothandel</p>
       
       <div class="contact-info">
         Turfschipper 116<br>

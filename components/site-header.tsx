@@ -52,14 +52,11 @@ export function SiteHeader() {
   useScrollLock(isCartOpen || isMobileMenuOpen)
 
   // --- Dropdown logic for desktop ---
-  const handleDropdownToggle = useCallback(
-    (e: React.MouseEvent, menuName: string) => {
-      e.preventDefault()
-      e.stopPropagation()
-      setOpenDropdown((prev) => (prev === menuName ? null : menuName))
-    },
-    []
-  )
+  const handleDropdownToggle = useCallback((e: React.MouseEvent, menuName: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setOpenDropdown((prev) => (prev === menuName ? null : menuName))
+  }, [])
 
   // --- Dropdown logic for mobile ---
   const handleMobileDropdownToggle = useCallback((menuName: string) => {
@@ -112,8 +109,8 @@ export function SiteHeader() {
         try {
           const res = await fetch(
             `https://api.megawin.be/product/list/?apikey=YIwYR3LZbNXllabpGviSnXBHvtqfPAIN&id_membre=1&rechercher_mot_cle=${encodeURIComponent(
-              searchQuery
-            )}`
+              searchQuery,
+            )}`,
           )
           const data = await res.json()
           setSearchResults(data.result?.product || [])
@@ -152,7 +149,7 @@ export function SiteHeader() {
         setIsMobileMenuOpen(false)
       }
     },
-    [router, searchQuery]
+    [router, searchQuery],
   )
 
   // Handle logout
@@ -163,7 +160,7 @@ export function SiteHeader() {
       await signOut({ redirect: false })
       router.push("/", { scroll: false })
     },
-    [router]
+    [router],
   )
 
   // Handle navigation to product page from search results
@@ -174,7 +171,7 @@ export function SiteHeader() {
       setShowSearchResults(false)
       setShowMobileSearch(false)
     },
-    [router]
+    [router],
   )
 
   return (
@@ -183,15 +180,34 @@ export function SiteHeader() {
         <div className="container mx-auto flex justify-between">
           <span>Meer dan 900+ producten</span>
           <div className="hidden md:flex gap-4">
-            <NoScrollLink href="/zakelijk" className="hover:underline">
-              Registreren
-            </NoScrollLink>
-            <NoScrollLink href="/klantenservice" className="hover:underline">
-              Klantenservice
-            </NoScrollLink>
-            <NoScrollLink href="/over-ons" className="hover:underline">
-              Over ons
-            </NoScrollLink>
+            {isLoggedIn ? (
+              <>
+                <NoScrollLink href="/account" className="hover:underline">
+                  Mijn account
+                </NoScrollLink>
+                <NoScrollLink href="/account/bestellingen" className="hover:underline">
+                  Bestellingen
+                </NoScrollLink>
+                <NoScrollLink href="/account/adressen" className="hover:underline">
+                  Adressen
+                </NoScrollLink>
+                <button onClick={handleLogout} className="hover:underline text-[#0E3159] font-bold hover:text-red-100">
+                  Uitloggen
+                </button>
+              </>
+            ) : (
+              <>
+                <NoScrollLink href="/login" className="hover:underline">
+                  Inloggen
+                </NoScrollLink>
+                <NoScrollLink href="/zakelijk" className="hover:underline">
+                  Registreren
+                </NoScrollLink>
+                <NoScrollLink href="/klantenservice" className="hover:underline">
+                  Klantenservice
+                </NoScrollLink>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -289,7 +305,7 @@ export function SiteHeader() {
                     <a
                       key={product.arcleunik}
                       href={`/product/${product.arcleunik}`}
-                      onClick={e => handleProductClick(e, product.arcleunik)}
+                      onClick={(e) => handleProductClick(e, product.arcleunik)}
                       className="block border-t border-gray-100 px-3 py-2 text-sm hover:bg-gray-50"
                     >
                       {product.title || product.megatech_Titre_lib_web_nl}
@@ -311,11 +327,7 @@ export function SiteHeader() {
 
           {/* MOBILE SEARCH ICON & DROPDOWN */}
           <div className="md:hidden relative">
-            <button
-              onClick={() => setShowMobileSearch((v) => !v)}
-              className="text-[#BEA46A]"
-              aria-label="Zoeken"
-            >
+            <button onClick={() => setShowMobileSearch((v) => !v)} className="text-[#BEA46A]" aria-label="Zoeken">
               <Search className="w-5 h-5" />
             </button>
             {showMobileSearch && (
@@ -327,14 +339,11 @@ export function SiteHeader() {
                   <Input
                     autoFocus
                     value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Zoek producten..."
                     className="flex-1 py-2"
                   />
-                  <button
-                    type="submit"
-                    className="text-gray-400 hover:text-[#BEA46A]"
-                  >
+                  <button type="submit" className="text-gray-400 hover:text-[#BEA46A]">
                     <Search className="w-5 h-5" />
                   </button>
                   <button
@@ -356,16 +365,14 @@ export function SiteHeader() {
                         <a
                           key={product.arcleunik}
                           href={`/product/${product.arcleunik}`}
-                          onClick={e => handleProductClick(e, product.arcleunik)}
+                          onClick={(e) => handleProductClick(e, product.arcleunik)}
                           className="block border-t border-gray-100 px-4 py-2 text-sm hover:bg-gray-50"
                         >
                           {product.title || product.megatech_Titre_lib_web_nl}
                         </a>
                       ))
                     ) : searchQuery.length > 2 ? (
-                      <div className="px-4 py-4 text-sm text-gray-500 text-center">
-                        Geen resultaten gevonden
-                      </div>
+                      <div className="px-4 py-4 text-sm text-gray-500 text-center">Geen resultaten gevonden</div>
                     ) : null}
                     <div className="border-t border-gray-100 px-4 py-2">
                       <NoScrollLink
@@ -522,14 +529,47 @@ export function SiteHeader() {
 
               {/* Bottom menu items moved under primary menu */}
               <div className="grid grid-cols-1 gap-4">
-                <NoScrollLink
-                  href="/login"
-                  className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-[#BEA46A] hover:text-white rounded-md transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <User className="w-6 h-6" />
-                  <span>Inloggen</span>
-                </NoScrollLink>
+                {isLoggedIn ? (
+                  <>
+                    <NoScrollLink
+                      href="/account"
+                      className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-[#BEA46A] hover:text-white rounded-md transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <User className="w-6 h-6" />
+                      <span>Mijn Account</span>
+                    </NoScrollLink>
+                    <NoScrollLink
+                      href="/account/bestellingen"
+                      className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-[#BEA46A] hover:text-white rounded-md transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <ShoppingCart className="w-6 h-6" />
+                      <span>Bestellingen</span>
+                    </NoScrollLink>
+                    <button
+                      onClick={(e) => {
+                        handleButtonClick(e, () => {
+                          setIsMobileMenuOpen(false)
+                          handleLogout(e)
+                        })
+                      }}
+                      className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-red-500 hover:text-white rounded-md transition-colors text-red-500"
+                    >
+                      <LogOut className="w-6 h-6" />
+                      <span>Uitloggen</span>
+                    </button>
+                  </>
+                ) : (
+                  <NoScrollLink
+                    href="/login"
+                    className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-[#BEA46A] hover:text-white rounded-md transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <User className="w-6 h-6" />
+                    <span>Inloggen</span>
+                  </NoScrollLink>
+                )}
                 <button
                   onClick={(e) => {
                     handleButtonClick(e, () => {
@@ -547,14 +587,6 @@ export function SiteHeader() {
                     </span>
                   )}
                 </button>
-                <NoScrollLink
-                  href="/account"
-                  className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-[#BEA46A] hover:text-white rounded-md transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <User className="w-6 h-6" />
-                  <span>Mijn Account</span>
-                </NoScrollLink>
               </div>
             </div>
           </div>

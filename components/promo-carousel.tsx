@@ -6,10 +6,10 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-// Updated promos array with XL Dranken in titles
+// Updated promos array with XL Groothandel in titles
 const promos = [
   {
-    title: "XL Dranken presenteert: Lovka",
+    title: "XL Groothandel presenteert: Lovka",
     description:
       "Maak kennis met Lovka, onze nieuwste innovatie die pure vodka combineert met een verfrissende energy smaak en een vleugje cafeïne.",
     discount: "NIEUW PRODUCT",
@@ -21,7 +21,7 @@ const promos = [
     href: "https://lovkadrinks.com/",
   },
   {
-    title: "XL Dranken - Uw Dranken Specialist",
+    title: "XL Groothandel - Uw Dranken Specialist",
     description:
       "Verken ons uitgebreide aanbod van premium alcoholische dranken, verfrissende frisdranken en exclusieve merken voor elke gelegenheid.",
     discount: "900+ PRODUCTEN",
@@ -33,7 +33,7 @@ const promos = [
     href: "http://localhost:3000/categorie/sterke-drank",
   },
   {
-    title: "XL Dranken Premium Collectie",
+    title: "XL Groothandel Premium Collectie",
     description:
       "Laat u meevoeren op een smaakvolle reis met onze zorgvuldig geselecteerde ambachtelijke rumcollectie van over de hele wereld.",
     discount: "25% KORTING",

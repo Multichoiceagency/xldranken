@@ -9,14 +9,14 @@ export function AboutUsSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div>
             <div className="flex items-center gap-2 mb-6">
-              <h2 className="text-3xl font-bold">XL Dranken</h2>
+              <h2 className="text-3xl font-bold">XL Groothandel</h2>
               <span className="text-sm font-medium text-muted-foreground">
                 900+ DRANKEN & PRODUCTEN
               </span>
             </div>
             <div className="space-y-6">
               <p>
-                Welkom bij XL Dranken, dé specialist in alcoholische en non-alcoholische dranken. 
+                Welkom bij XL Groothandel, dé specialist in alcoholische en non-alcoholische dranken. 
                 Met trots bieden wij een assortiment van meer dan 900 verschillende dranken aan, 
                 zorgvuldig geselecteerd om aan al uw wensen te voldoen.
               </p>
@@ -34,7 +34,7 @@ export function AboutUsSection() {
               </p>
               <p>
                 Naast ons uitgebreide drankenassortiment bieden we ook een selectie van food en non-food producten aan. 
-                XL Dranken is niet alleen uw partner voor particuliere aankopen, maar levert ook aan avondwinkels, 
+                XL Groothandel is niet alleen uw partner voor particuliere aankopen, maar levert ook aan avondwinkels, 
                 supermarkten, cafés en bars. Onze flexibele service en brede productaanbod maken ons de ideale leverancier 
                 voor zowel particulieren als bedrijven in de horeca- en retailsector.
               </p>
@@ -43,7 +43,7 @@ export function AboutUsSection() {
           <div className="relative h-[700px] rounded-lg overflow-hidden">
             <Image
               src="/winkel/winkel2.jpeg"
-              alt="XL Dranken Groothandel"
+              alt="XL Groothandel Groothandel"
               fill
               className="object-contain rounded-lg"
             />

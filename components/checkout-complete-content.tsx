@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, Package, Truck } from "lucide-react"
@@ -9,66 +9,81 @@ import { useCart } from "@/lib/cart-context"
 export default function CheckoutCompleteContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { clearCart } = useCart()
+
+  // Get and memoize order details from URL params
   const orderNumber = searchParams.get("orderNumber") || "Unknown"
   const total = searchParams.get("total") || "0.00"
-  const { clearCart } = useCart()
-  const [currentDate] = useState(new Date())
 
-  // Calculate estimated delivery date (3 business days from now)
-  const [estimatedDelivery] = useState(() => {
-    const date = new Date(currentDate)
+  // Initialize dates only once
+  const [orderDetails] = useState(() => {
+    const currentDate = new Date()
+
+    // Calculate estimated delivery date (3 business days from now)
+    const estimatedDelivery = new Date(currentDate)
     let businessDaysToAdd = 3
 
     while (businessDaysToAdd > 0) {
-      date.setDate(date.getDate() + 1)
-      if (date.getDay() !== 0 && date.getDay() !== 6) {
+      estimatedDelivery.setDate(estimatedDelivery.getDate() + 1)
+      if (estimatedDelivery.getDay() !== 0 && estimatedDelivery.getDay() !== 6) {
         businessDaysToAdd--
       }
     }
 
-    return date
-  })
+    // Format dates
+    const formattedOrderDate = currentDate.toLocaleDateString("nl-NL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
 
-  // Format dates
-  const formattedOrderDate = currentDate.toLocaleDateString("nl-NL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
+    const formattedDeliveryDate = estimatedDelivery.toLocaleDateString("nl-NL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
 
-  const formattedDeliveryDate = estimatedDelivery.toLocaleDateString("nl-NL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
-
-  // Clear cart on page load - with proper dependency array
-  useEffect(() => {
-    try {
-      clearCart()
-    } catch (error) {
-      console.error("Error clearing cart:", error)
+    return {
+      currentDate,
+      estimatedDelivery,
+      formattedOrderDate,
+      formattedDeliveryDate,
     }
-  }, [clearCart]) // Add clearCart to dependency array
+  })
 
-  // Handle navigation manually if needed
-  const handleNavigateHome = () => {
+  // Memoize navigation handlers to prevent recreating on each render
+  const handleNavigateHome = useCallback(() => {
     try {
       router.push("/")
     } catch (error) {
       console.error("Navigation error:", error)
-      // Fallback to window.location if router fails
       window.location.href = "/"
     }
-  }
+  }, [router])
 
-  const handleNavigateOrders = () => {
+  const handleNavigateOrders = useCallback(() => {
     try {
       router.push("/account/bestellingen")
     } catch (error) {
       console.error("Navigation error:", error)
+      // No fallback needed here as this is not a critical navigation
     }
-  }
+  }, [router])
+
+  // Clear cart on page load - with proper error handling
+  useEffect(() => {
+    const performCartClear = async () => {
+      try {
+        await clearCart()
+      } catch (error) {
+        console.error("Error clearing cart:", error)
+      }
+    }
+
+    performCartClear()
+    // We only want to run this once when the component mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -94,7 +109,7 @@ export default function CheckoutCompleteContent() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Besteldatum</p>
-                <p className="font-medium">{formattedOrderDate}</p>
+                <p className="font-medium">{orderDetails.formattedOrderDate}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Totaalbedrag</p>
@@ -111,7 +126,7 @@ export default function CheckoutCompleteContent() {
                 <Truck className="w-5 h-5 text-primary mt-0.5" />
                 <div>
                   <p className="font-medium">Verwachte levering</p>
-                  <p className="text-gray-600">{formattedDeliveryDate}</p>
+                  <p className="text-gray-600">{orderDetails.formattedDeliveryDate}</p>
                   <p className="text-sm text-gray-500 mt-1">
                     Je ontvangt een e-mail met de verzendbevestiging zodra je bestelling is verzonden.
                   </p>
@@ -156,7 +171,7 @@ export default function CheckoutCompleteContent() {
                 <div>
                   <p className="font-medium">Verzending</p>
                   <p className="text-sm text-gray-600">
-                    Zodra je bestelling is verzonden, ontvang je een e-mail met de track & trace informatie.
+                    Zodra we je bestelling hebben verzonden, ontvang je een e-mail met de verzendinformatie.
                   </p>
                 </div>
               </div>

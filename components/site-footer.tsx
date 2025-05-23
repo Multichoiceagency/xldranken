@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { faFacebookF, faInstagram, faPinterestP, faWhatsapp } from "@fortawesome/free-brands-svg-icons"
+import { faFacebookF, faInstagram, faPinterestP, faTiktok, faWhatsapp } from "@fortawesome/free-brands-svg-icons"
 import {
   faEnvelope,
   faMapMarkerAlt,
@@ -60,7 +60,7 @@ export function SiteFooter() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Contact Information Column */}
           <div>
-            <Image src="/logos/logo-wit.png" alt="XL Dranken Logo" width={300} height={60} className="object-contain" />
+            <Image src="/logos/logo-wit.png" alt="XL Groothandel Logo" width={300} height={60} className="object-contain" />
             <h3 className="font-bold mb-4 mt-4">Informatie</h3>
             <ul className="space-y-3 text-sm">
               <li>
@@ -84,9 +84,9 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="tel:0615472574" className="font-bold hover:text-[#d0c298] flex items-center">
+                <Link href="tel:06184959494" className="font-bold hover:text-[#d0c298] flex items-center">
                   <FontAwesomeIcon icon={faPhone} className="mr-2 w-4 h-4" />
-                  Klantenservice +31 6 154 725 74
+                  Klantenservice +31 6 184 959 49
                 </Link>
               </li>
               <li>
@@ -160,18 +160,28 @@ export function SiteFooter() {
             <h3 className="font-bold mb-4 mt-6">KLANTENSERVICE</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/zakelijk" className="hover:text-[#d0c298]">
-                  Registreren
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-[#d0c298]">
-                  Contact
-                </Link>
-              </li>
-              <li>
                 <Link href="/klantenservice" className="hover:text-[#d0c298]">
                   Klantenservice
+                </Link>
+              </li>
+              <li>
+                <Link href="/bezorging" className="hover:text-[#d0c298]">
+                  Bezorgen
+                </Link>
+              </li>
+              <li>
+                <Link href="/retourneren" className="hover:text-[#d0c298]">
+                  Retourneren
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-[#d0c298]">
+                  Veelgestelde Vragen
+                </Link>
+              </li>
+                            <li>
+                <Link href="/contact" className="hover:text-[#d0c298]">
+                  Contact
                 </Link>
               </li>
             </ul>
@@ -179,7 +189,7 @@ export function SiteFooter() {
 
           {/* Company Column */}
           <div>
-            <h3 className="font-bold mb-4">XL DRANKEN</h3>
+            <h3 className="font-bold mb-4">XL Groothandel</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/over-ons" className="hover:text-[#d0c298]">
@@ -216,8 +226,8 @@ export function SiteFooter() {
               <Link href="https://instagram.com" className="hover:text-[#d0c298]">
                 <FontAwesomeIcon icon={faInstagram} className="w-5 h-5" />
               </Link>
-              <Link href="https://pinterest.com" className="hover:text-[#d0c298]">
-                <FontAwesomeIcon icon={faPinterestP} className="w-5 h-5" />
+              <Link href="https://tiktok.com" className="hover:text-[#d0c298]">
+                <FontAwesomeIcon icon={faTiktok} className="w-5 h-5" />
               </Link>
             </div>
           </div>
@@ -245,7 +255,7 @@ export function SiteFooter() {
           <div className="mt-6 flex flex-col md:flex-row space-between justify-center items-center text-sm text-white">
             <div className="flex flex-wrap items-center gap-2 justify-center md:justify-center">
               <span>
-                Gebouwd met NextJS door Multichoiceagency en YX Digital © 2025 XL Dranken - Megawin Kassasysteem
+                Gebouwd met NextJS door Multichoiceagency en YX Digital © 2025 XL Groothandel - Megawin Kassasysteem
               </span>
               <span>|</span>
               <Link href="/algemene-voorwaarden" className="hover:text-[#d0c298]">

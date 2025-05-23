@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     // Email options
     const mailOptions = {
-      from: `"XL Dranken Website" <${process.env.EMAIL_FROM || "noreply@xlgroothandelbv.nl"}>`,
+      from: `"XL Groothandel Website" <${process.env.EMAIL_FROM || "noreply@xlgroothandelbv.nl"}>`,
       to: process.env.EMAIL_TO || "zakelijk@xlgroothandelbv.nl",
       replyTo: formData.email,
       subject: `Nieuwe zakelijke registratie - ${formData.bedrijfsnaam}`,
@@ -193,7 +193,7 @@ Opmerkingen: ${data.opmerkingen || "Geen opmerkingen"}
     </div>
     
     <div class="footer">
-      <p>Dit bericht is automatisch gegenereerd vanaf de XL Dranken website.</p>
+      <p>Dit bericht is automatisch gegenereerd vanaf de XL Groothandel website.</p>
     </div>
   </div>
 </body>

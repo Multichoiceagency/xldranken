@@ -26,7 +26,7 @@ export default function PrivacyBeleidPage() {
             <br />
             Adres: Turfschipper 116, 2292 JB Wateringen
             <br />
-            Telefoon: +31 6 154 725 74
+            Telefoon: +31 6 184959494 725 74
             <br />
             E-mail: info@xlgroothandelbv.nl
           </p>
@@ -185,7 +185,7 @@ export default function PrivacyBeleidPage() {
               <br />
               BTW-nummer: [BTW-nummer]
               <br />
-              Klantenservice: +31 6 154 725 74
+              Klantenservice: +31 6 184959494 725 74
             </p>
           </div>
         </div>

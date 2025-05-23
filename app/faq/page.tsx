@@ -7,9 +7,9 @@ import { faHeadset, faQuestionCircle } from "@fortawesome/free-solid-svg-icons"
 import { faqData } from "@/lib/faq-data"
 
 export const metadata: Metadata = {
-  title: "Veelgestelde Vragen | XL Dranken",
+  title: "Veelgestelde Vragen | XL Groothandel",
   description:
-    "Vind antwoorden op veelgestelde vragen over bestellingen, leveringen, retourneren, betaalmethoden en meer bij XL Dranken.",
+    "Vind antwoorden op veelgestelde vragen over bestellingen, leveringen, retourneren, betaalmethoden en meer bij XL Groothandel.",
 }
 
 export default function FaqPage() {
@@ -21,7 +21,7 @@ export default function FaqPage() {
         <div className="absolute inset-0 z-0">
           <Image
             src="/winkel/winkel1.png"
-            alt="XL Dranken klantenservice"
+            alt="XL Groothandel klantenservice"
             fill
             className="h-full w-full object-cover"
             priority

@@ -53,6 +53,7 @@
     "embla-carousel-react": "latest",
     "input-otp": "1.4.1",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.1",
     "lucide-react": "^0.454.0",
     "motion": "^12.12.1",
     "next": "^15.1.6",
@@ -66,6 +67,7 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.54.1",
     "react-icons": "^5.5.0",
+    "react-onesignal": "^3.2.2",
     "react-resizable-panels": "^2.1.7",
     "react-responsive": "latest",
     "recharts": "2.15.0",
@@ -86,6 +88,7 @@
     "@types/uuid": "^10.0.0",
     "postcss": "^8.0.0",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^3.1.4"
   }
 }

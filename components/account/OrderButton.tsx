@@ -1,34 +1,37 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
-import { getCustomerOrderDetails } from "@/lib/api"; // Ensure this is the correct path to your API function
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Eye } from "lucide-react"
+import { useRouter } from "next/navigation"
 
-interface OrderButtonProps {
-  orderGuid: string;
+// Define the props interface for OrderButton
+export interface OrderButtonProps {
+  orderGuid: string
+  // Add orderNumber to the props interface
+  orderNumber?: string
 }
 
-export default function OrderButton({ orderGuid }: OrderButtonProps) {
-  const [loading, setLoading] = useState(false);
+export default function OrderButton({ orderGuid, orderNumber }: OrderButtonProps) {
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
-  // Function to handle the "View Order" button click
   const handleViewOrder = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const details = await getCustomerOrderDetails(orderGuid);
-      console.log("Order Details:", details); // Handle the details (e.g., show them in a modal or redirect)
+      // Navigate to order details page
+      router.push(`/bestellingen/${orderGuid}`)
     } catch (error) {
-      console.error("Error fetching order details:", error);
+      console.error("Error viewing order:", error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Button variant="ghost" size="sm" onClick={handleViewOrder} disabled={loading}>
       <Eye className="h-4 w-4 mr-2" />
       {loading ? "Laden..." : "Bekijken"}
     </Button>
-  );
+  )
 }

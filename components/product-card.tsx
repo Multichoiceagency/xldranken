@@ -43,8 +43,12 @@ export default function ProductCard({ product }: { product: ProductProps }) {
         return product.photo1_base64
       }
 
-      // Otherwise, assume it's a base64 string without the prefix
-      return `data:image/jpeg;base64,${product.photo1_base64}`
+      // Check if it's a valid base64 string (basic validation)
+      if (/^[A-Za-z0-9+/=]+$/.test(product.photo1_base64.substring(0, 20))) {
+        return `data:image/jpeg;base64,${product.photo1_base64}`
+      }
+
+      console.log(`Invalid base64 data for product: ${product.title}`)
     }
 
     // Fallback to placeholder
@@ -54,11 +58,18 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const imageSrc = getImageSrc()
   const regularPrice = Number(product.prix_vente_groupe) || 0
 
+  // Update the handleAddToCart function to ensure we're explicitly logging and passing the fam2id
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
+
+    // Always add at least 1 item when clicking the add to cart button
     const quantity = Math.max(1, Number.parseInt(quantityInput) || 1)
 
     setIsAnimating(true)
+
+    // Log the product's fam2id for debugging
+    console.log(`Adding product to cart with fam2id: ${product.fam2id || "undefined"}`)
+
     addToCart({
       id: product.arcleunik,
       name: product.title,
@@ -66,8 +77,18 @@ export default function ProductCard({ product }: { product: ProductProps }) {
       image: imageSrc,
       volume: product.arcleunik,
       productCode: product.productCode || "",
-      quantity,
+      arcleunik: product.arcleunik,
+      // IMPORTANT: Pass the exact fam2id from the product data without any modification
+      fam2id: product.fam2id,
     })
+
+    // If the quantity should be more than 1, update it after adding
+    if (quantity > 1 && inCartInfo.inCart) {
+      updateQuantity(product.arcleunik, quantity)
+    }
+
+    // Update the quantity input to match what was added
+    setQuantityInput(quantity.toString())
 
     toast({
       title: "Product toegevoegd",
@@ -78,13 +99,32 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   }
 
   const handleQuantityChange = (val: number) => {
-    setQuantityInput(val.toString())
     if (inCartInfo.inCart) {
+      // Only update quantity if the item is already in cart
+      setQuantityInput(val.toString())
       updateQuantity(product.arcleunik, val)
+
+      if (val > 0) {
+        toast({
+          title: "Hoeveelheid bijgewerkt",
+          description: `${product.title}: ${val} stuks`,
+        })
+      } else {
+        // If quantity is set to 0, remove from cart
+        removeFromCart(product.arcleunik)
+        toast({
+          title: "Product verwijderd",
+          description: `${product.title} is verwijderd uit je winkelwagen`,
+        })
+      }
+    } else {
+      // If not in cart, show a message that they need to add it first
       toast({
-        title: "Hoeveelheid bijgewerkt",
-        description: `${product.title}: ${val} stuks`,
+        title: "Voeg eerst toe aan winkelwagen",
+        description: "Klik op 'In winkelmand' om het product toe te voegen",
       })
+      // Reset quantity input to 0
+      setQuantityInput("0")
     }
   }
 
@@ -166,11 +206,12 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 p-0"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation()
                     const val = Math.max(0, Number.parseInt(quantityInput) - 1)
                     handleQuantityChange(val)
                   }}
-                  disabled={Number.parseInt(quantityInput) <= 0}
+                  disabled={Number.parseInt(quantityInput) <= 0 || !inCartInfo.inCart}
                 >
                   <Minus className="h-3 w-3" />
                 </Button>
@@ -184,7 +225,13 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                   onChange={(e) => {
                     if (/^\d*$/.test(e.target.value)) setQuantityInput(e.target.value)
                   }}
-                  onBlur={() => handleQuantityChange(Number.parseInt(quantityInput) || 0)}
+                  onBlur={() => {
+                    if (inCartInfo.inCart) {
+                      handleQuantityChange(Number.parseInt(quantityInput) || 0)
+                    } else {
+                      setQuantityInput("0")
+                    }
+                  }}
                   onKeyDown={(e) => e.key === "Enter" && inputRef.current?.blur()}
                   className="w-10 text-center text-xs sm:text-sm font-medium border-0 focus:ring-0"
                   aria-label="Aantal"
@@ -194,10 +241,19 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 p-0"
-                  onClick={() => {
-                    const val = Math.max(0, Number.parseInt(quantityInput) + 1)
-                    handleQuantityChange(val)
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (inCartInfo.inCart) {
+                      const val = Math.max(0, Number.parseInt(quantityInput) + 1)
+                      handleQuantityChange(val)
+                    } else {
+                      toast({
+                        title: "Voeg eerst toe aan winkelwagen",
+                        description: "Klik op 'In winkelmand' om het product toe te voegen",
+                      })
+                    }
                   }}
+                  disabled={!inCartInfo.inCart}
                 >
                   <Plus className="h-3 w-3" />
                 </Button>
@@ -207,10 +263,13 @@ export default function ProductCard({ product }: { product: ProductProps }) {
             {/* Add to Cart Button */}
             <Button
               className="w-full bg-green-500 hover:bg-green-600 text-white transition-all duration-300 h-8 px-2 sm:px-3"
-              onClick={handleAddToCart}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleAddToCart(e)
+              }}
             >
               <ShoppingCart className="w-6 h-6 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="text-xs sm:text-sm">In winkelmand</span>
+              <span className="text-xs sm:text-sm">{inCartInfo.inCart ? "Bijwerken" : "In winkelmand"}</span>
             </Button>
           </div>
         )}

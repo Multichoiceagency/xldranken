@@ -5,16 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCart } from "@/lib/cart-context"
-import { Clock, Plus, Minus, Store } from "lucide-react"
+import { Clock, Plus, Minus, Store, Mail, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Textarea } from "@/components/ui/textarea"
 import { useRouter } from "next/navigation"
-import { handleOrders } from "@/lib/api"
 import { FaIdeal } from "react-icons/fa"
+import { processOrderAndSendConfirmation } from "@/actions/order-actions"
 
 const getDeliveryDates = () => {
   const dates = []
@@ -38,13 +37,13 @@ const deliveryDates = getDeliveryDates()
 
 const deliveryTimes = [{ label: "Standaard levering", value: "standard" }]
 
-export default function CheckoutPage({ customerData }: any) {
+export default function UpdatedCheckoutPage({ customerData }: any) {
   const router = useRouter()
   const [deliveryOption, setDeliveryOption] = useState<"delivery" | "pickup">("delivery")
   const [selectedDate, setSelectedDate] = useState(deliveryDates[0])
   const [selectedTime, setSelectedTime] = useState("standard")
   const [deliveryComment, setDeliveryComment] = useState("")
-  const [differentBillingAddress, setDifferentBillingAddress] = useState(false)
+  const [deliveryAddress, setDeliveryAddress] = useState("")
   const { cart, getCartTotal, updateQuantity, clearCart } = useCart()
   const { totalItems, totalPrice, totalPriceExclVAT } = getCartTotal()
 
@@ -52,9 +51,12 @@ export default function CheckoutPage({ customerData }: any) {
   const total = totalPrice
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [orderStatus, setOrderStatus] = useState<{ success?: boolean; message?: string; orderNumber?: string } | null>(
-    null,
-  )
+  const [orderStatus, setOrderStatus] = useState<{
+    success?: boolean
+    message?: string
+    orderNumber?: string
+    emailSent?: boolean
+  } | null>(null)
 
   const handlePlaceOrder = async () => {
     // Reset status
@@ -62,30 +64,53 @@ export default function CheckoutPage({ customerData }: any) {
     setIsSubmitting(true)
 
     try {
-      // Call the handleOrders function from the API
-      await handleOrders(cart, customerData)
+      // Prepare delivery address
+      const address =
+        deliveryOption === "delivery"
+          ? deliveryAddress ||
+            `${customerData?.address || ""}, ${customerData?.zipcode || ""} ${customerData?.city || ""}`.trim()
+          : "XL Groothandel B.V., Turfschipper 116, 2292 JB Wateringen"
 
-      // Generate a unique order number for demonstration
-      const orderNumber = `ORD-${Math.floor(Math.random() * 10000)}`
+      // Prepare order data
+      const orderData = {
+        cart,
+        customerData,
+        deliveryOption,
+        deliveryDate: `${selectedDate.day} ${selectedDate.date}`,
+        deliveryAddress: address,
+        deliveryInstructions: deliveryComment,
+      }
 
-      // Set success status
-      setOrderStatus({
-        success: true,
-        message: "Bestelling succesvol geplaatst!",
-        orderNumber: orderNumber,
-      })
+      // Process order and send confirmation email
+      const result = await processOrderAndSendConfirmation(orderData)
 
-      // Clear the cart after successful order
-      clearCart()
+      if (result.success) {
+        // Set success status
+        setOrderStatus({
+          success: true,
+          message: "Bestelling succesvol geplaatst en bevestiging verzonden!",
+          orderNumber: result.orderNumber,
+          emailSent: result.emailSent,
+        })
 
-      // Redirect to thank you page with order details
-      router.push(`/checkout/complete?orderNumber=${orderNumber}&total=${total.toFixed(2)}`)
+        // Clear the cart after successful order
+        clearCart()
+
+        // Redirect to thank you page with order details
+        router.push(
+          `/checkout/complete?orderNumber=${result.orderNumber}&total=${result.total}&emailSent=${result.emailSent}`,
+        )
+      } else {
+        setOrderStatus({
+          success: false,
+          message: result.error || "Er is een fout opgetreden bij het plaatsen van de bestelling.",
+        })
+      }
     } catch (error) {
       console.error("Error placing order:", error)
       setOrderStatus({
         success: false,
-        message:
-          error instanceof Error ? error.message : "Er is een fout opgetreden bij het plaatsen van de bestelling.",
+        message: error instanceof Error ? error.message : "Er is een onverwachte fout opgetreden.",
       })
     } finally {
       setIsSubmitting(false)
@@ -100,6 +125,33 @@ export default function CheckoutPage({ customerData }: any) {
             <nav className="flex gap-8 border-b">
               <button className="font-medium text-primary border-b-2 border-primary pb-4">Bezorging</button>
             </nav>
+
+            {/* Order Status Display */}
+            {orderStatus && (
+              <div
+                className={`p-4 rounded-lg border ${
+                  orderStatus.success
+                    ? "bg-green-50 border-green-200 text-green-800"
+                    : "bg-red-50 border-red-200 text-red-800"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {orderStatus.success ? (
+                    <CheckCircle className="w-5 h-5" />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+                      <span className="text-white text-xs">!</span>
+                    </div>
+                  )}
+                  <span className="font-medium">{orderStatus.message}</span>
+                </div>
+                {orderStatus.orderNumber && (
+                  <p className="mt-2 text-sm">
+                    Bestelnummer: <strong>{orderStatus.orderNumber}</strong>
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <h1 className="text-2xl font-bold mb-6">BEZORGING</h1>
@@ -122,42 +174,17 @@ export default function CheckoutPage({ customerData }: any) {
                         <div className="mt-4 space-y-4">
                           <div>
                             <Label>MIJN GEGEVENS</Label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1"></div>
                             <Input
-                              defaultValue={customerData?.address || ""}
-                              placeholder="Straat en huisnummer"
+                              value={deliveryAddress}
+                              onChange={(e) => setDeliveryAddress(e.target.value)}
+                              placeholder={`${customerData?.address || "Straat en huisnummer"}`}
                               className="mt-2"
                             />
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                               <Input defaultValue={customerData?.zipcode || ""} placeholder="Postcode" />
                               <Input defaultValue={customerData?.city || ""} placeholder="Plaats" />
                             </div>
-
-                            {/* Billing Address Toggle */}
-                            <div className="flex items-center space-x-2 mt-4">
-                              <Checkbox
-                                id="different-billing"
-                                checked={differentBillingAddress}
-                                onCheckedChange={(checked) => setDifferentBillingAddress(checked as boolean)}
-                              />
-                              <Label htmlFor="different-billing">Factuuradres is anders dan bezorgadres</Label>
-                            </div>
-
-                            {differentBillingAddress && (
-                              <div className="mt-4 space-y-2 p-4 border rounded-md bg-gray-50">
-                                <Label>FACTUURADRES</Label>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                                  <Input placeholder="Voornaam" />
-                                  <Input placeholder="Achternaam" />
-                                </div>
-                                <Input placeholder="Straat en huisnummer" className="mt-2" />
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                                  <Input placeholder="Postcode" />
-                                  <Input placeholder="Plaats" />
-                                </div>
-                              </div>
-                            )}
                           </div>
                         </div>
                       )}
@@ -179,9 +206,8 @@ export default function CheckoutPage({ customerData }: any) {
                             <Store className="w-5 h-5 mt-0.5 text-gray-700" />
                             <div>
                               <p className="font-medium">XL Groothandel B.V.</p>
-                              <p className="text-sm text-gray-600">Industrieweg 10</p>
-                              <p className="text-sm text-gray-600">1234 AB Amsterdam</p>
-                              <p className="text-sm text-gray-600 mt-1">Openingstijden: Ma-Vr 9:00-17:00</p>
+                              <p className="text-sm text-gray-600">Turfschipper 116</p>
+                              <p className="text-sm text-gray-600">2292 JB Wateringen</p>
                             </div>
                           </div>
                         </div>
@@ -410,6 +436,18 @@ export default function CheckoutPage({ customerData }: any) {
                 <div className="text-sm text-gray-600 mt-1">
                   {selectedDate.day} {selectedDate.date}
                 </div>
+              </div>
+
+              {/* Email Confirmation Notice */}
+              <div className="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <Mail className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-900">Orderbevestiging</span>
+                </div>
+                <p className="text-xs text-blue-800">
+                  Na het plaatsen van uw bestelling ontvangt u automatisch een gedetailleerde bevestiging per e-mail met
+                  alle producten georganiseerd per categorie.
+                </p>
               </div>
 
               {/* Price Breakdown */}

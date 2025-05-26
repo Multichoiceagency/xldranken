@@ -1,5 +1,6 @@
 "use client"
 
+import type React from "react"
 import { SessionProvider } from "next-auth/react"
 import { AuthProvider } from "@/context/AuthContext"
 import { CartProvider } from "@/lib/cart-context"

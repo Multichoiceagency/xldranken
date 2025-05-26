@@ -5,6 +5,11 @@ const PRODUCT_API_URL = process.env.NEXT_PUBLIC_API_URL
 const CUSTOMER_API_URL = process.env.NEXT_PUBLIC_CUSTOMER_API_URL
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY
 
+// Helper function to create a delay
+const sleep = (ms: number): Promise<void> => {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 export const menuItemsList = [
   {
     name: "ALCOHOL",
@@ -129,49 +134,34 @@ export const menuItemsList = [
   },
 ]
 
-// Helper function to create a delay
-const sleep = (ms: number): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
+// This is the handleOrders function used by the checkout process
+// It's a wrapper that adapts the cart data to work with the Megawin API
+export async function handleOrders(cart: any[], customerData: any) {
+  console.log("Processing order with Megawin API...")
+  console.log("Cart:", cart)
+  console.log("Customer Data:", customerData)
 
-// Helper function to construct API URL with parameters
-export function constructApiUrl(endpoint: string, params: Record<string, string>, isCustomerEndpoint = false) {
-  // Validate environment variables before making the request
-  if (!PRODUCT_API_URL) {
-    console.error("NEXT_PUBLIC_API_URL is not defined")
-    throw new Error("Product API URL is not defined")
+  try {
+    // Use the existing Megawin order creation flow
+    const orderID = await createEmptyORder(customerData.clcleunik)
+    const fullOrder = await addLinesToOrder(orderID.result.guid, cart)
+    const completeOrder = await sendToMegawin(orderID.result.guid)
+
+    console.log("Order created with ID:", orderID.result.guid)
+    console.log("Order lines added:", fullOrder)
+    console.log("Order sent to Megawin:", completeOrder)
+
+    return { success: true, orderGuid: orderID.result.guid }
+  } catch (error) {
+    console.error("Error processing order:", error)
+    return { success: false, error: error instanceof Error ? error.message : "Unknown error" }
   }
-
-  if (isCustomerEndpoint && !CUSTOMER_API_URL) {
-    console.error("NEXT_PUBLIC_CUSTOMER_API_URL is not defined")
-    throw new Error("Customer API URL is not defined")
-  }
-
-  if (!API_KEY) {
-    console.error("NEXT_PUBLIC_API_KEY is not defined")
-    throw new Error("API KEY is not defined")
-  }
-
-  // Add API key to params
-  const queryParams = new URLSearchParams({
-    apikey: API_KEY,
-    ...params,
-  })
-
-  // For customer endpoints, use the customer API URL
-  if (isCustomerEndpoint) {
-    const baseUrl = CUSTOMER_API_URL?.endsWith("/") ? CUSTOMER_API_URL : `${CUSTOMER_API_URL}/`
-    return `${baseUrl}${endpoint}?${queryParams}`
-  }
-
-  // For product endpoints, use the product API URL
-  return `${PRODUCT_API_URL}?${queryParams}`
 }
 
 export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[]> {
   try {
     // Construct the URL for products
-    const url = constructApiUrl("", { fam1ID }, false)
+    const url = `${PRODUCT_API_URL}?apikey=${API_KEY}&fam1ID=${fam1ID}`
     console.log("Fetching products by fam1ID from URL:", url) // Debug log
 
     const response = await fetch(url)
@@ -193,7 +183,7 @@ export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[
 // Updated to handle larger batch sizes
 export async function getProductsByFam2ID(fam2ID: string, limit = 100, page = 1): Promise<ProductProps[]> {
   try {
-    const url = `${process.env.NEXT_PUBLIC_API_URL}?apikey=${API_KEY}&fam2ID=${fam2ID}&limit=${limit}&page=${page}`
+    const url = `${PRODUCT_API_URL}?apikey=${API_KEY}&fam2ID=${fam2ID}&limit=${limit}&page=${page}`
 
     // Log the final URL with all parameters
     console.log("Fetching products from URL:", url)
@@ -236,7 +226,7 @@ export async function searchProducts(query: string): Promise<ProductProps[]> {
     console.log(`[searchProducts] Searching for: "${searchQuery}"`)
 
     // First try to search using the API's search parameter
-    const url = constructApiUrl("", { search: searchQuery }, false)
+    const url = `${PRODUCT_API_URL}?apikey=${API_KEY}&search=${searchQuery}`
     console.log("[searchProducts] Searching products from URL:", url)
 
     // Add a small delay to prevent too many rapid requests
@@ -261,7 +251,7 @@ export async function searchProducts(query: string): Promise<ProductProps[]> {
       console.log("[searchProducts] Few results from API search, trying client-side filtering")
 
       // Get a larger set of products to search through
-      const allProductsUrl = constructApiUrl("", { limit: "100" }, false)
+      const allProductsUrl = `${PRODUCT_API_URL}?apikey=${API_KEY}&limit=100`
       console.log("[searchProducts] Fetching all products from:", allProductsUrl)
 
       const allProductsResponse = await fetch(allProductsUrl)
@@ -330,7 +320,7 @@ export async function searchProducts(query: string): Promise<ProductProps[]> {
 export async function getProductsCount(fam2ID: string): Promise<number> {
   try {
     // Get the base URL from constructApiUrl with the fam2ID parameter
-    const baseUrl = constructApiUrl("", { fam2ID }, false)
+    const baseUrl = `${PRODUCT_API_URL}?apikey=${API_KEY}&fam2ID=${fam2ID}`
 
     // Create URL object to easily add parameters
     const url = new URL(baseUrl)
@@ -380,7 +370,7 @@ export async function getCustomerById(id: string) {
     const customerId = String(id)
 
     // Use customer API URL for customer endpoints
-    const url = constructApiUrl("", { clcleunik: customerId }, true)
+    const url = `${CUSTOMER_API_URL}?apikey=${API_KEY}&clcleunik=${customerId}`
     console.log("Fetching customer by ID from URL:", url) // Debug log
 
     const response = await fetch(url)
@@ -522,27 +512,45 @@ export async function cleanTestData(id: string) {
   }
 }
 
-export async function getCustomerOrder(id: string) {
+// Get customer orders - returns an array of orders
+export async function getCustomerOrder(clcleunik: string): Promise<any[]> {
   try {
+    // Validate the customer ID
+    if (!clcleunik) {
+      console.error("No customer ID provided")
+      return []
+    }
+
     // Use customer API URL for customer endpoints
-    const url = `${process.env.NEXT_PUBLIC_CUSTOMER_ORDERS_API_URL}&clcleunik=${id}&apikey=${API_KEY}`
+    const url = `${process.env.NEXT_PUBLIC_CUSTOMER_ORDERS_API_URL}&clcleunik=${clcleunik}&apikey=${API_KEY}`
     console.log("Fetching customer orders from URL:", url) // Debug log
 
     const response = await fetch(url)
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status} ${response.statusText}`)
+      console.error(`API Error: ${response.status} ${response.statusText}`)
+      // Return empty array instead of throwing to handle gracefully
+      return []
     }
 
     const data = await response.json()
-    console.log(data.result.order)
+    console.log("Customer orders response:", data)
 
-    return data.result.order
+    // Ensure we always return an array
+    if (data.result?.order && Array.isArray(data.result.order)) {
+      return data.result.order
+    }
+
+    // If no orders found, return empty array
+    return []
   } catch (error) {
     console.error("Error fetching customer orders:", error)
-    throw error
+    // Return empty array on error to handle gracefully
+    return []
   }
 }
+
+// Update the getCustomerOrderDetails function to properly handle the API response
 
 export async function getCustomerOrderDetails(guid: string) {
   try {
@@ -557,7 +565,17 @@ export async function getCustomerOrderDetails(guid: string) {
     }
 
     const data = await response.json()
-    console.log(data.result.order)
+
+    if (!data.success || !data.result?.order) {
+      console.error("Order details not found in API response:", data)
+      throw new Error("Order details not found")
+    }
+
+    console.log("Order details retrieved successfully:", {
+      guid,
+      hasLines: !!data.result.order.lines,
+      lineCount: data.result.order.lines?.length || 0,
+    })
 
     return data.result.order
   } catch (error) {
@@ -566,56 +584,112 @@ export async function getCustomerOrderDetails(guid: string) {
   }
 }
 
+// Update the getOrderDetails function to use the customer order details API properly
+export async function getOrderDetails(orderGuid: string, customerClcleunik?: string) {
+  try {
+    // First, try to use the customer order details API
+    if (process.env.NEXT_PUBLIC_CUSTOMER_ORDER_DETAILS_API_URL) {
+      const orderDetails = await getCustomerOrderDetails(orderGuid)
+
+      // Transform the data to match our expected format
+      if (orderDetails && orderDetails.lines) {
+        return orderDetails.lines.map((line: any) => ({
+          id: line.arcleunik || line.id,
+          name: line.title || line.name,
+          quantity: Number.parseInt(line.qty || "1", 10),
+          price: Number.parseFloat(line.prix_vente_groupe || line.price || "0"),
+          image: line.photo1_base64
+            ? `data:image/jpeg;base64,${line.photo1_base64}`
+            : `/placeholder.svg?height=50&width=50&query=${encodeURIComponent(line.title || "product")}`,
+        }))
+      }
+
+      return []
+    }
+
+    // Fallback to a generic order details endpoint if available
+    if (process.env.API_BASE_URL) {
+      const response = await fetch(`${process.env.API_BASE_URL}/orders/${orderGuid}/details`, {
+        headers: {
+          Authorization: `Bearer ${process.env.API_TOKEN || API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch order details")
+      }
+
+      const data = await response.json()
+
+      // Transform the data to match our expected format
+      return data.items.map((item: any) => ({
+        id: item.product_id || item.arcleunik,
+        name: item.product_name || item.title,
+        quantity: item.quantity,
+        price: item.unit_price || item.price,
+        image:
+          item.product_image ||
+          (item.photo1_base64
+            ? `data:image/jpeg;base64,${item.photo1_base64}`
+            : `/placeholder.svg?height=50&width=50&query=${encodeURIComponent(item.product_name || "product")}`),
+      }))
+    }
+
+    // If no API is available, throw an error
+    throw new Error("No order details API configured")
+  } catch (error) {
+    console.error("Error fetching order details:", error)
+    throw error
+  }
+}
 
 // BESTELLINGEN AANMAKEN //DIAZ CODE
-export async function createEmptyORder(customerID: string){
+export async function createEmptyORder(customerID: string) {
   const url = `${process.env.NEXT_PUBLIC_ORDERS_CREATE_BLANK_URL}apikey=${API_KEY}`
 
-   const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        clcleunik: customerID,
-        use: "clcleunik"
-      }),
-    })
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      clcleunik: customerID,
+      use: "clcleunik",
+    }),
+  })
 
-  const order_guid = await  response.json()
+  const order_guid = await response.json()
   console.log(order_guid)
 
   return order_guid
-
 }
 
 export async function addLinesToOrder(orderID: any, orderLines: any[]) {
-  console.log("adding order lines for order: ", orderID);
+  console.log("adding order lines for order: ", orderID)
   for (const orderLine of orderLines) {
     const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}
     &arcleunik=${orderLine.volume}
     &guid=${orderID}
-    &qty=${orderLine.quantity}`;
+    &qty=${orderLine.quantity}`
 
     try {
       const res = await fetch(url, {
         method: "POST",
-      });
-      const data = await res.json();
-      console.log("Added line:", data);
+      })
+      const data = await res.json()
+      console.log("Added line:", data)
     } catch (error) {
-      console.error("Error adding line to order:", error);
+      console.error("Error adding line to order:", error)
     }
   }
-
 }
 
 // GET ORDER TOTAL FORM MEGAWIN
-// TODO: cannot upadte the order total after the order is created, and order is not automatically calculated
-export async  function getOrderTotal(orderID: any) {
+// TODO: cannot update the order total after the order is created, and order is not automatically calculated
+export async function getOrderTotal(orderID: any) {
   try {
-
-    console.log("Getting order total: ", orderID);
+    console.log("Getting order total: ", orderID)
     const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}&guid=${orderID}`
 
     const response = await fetch(url)
@@ -625,12 +699,11 @@ export async  function getOrderTotal(orderID: any) {
     }
 
     const data = await response.json()
-    return (data.result.total)
+    return data.result.total
   } catch (error) {
     console.error("Error fetching order details:", error)
     throw error
   }
-
 }
 
 export async function sendToMegawin(orderID: any) {
@@ -644,27 +717,9 @@ export async function sendToMegawin(orderID: any) {
   try {
     const res = await fetch(url, {
       method: "POST",
-    });
-    const data = await res.json();
+    })
+    const data = await res.json()
   } catch (error) {
-    console.error("Error adding line to order:", error);
+    console.error("Error adding line to order:", error)
   }
-}
-
-export async function handleOrders(orderData: any, customerID: any) {
-  console.log("order data: ", orderData)
-  console.log("customer id: ", customerID.clcleunik)
-  try {
-    const orderID = await createEmptyORder(customerID.clcleunik)
-    const fullOrder = await addLinesToOrder(orderID.result.guid, orderData)
-    const completeOrder = await sendToMegawin(orderID.result.guid)
-
-    console.log(orderID.result.guid)
-    console.log(fullOrder)
-    console.log(completeOrder)
-  } catch (error) {
-    console.log(error)
-  }
-
-
 }

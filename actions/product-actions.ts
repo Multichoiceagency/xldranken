@@ -1,6 +1,5 @@
 "use server"
 
-import { getProductsBatch } from "@/lib/api"
 import type { ProductProps } from "@/types/product"
 
 // Helper function to create a delay
@@ -12,7 +11,7 @@ const sleep = (ms: number): Promise<void> => {
 export async function fetchMoreProducts(
   categoryId: string,
   batchNumber: number,
-  batchSize = 48,
+  batchSize = 12,
 ): Promise<ProductProps[]> {
   try {
     console.log(`Fetching batch ${batchNumber} of products for category ${categoryId}`)
@@ -31,3 +30,7 @@ export async function fetchMoreProducts(
     return []
   }
 }
+async function getProductsBatch(categoryId: string, batchSize: number, batchNumber: number): Promise<ProductProps[]> {
+  throw new Error("Function not implemented.")
+}
+

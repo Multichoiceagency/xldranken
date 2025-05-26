@@ -1,3 +1,4 @@
+import type React from "react"
 import type { Metadata } from "next"
 import { Poppins } from "next/font/google"
 import "./globals.css"
@@ -8,9 +9,10 @@ import { WhatsAppButton } from "@/components/whatsapp-button"
 import { Toaster } from "@/components/ui/toaster"
 import { NotificationPopup } from "@/components/notification-popup"
 import { AgeVerificationPopup } from "@/components/AgeVerificationPopup"
-import { Providers } from "./providers" // <== import new wrapper
+import { Providers } from "./providers"
 import ScrollReset from "@/components/ScrollReset"
 import InstallPrompt from "@/components/InstallPrompt"
+import Script from "next/script"
 
 const poppins = Poppins({
   subsets: ["latin-ext"],
@@ -37,6 +39,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-title" content="XL Groothandel" />
       </head>
       <body className={`${poppins.className} antialiased bg-background text-text`}>
+        {/* OneSignal Scripts */}
+        <Script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" strategy="afterInteractive" />
+        <Script id="onesignal-init" strategy="afterInteractive">
+          {`
+            window.OneSignalDeferred = window.OneSignalDeferred || [];
+            OneSignalDeferred.push(async function(OneSignal) {
+              await OneSignal.init({
+                appId: "32d3547f-ec7c-4a28-818f-f01357f4e9c9",
+                safari_web_id: "web.onesignal.auto.0893d0c7-c315-4498-a086-d9071f0f29e9",
+                notifyButton: {
+                  enable: true,
+                },
+                allowLocalhostAsSecureOrigin: true,
+              });
+            });
+          `}
+        </Script>
+
         <ScrollReset />
         <Providers>
           <InstallPrompt />

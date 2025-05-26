@@ -1,16 +1,23 @@
-// Add OneSignal types to the global Window interface
+// Global type definitions
 interface Window {
-  OneSignalDeferred?: ((OneSignal: any) => void)[]
   OneSignal?: {
-    User: any
-    // Common methods for subdomain approach
-    init: (options: any) => Promise<any>
-    isPushNotificationsEnabled?: () => Promise<boolean>
-    registerForPushNotifications?: () => void
-    setSubscription?: (enabled: boolean) => void
-    sendTag?: (key: string, value: string) => void
-    getUserId?: () => Promise<string>
-    getSubscription?: () => Promise<boolean>
+    isPushNotificationsSupported: () => Promise<boolean>
+    isPushNotificationsEnabled: () => Promise<boolean>
+    registerForPushNotifications: () => Promise<void>
+    showSlidedownPrompt: () => Promise<void>
+    showNativePrompt: () => Promise<void>
+    getNotificationPermission: () => Promise<string>
+    getUserId: () => Promise<string | null>
+    setExternalUserId: (id: string) => Promise<void>
+    logout: () => Promise<void>
+    [key: string]: any
   }
+  OneSignalDeferred?: any[]
+  oneSignalInitialized?: boolean
 }
-
+interface Document {
+  webkitHidden?: boolean
+  msHidden?: boolean
+  mozHidden?: boolean
+  hidden?: boolean
+}

@@ -105,7 +105,7 @@ function AboutUsSectionSkeleton() {
 
 function InstallAppSkeleton() {
   return (
-    <div className="w-full py-10 px-4 bg-gradient-to-r from-[#2D1B69] to-[#5D4A9C]">
+    <div className="w-full pt-10 px-4 bg-gradient-to-r from-[#2D1B69] to-[#5D4A9C]">
       <div className="container mx-auto">
         <Skeleton className="h-8 w-64 mb-4 bg-gray-700" />
         <div className="grid md:grid-cols-2 gap-8">

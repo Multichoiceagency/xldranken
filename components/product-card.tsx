@@ -16,7 +16,8 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const { toast } = useToast()
   const { isLoggedIn, loading } = useAuthContext()
   const [isAnimating, setIsAnimating] = useState(false)
-  const [quantityInput, setQuantityInput] = useState("0")
+  const [quantityInput, setQuantityInput] = useState("1")
+  const [isHovered, setIsHovered] = useState(false)
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [inCartInfo, setInCartInfo] = useState({ inCart: false, quantity: 0 })
@@ -29,7 +30,14 @@ export default function ProductCard({ product }: { product: ProductProps }) {
     const quantity = inCart ? cart.find((item) => item.id === product.arcleunik)?.quantity || 0 : 0
 
     setInCartInfo({ inCart, quantity })
-    setQuantityInput(quantity > 0 ? quantity.toString() : "0")
+
+    // Only update quantity input if item is in cart, otherwise keep user's input
+    if (inCart && quantity > 0) {
+      setQuantityInput(quantity.toString())
+    } else if (!inCart) {
+      // Reset to 1 when item is not in cart
+      setQuantityInput("1")
+    }
   }, [cart, isInCart, product])
 
   if (!product) return <p className="text-gray-500">Product niet beschikbaar</p>
@@ -58,74 +66,74 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const imageSrc = getImageSrc()
   const regularPrice = Number(product.prix_vente_groupe) || 0
 
-  // Update the handleAddToCart function to ensure we're explicitly logging and passing the fam2id
+  // Update the handleAddToCart function to use the current quantity input
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
 
-    // Always add at least 1 item when clicking the add to cart button
     const quantity = Math.max(1, Number.parseInt(quantityInput) || 1)
 
     setIsAnimating(true)
 
-    // Log the product's fam2id for debugging
     console.log(`Adding product to cart with fam2id: ${product.fam2id || "undefined"}`)
 
-    addToCart({
-      id: product.arcleunik,
-      name: product.title,
-      price: regularPrice,
-      image: imageSrc,
-      volume: product.arcleunik,
-      productCode: product.productCode || "",
-      arcleunik: product.arcleunik,
-      // IMPORTANT: Pass the exact fam2id from the product data without any modification
-      fam2id: product.fam2id,
-    })
-
-    // If the quantity should be more than 1, update it after adding
-    if (quantity > 1 && inCartInfo.inCart) {
+    if (inCartInfo.inCart) {
+      // If already in cart, update the quantity
       updateQuantity(product.arcleunik, quantity)
+      toast({
+        title: "Hoeveelheid bijgewerkt",
+        description: `${product.title}: ${quantity} stuks`,
+      })
+    } else {
+      // Add new item to cart with specified quantity
+      addToCart({
+        id: product.arcleunik,
+        name: product.title,
+        price: regularPrice,
+        image: imageSrc,
+        volume: product.arcleunik,
+        productCode: product.productCode || "",
+        arcleunik: product.arcleunik,
+        fam2id: product.fam2id,
+      })
+
+      // If quantity is more than 1, update it after adding
+      if (quantity > 1) {
+        setTimeout(() => {
+          updateQuantity(product.arcleunik, quantity)
+        }, 100)
+      }
+
+      toast({
+        title: "Product toegevoegd",
+        description: `${product.title}: ${quantity} stuks toegevoegd aan je winkelwagen`,
+      })
     }
-
-    // Update the quantity input to match what was added
-    setQuantityInput(quantity.toString())
-
-    toast({
-      title: "Product toegevoegd",
-      description: `${product.title} is toegevoegd aan je winkelwagen`,
-    })
 
     setTimeout(() => setIsAnimating(false), 1000)
   }
 
   const handleQuantityChange = (val: number) => {
-    if (inCartInfo.inCart) {
-      // Only update quantity if the item is already in cart
-      setQuantityInput(val.toString())
-      updateQuantity(product.arcleunik, val)
+    const newVal = Math.max(1, val) // Minimum quantity is 1
+    setQuantityInput(newVal.toString())
 
-      if (val > 0) {
-        toast({
-          title: "Hoeveelheid bijgewerkt",
-          description: `${product.title}: ${val} stuks`,
-        })
-      } else {
-        // If quantity is set to 0, remove from cart
-        removeFromCart(product.arcleunik)
-        toast({
-          title: "Product verwijderd",
-          description: `${product.title} is verwijderd uit je winkelwagen`,
-        })
-      }
-    } else {
-      // If not in cart, show a message that they need to add it first
+    if (inCartInfo.inCart) {
+      // Update cart quantity if item is already in cart
+      updateQuantity(product.arcleunik, newVal)
       toast({
-        title: "Voeg eerst toe aan winkelwagen",
-        description: "Klik op 'In winkelmand' om het product toe te voegen",
+        title: "Hoeveelheid bijgewerkt",
+        description: `${product.title}: ${newVal} stuks`,
       })
-      // Reset quantity input to 0
-      setQuantityInput("0")
     }
+  }
+
+  const handleRemoveFromCart = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    removeFromCart(product.arcleunik)
+    setQuantityInput("1") // Reset to 1 when removed
+    toast({
+      title: "Product verwijderd",
+      description: `${product.title} is verwijderd uit je winkelwagen`,
+    })
   }
 
   const navigateToProductPage = () => {
@@ -133,87 +141,133 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   }
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-lg border transition-all duration-500 h-full w-full">
+    <div
+      className="group relative flex flex-col bg-white rounded-2xl border-2 border-[#C6B07F]/10 hover:border-[#C6B07F]/30 transition-all duration-500 h-full w-full shadow-lg hover:shadow-2xl transform hover:-translate-y-2 overflow-hidden"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Product Badge */}
+      {inCartInfo.inCart && (
+        <div className="absolute top-3 left-3 z-20 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
+          In winkelwagen
+        </div>
+      )}
+
+      {/* Quick Actions */}
       <div
-        className="relative h-[120px] sm:h-[160px] md:h-[200px] w-full overflow-hidden p-2 sm:p-4 cursor-pointer"
+        className={`absolute top-3 right-3 z-20 flex flex-col gap-2 transition-all duration-300 ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
+      >
+        {isLoggedIn && inCartInfo.inCart && (
+          <button
+            onClick={handleRemoveFromCart}
+            className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-red-500 hover:text-white transition-all duration-300 group/btn"
+          >
+            <Trash2 className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+          </button>
+        )}
+      </div>
+
+      {/* Image Section */}
+      <div
+        className="relative h-[200px] sm:h-[220px] md:h-[240px] w-full overflow-hidden cursor-pointer bg-white"
         onClick={navigateToProductPage}
       >
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#C6B07F] to-[#0F3059]"></div>
+        </div>
+
         <Image
           src={imageError ? "/placeholder.svg" : imageSrc}
           alt={product.title}
           fill
-          className={`object-contain transition-transform duration-500 ${isAnimating ? "scale-110" : "group-hover:scale-75"}`}
+          className={`object-contain p-4 transition-all duration-700 ${
+            isAnimating ? "scale-110 rotate-3" : isHovered ? "scale-105" : "scale-100"
+          }`}
           unoptimized
           onError={() => setImageError(true)}
         />
+
+        {/* Hover Overlay */}
+        <div
+          className={`absolute inset-0 bg-gradient-to-t from-[#0F3059]/20 via-transparent to-transparent transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`}
+        />
+
+        {/* Animation Overlay */}
         {isAnimating && (
-          <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10 animate-pulse">
-            <div className="bg-green-500 text-white rounded-full p-1 sm:p-2 animate-bounce">
-              <Check className="w-4 h-4 sm:w-6 sm:h-6" />
+          <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-500/20 flex items-center justify-center z-10 animate-pulse">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full p-3 animate-bounce shadow-2xl">
+              <Check className="w-6 h-6" />
             </div>
           </div>
         )}
       </div>
 
-      <div className="flex flex-col p-2 sm:p-4 pt-0 flex-grow">
+      {/* Content Section */}
+      <div className="flex flex-col p-4 sm:p-5 flex-grow bg-gradient-to-b from-white to-gray-50/50">
+        {/* Product Title */}
         <h3
-          className="text-left font-bold text-[#002B7F] min-h-[2.5rem] line-clamp-2 text-xs sm:text-sm md:text-base cursor-pointer mb-1 sm:mb-2"
+          className="text-left font-bold text-[#0F3059] min-h-[3rem] line-clamp-2 text-sm sm:text-base cursor-pointer mb-3 hover:text-[#C6B07F] transition-colors duration-300 leading-tight"
           onClick={navigateToProductPage}
         >
           {product.title}
         </h3>
 
-        <div className="flex items-center justify-between mb-2 sm:mb-4 mt-auto">
+        {/* Price Section */}
+        <div className="flex items-center justify-between mb-4 mt-auto">
           {loading ? (
-            <span className="text-xs sm:text-sm text-gray-400 font-medium">Laden...</span>
+            <div className="flex items-center gap-2">
+              <div className="w-16 h-6 bg-gray-200 rounded animate-pulse"></div>
+              <span className="text-xs text-gray-400">Laden...</span>
+            </div>
           ) : isLoggedIn ? (
-            <span className="text-[#E31931] text-sm sm:text-lg md:text-xl font-bold">
-              {regularPrice > 0 ? `€ ${regularPrice.toFixed(2).replace(".", ",")}` : "Prijs onbekend"}
-            </span>
-          ) : (
-            <span className="text-gray-600 text-xs sm:text-sm font-normal hover:font-bold hover:text-green-700">
-              Log in voor prijzen
-            </span>
-          )}
+            (() => {
+              const price = Number(product.prix_vente_groupe)
 
-          {isLoggedIn && inCartInfo.inCart && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 sm:h-8 sm:w-8 p-0 text-red-500 hover:text-red-700"
-              onClick={(e) => {
-                e.stopPropagation()
-                removeFromCart(product.arcleunik)
-                setQuantityInput("0")
-                toast({
-                  title: "Product verwijderd",
-                  description: `${product.title} is verwijderd uit je winkelwagen`,
-                })
-              }}
-            >
-              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
+              // Show price if it's a valid number and greater than 0
+              if (!isNaN(price) && price > 0) {
+                return (
+                  <div className="flex flex-col">
+                    <span className="text-2xl font-bold bg-gradient-to-r from-[#0F3059] to-[#1a4a7a] bg-clip-text text-transparent">
+                      €{price.toFixed(2).replace(".", ",")}
+                    </span>
+                    <span className="text-xs text-gray-500">per stuk</span>
+                  </div>
+                )
+              } else {
+                return (
+                  <div className="bg-gray-100 px-3 py-2 rounded-lg">
+                    <span className="text-gray-500 text-sm font-medium">Prijs onbekend</span>
+                  </div>
+                )
+              }
+            })()
+          ) : (
+            <div className="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3 rounded-lg border border-gray-300">
+              <span className="text-gray-600 text-sm font-medium">Prijzen zichtbaar na inloggen</span>
+            </div>
           )}
         </div>
 
+        {/* Quantity and Cart Controls */}
         {!loading && isLoggedIn && (
-          <div className="flex flex-col space-y-2">
-            {/* Quantity Selector - Now above the button */}
+          <div className="space-y-3">
+            {/* Quantity Selector */}
             <div className="flex items-center justify-between">
-              <span className="text-xs sm:text-sm font-medium">Aantal:</span>
-              <div className="flex items-center border rounded-md">
+              <span className="text-sm font-semibold text-[#0F3059]">Aantal:</span>
+              <div className="flex items-center bg-white border-2 border-[#C6B07F]/30 rounded-xl overflow-hidden shadow-sm">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 p-0"
+                  className="h-10 w-10 hover:bg-[#C6B07F]/10 text-[#0F3059] disabled:opacity-50 transition-all duration-300"
                   onClick={(e) => {
                     e.stopPropagation()
-                    const val = Math.max(0, Number.parseInt(quantityInput) - 1)
+                    const val = Math.max(1, Number.parseInt(quantityInput) - 1)
                     handleQuantityChange(val)
                   }}
-                  disabled={Number.parseInt(quantityInput) <= 0 || !inCartInfo.inCart}
+                  disabled={Number.parseInt(quantityInput) <= 1}
                 >
-                  <Minus className="h-3 w-3" />
+                  <Minus className="h-4 w-4" />
                 </Button>
 
                 <input
@@ -223,57 +277,73 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                   pattern="[0-9]*"
                   value={quantityInput}
                   onChange={(e) => {
-                    if (/^\d*$/.test(e.target.value)) setQuantityInput(e.target.value)
-                  }}
-                  onBlur={() => {
-                    if (inCartInfo.inCart) {
-                      handleQuantityChange(Number.parseInt(quantityInput) || 0)
-                    } else {
-                      setQuantityInput("0")
+                    if (/^\d*$/.test(e.target.value)) {
+                      const val = e.target.value
+                      setQuantityInput(val)
                     }
                   }}
+                  onBlur={() => {
+                    const val = Math.max(1, Number.parseInt(quantityInput) || 1)
+                    handleQuantityChange(val)
+                  }}
                   onKeyDown={(e) => e.key === "Enter" && inputRef.current?.blur()}
-                  className="w-10 text-center text-xs sm:text-sm font-medium border-0 focus:ring-0"
+                  className="w-12 text-center font-bold border-0 focus:ring-0 text-[#0F3059] bg-[#C6B07F]/5 focus:bg-[#C6B07F]/10 transition-colors"
+                  style={{ fontSize: "16px" }} // Prevent mobile zoom
                   aria-label="Aantal"
                 />
 
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 p-0"
+                  className="h-10 w-10 hover:bg-[#C6B07F]/10 text-[#0F3059] transition-all duration-300"
                   onClick={(e) => {
                     e.stopPropagation()
-                    if (inCartInfo.inCart) {
-                      const val = Math.max(0, Number.parseInt(quantityInput) + 1)
-                      handleQuantityChange(val)
-                    } else {
-                      toast({
-                        title: "Voeg eerst toe aan winkelwagen",
-                        description: "Klik op 'In winkelmand' om het product toe te voegen",
-                      })
-                    }
+                    const val = Number.parseInt(quantityInput) + 1
+                    handleQuantityChange(val)
                   }}
-                  disabled={!inCartInfo.inCart}
                 >
-                  <Plus className="h-3 w-3" />
+                  <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
             {/* Add to Cart Button */}
             <Button
-              className="w-full bg-green-500 hover:bg-green-600 text-white transition-all duration-300 h-8 px-2 sm:px-3"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleAddToCart(e)
-              }}
+              className="w-full bg-gradient-to-r from-[#0F3059] to-[#1a4a7a] hover:from-[#1a4a7a] hover:to-[#0F3059] text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl transform active:scale-95 group/cart"
+              onClick={handleAddToCart}
             >
-              <ShoppingCart className="w-6 h-6 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              <span className="text-xs sm:text-sm">{inCartInfo.inCart ? "Bijwerken" : "In winkelmand"}</span>
+              <ShoppingCart className="w-5 h-5 mr-2 group-hover/cart:scale-110 transition-transform duration-300" />
+              <span className="text-sm">{inCartInfo.inCart ? "Bijwerken" : `Voeg ${quantityInput} toe`}</span>
+            </Button>
+
+            {/* Total Price Preview */}
+            {regularPrice > 0 && Number.parseInt(quantityInput) >= 1 && (
+              <div className="bg-gradient-to-r from-[#C6B07F]/10 to-[#d4c291]/10 border border-[#C6B07F]/20 rounded-lg p-3 text-center">
+                <span className="text-xs text-gray-600">Totaal: </span>
+                <span className="font-bold text-[#0F3059]">
+                  €{(regularPrice * Number.parseInt(quantityInput)).toFixed(2).replace(".", ",")}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Login Prompt for Non-Authenticated Users */}
+        {!loading && !isLoggedIn && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 text-center">
+            <p className="text-sm text-blue-800 mb-2">Log in om te bestellen</p>
+            <Button
+              onClick={() => router.push("/login")}
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 text-white font-semibold py-2 rounded-lg transition-all duration-300 hover:scale-105"
+            >
+              Inloggen
             </Button>
           </div>
         )}
       </div>
+
+      {/* Bottom Gradient Border */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C6B07F] via-[#d4c291] to-[#C6B07F] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
     </div>
   )
 }

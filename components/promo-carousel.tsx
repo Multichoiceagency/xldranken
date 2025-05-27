@@ -8,6 +8,18 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 
 // Updated promos array with XL Groothandel in titles
 const promos = [
+    {
+    title: "XL Groothandel - Uw Dranken Specialist",
+    description:
+      "Verken ons uitgebreide aanbod van premium alcoholische dranken, verfrissende frisdranken en exclusieve merken voor elke gelegenheid.",
+    discount: "900+ PRODUCTEN",
+    media: {
+      type: "image",
+      src: "/winkel/winkel2.jpeg",
+    },
+    buttonText: "Registereer nu",
+    href: "/zakelijk",
+  },
   {
     title: "XL Groothandel presenteert: Lovka",
     description:
@@ -21,28 +33,16 @@ const promos = [
     href: "https://lovkadrinks.com/",
   },
   {
-    title: "XL Groothandel - Uw Dranken Specialist",
+    title: "XL Groothandel - al jaren uw vertrouwde leverancier",
     description:
-      "Verken ons uitgebreide aanbod van premium alcoholische dranken, verfrissende frisdranken en exclusieve merken voor elke gelegenheid.",
-    discount: "900+ PRODUCTEN",
-    media: {
-      type: "image",
-      src: "/winkel/winkel2.jpeg",
-    },
-    buttonText: "Bekijk Sterke Dranken",
-    href: "http://localhost:3000/categorie/sterke-drank",
-  },
-  {
-    title: "XL Groothandel Premium Collectie",
-    description:
-      "Laat u meevoeren op een smaakvolle reis met onze zorgvuldig geselecteerde ambachtelijke rumcollectie van over de hele wereld.",
-    discount: "25% KORTING",
+      "Levering door heel Nederland. Wij zijn al jaren uw vertrouwde leverancier van dranken en food producten.",
+    discount: "Levering door heel Nederland",
     media: {
       type: "image",
       src: "/winkel/winkel3.jpeg",
     },
     buttonText: " Bekijk Cocktails",
-    href: "http://localhost:3000/categorie/cocktails",
+    href: "/categorie/cocktails",
   },
 ]
 

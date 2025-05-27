@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import { Search } from "lucide-react"
+import { Search, LogIn } from "lucide-react"
 import ProductCard from "@/components/product-card"
+import { Button } from "@/components/ui/button"
 import type { ProductProps } from "@/types/product"
-import { useCart } from "@/lib/cart-context" // Assuming this exists
+import { useCart } from "@/lib/cart-context"
+import { useAuthContext } from "@/context/AuthContext"
 
 export default function SearchPage() {
   const searchParams = useSearchParams()
@@ -16,6 +18,7 @@ export default function SearchPage() {
   const [localSearchQuery, setLocalSearchQuery] = useState(query)
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(query)
   const { addToCart, isInCart } = useCart()
+  const { isLoggedIn, loading: authLoading } = useAuthContext()
 
   // Update local search query when URL query changes
   useEffect(() => {
@@ -54,14 +57,32 @@ export default function SearchPage() {
           console.log("API Response:", data.result?.product?.[0]) // Log the first product for debugging
 
           // Transform API response to match ProductProps
-          const transformedResults = (data.result?.product || []).map((item: any) => ({
-            arcleunik: item.arcleunik,
-            title: item.title || item.megatech_Titre_lib_web_nl || "Product",
-            photo1_base64: item.photo1_base64 || "", // Use photo1_base64 directly instead of image_url
-            prix_vente_groupe: item.prix_promo_ttc || item.prix_vente_ttc || 0,
-            productCode: item.code_article || item.arcleunik,
-            // Add any other required fields for ProductProps
-          }))
+          const transformedResults = (data.result?.product || []).map((item: any) => {
+            // Debug log the raw API item to see available price fields
+            console.log("Raw API item:", {
+              arcleunik: item.arcleunik,
+              title: item.title,
+              prix_promo_ttc: item.prix_promo_ttc,
+              prix_vente_ttc: item.prix_vente_ttc,
+              prix_vente_groupe: item.prix_vente_groupe,
+              // Log other potential price fields
+              prix_public: item.prix_public,
+              prix_achat: item.prix_achat,
+            })
+
+            // Try to get the best available price
+            const price = item.prix_vente_groupe || item.prix_promo_ttc || item.prix_vente_ttc || 0
+
+            return {
+              arcleunik: item.arcleunik,
+              title: item.title || item.megatech_Titre_lib_web_nl || "Product",
+              photo1_base64: item.photo1_base64 || "",
+              prix_vente_groupe: price, // Use the resolved price
+              productCode: item.code_article || item.arcleunik,
+              fam2id: item.fam2id,
+              // Add any other required fields for ProductProps
+            }
+          })
 
           setSearchResults(transformedResults)
         } else {
@@ -83,11 +104,41 @@ export default function SearchPage() {
     return () => clearTimeout(timer)
   }, [debouncedSearchQuery])
 
+  const handleLoginRedirect = () => {
+    router.push("/login")
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Authentication status banner */}
+      {!authLoading && !isLoggedIn && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <LogIn className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-blue-800 font-medium">Log in voor prijzen en bestellen</p>
+                <p className="text-blue-600 text-sm">
+                  Meld je aan om prijzen te zien en producten toe te voegen aan je winkelwagen
+                </p>
+              </div>
+            </div>
+            <Button onClick={handleLoginRedirect} className="bg-blue-600 hover:bg-blue-700 text-white">
+              Inloggen
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Search header with input field for updating search */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Zoekresultaten</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold">Zoekresultaten</h1>
+          {!authLoading && isLoggedIn && (
+            <div className="text-sm text-green-600 font-medium">✓ Ingelogd - Prijzen zichtbaar</div>
+          )}
+        </div>
+
         <div className="flex items-stretch mb-4">
           <div className="bg-[#BEA46A] text-white px-3 py-2 rounded-l-md flex items-center">
             <Search className="h-5 w-5" />
@@ -100,6 +151,7 @@ export default function SearchPage() {
             className="flex-1 px-4 py-2 border-y border-r border-gray-300 rounded-r-md focus:outline-none focus:ring-1 focus:ring-[#BEA46A]"
           />
         </div>
+
         {debouncedSearchQuery && (
           <p className="text-gray-600">
             Resultaten voor: <span className="text-[#BEA46A] font-medium">&quot;{debouncedSearchQuery}&quot;</span>
@@ -108,14 +160,14 @@ export default function SearchPage() {
       </div>
 
       {/* Loading state */}
-      {isLoading && (
+      {(isLoading || authLoading) && (
         <div className="flex justify-center items-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#BEA46A]"></div>
         </div>
       )}
 
       {/* No results */}
-      {!isLoading && searchResults.length === 0 && debouncedSearchQuery && (
+      {!isLoading && !authLoading && searchResults.length === 0 && debouncedSearchQuery && (
         <div className="text-center py-12">
           <div className="bg-gray-100 inline-block p-6 rounded-full mb-4">
             <Search className="h-12 w-12 text-gray-400" />
@@ -136,10 +188,14 @@ export default function SearchPage() {
       )}
 
       {/* Search results */}
-      {!isLoading && searchResults.length > 0 && (
+      {!isLoading && !authLoading && searchResults.length > 0 && (
         <>
-          <p className="mb-4 text-gray-600">{searchResults.length} producten gevonden</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-gray-600">{searchResults.length} producten gevonden</p>
+            {!isLoggedIn && <p className="text-sm text-gray-500 italic">Log in om prijzen te zien en te bestellen</p>}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {searchResults.map((product) => (
               <ProductCard key={product.arcleunik} product={product} />
             ))}
@@ -148,13 +204,21 @@ export default function SearchPage() {
       )}
 
       {/* Empty state - no query */}
-      {!isLoading && !debouncedSearchQuery && (
+      {!isLoading && !authLoading && !debouncedSearchQuery && (
         <div className="text-center py-12">
           <div className="bg-gray-100 inline-block p-6 rounded-full mb-4">
             <Search className="h-12 w-12 text-gray-400" />
           </div>
           <h2 className="text-2xl font-bold mb-2">Begin met zoeken</h2>
-          <p className="text-gray-600 mb-6">Voer een zoekopdracht in om producten te vinden</p>
+          <p className="text-gray-600 mb-6">
+            Voer een zoekopdracht in om producten te vinden
+            {!isLoggedIn && (
+              <span className="block mt-2 text-sm text-blue-600">
+                Log in om prijzen te zien en producten te bestellen
+              </span>
+            )}
+          </p>
+
           <div className="max-w-md mx-auto">
             <h3 className="font-semibold mb-2 text-left">Populaire categorieën:</h3>
             <div className="flex flex-wrap gap-2 justify-center">

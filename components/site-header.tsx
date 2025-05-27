@@ -6,6 +6,19 @@ import type Link from "next/link"
 import Image from "next/image"
 import { useRouter, usePathname } from "next/navigation"
 import { Menu, X, Search, User, ShoppingCart, LogOut, ChevronDown, ChevronUp } from "lucide-react"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import {
+  faHome,
+  faWineBottle,
+  faBeer,
+  faGlassWater,
+  faUtensils,
+  faBox,
+  faUser,
+  faShoppingCart,
+  faSignOutAlt,
+  faCubes,
+} from "@fortawesome/free-solid-svg-icons"
 import { useCart } from "@/lib/cart-context"
 import { menuItemsList } from "@/lib/api"
 import { SideCart } from "@/components/side-cart"
@@ -27,6 +40,35 @@ const NoScrollLink = ({ href, children, className, onClick, ...props }: React.Co
       {children}
     </a>
   )
+}
+
+// Icon mapping for menu items
+const getMenuIcon = (menuName: string) => {
+  switch (menuName.toLowerCase()) {
+    case "alcohol":
+    case "sterke drank":
+      return faWineBottle
+    case "wijn":
+      return faWineBottle
+    case "bier":
+      return faBeer
+    case "frisdranken":
+      return faGlassWater
+    case "food":
+      return faUtensils
+    case "non-food":
+      return faBox
+    default:
+      return faCubes
+  }
+}
+
+// Haptic feedback utility
+const triggerHapticFeedback = () => {
+  if (typeof window !== "undefined" && "navigator" in window && "vibrate" in navigator) {
+    // Light haptic feedback - short vibration
+    navigator.vibrate(50)
+  }
 }
 
 export function SiteHeader() {
@@ -136,7 +178,17 @@ export function SiteHeader() {
 
   const toggleUserMenu = useCallback(() => setIsUserMenuOpen((prev) => !prev), [])
   const toggleCart = useCallback(() => setIsCartOpen((prev) => !prev), [])
-  const toggleMobileMenu = useCallback(() => setIsMobileMenuOpen((prev) => !prev), [])
+
+  const toggleMobileMenu = useCallback(() => {
+    setIsMobileMenuOpen((prev) => {
+      const newState = !prev
+      // Trigger haptic feedback when opening the menu on mobile
+      if (newState) {
+        triggerHapticFeedback()
+      }
+      return newState
+    })
+  }, [])
 
   // Search submit (desktop & mobile)
   const handleSearchSubmit = useCallback(
@@ -176,34 +228,44 @@ export function SiteHeader() {
 
   return (
     <>
-      <div className="bg-[#BEA46A] text-white py-2 text-sm px-4">
-        <div className="container mx-auto flex justify-between">
-          <span>Meer dan 900+ producten</span>
-          <div className="hidden md:flex gap-4">
+      {/* Top Banner */}
+      <div className="bg-gradient-to-r from-[#C6B07F] to-[#d4c291] text-white py-3 text-sm px-4 shadow-sm">
+        <div className="container mx-auto px-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="font-semibold">Meer dan 900+ producten</span>
+          </div>
+          <div className="hidden md:flex gap-6">
             {isLoggedIn ? (
               <>
-                <NoScrollLink href="/account" className="hover:underline">
+                <NoScrollLink href="/account" className="hover:text-white/80 transition-colors font-medium">
                   Mijn account
                 </NoScrollLink>
-                <NoScrollLink href="/account/bestellingen" className="hover:underline">
+                <NoScrollLink
+                  href="/account/bestellingen"
+                  className="hover:text-white/80 transition-colors font-medium"
+                >
                   Bestellingen
                 </NoScrollLink>
-                <NoScrollLink href="/account/adressen" className="hover:underline">
+                <NoScrollLink href="/account/adressen" className="hover:text-white/80 transition-colors font-medium">
                   Adressen
                 </NoScrollLink>
-                <button onClick={handleLogout} className="hover:underline text-[#0E3159] font-bold hover:text-red-100">
+                <button
+                  onClick={handleLogout}
+                  className="hover:text-red-200 transition-colors font-bold text-[#0E3058]"
+                >
                   Uitloggen
                 </button>
               </>
             ) : (
               <>
-                <NoScrollLink href="/login" className="hover:underline">
+                <NoScrollLink href="/login" className="hover:text-white/80 transition-colors font-medium">
                   Inloggen
                 </NoScrollLink>
-                <NoScrollLink href="/zakelijk" className="hover:underline">
+                <NoScrollLink href="/zakelijk" className="hover:text-white/80 transition-colors font-medium">
                   Registreren
                 </NoScrollLink>
-                <NoScrollLink href="/klantenservice" className="hover:underline">
+                <NoScrollLink href="/klantenservice" className="hover:text-white/80 transition-colors font-medium">
                   Klantenservice
                 </NoScrollLink>
               </>
@@ -212,30 +274,35 @@ export function SiteHeader() {
         </div>
       </div>
 
-      <header className="sticky top-0 z-50 bg-white shadow-md">
+      {/* Main Header */}
+      <header className="sticky top-0 z-50 bg-white shadow-lg border-b border-[#C6B07F]/20">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          {/* Logo Section */}
           <div className="flex items-center gap-4">
-            <button onClick={(e) => handleButtonClick(e, toggleMobileMenu)} className="lg:hidden">
-              <Menu className="w-6 h-6" />
+            <button
+              onClick={(e) => handleButtonClick(e, toggleMobileMenu)}
+              className="lg:hidden p-2 rounded-lg hover:bg-[#C6B07F]/10 transition-colors"
+            >
+              <Menu className="w-6 h-6 text-[#0F3059]" />
             </button>
-            <NoScrollLink href="/">
+            <NoScrollLink href="/" className="flex-shrink-0">
               <Image
                 src="/logos/logo-xlgroothandelbv.png"
                 alt="XL Logo"
                 width={200}
-                height={48}
-                className="object-contain"
+                height={56}
+                className="object-contain hover:scale-105 transition-transform duration-300"
                 priority
               />
             </NoScrollLink>
           </div>
 
-          {/* Desktop nav */}
-          <nav className="hidden lg:flex flex-1 justify-center gap-10 font-semibold">
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex flex-1 justify-center gap-8 font-semibold">
             {menuItemsList.map((item) => (
               <div
                 key={item.name}
-                className="relative"
+                className="relative group"
                 ref={(el) => {
                   dropdownRefs.current[item.name] = el
                 }}
@@ -243,10 +310,17 @@ export function SiteHeader() {
                 {item.submenu?.length ? (
                   <>
                     <div className="flex items-center">
-                      <NoScrollLink href={item.href} className="hover:text-[#BEA46A] py-2 mr-1">
+                      <NoScrollLink
+                        href={item.href}
+                        className="hover:text-[#C6B07F] py-3 mr-1 transition-colors duration-300 relative group"
+                      >
                         {item.name}
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C6B07F] group-hover:w-full transition-all duration-300"></span>
                       </NoScrollLink>
-                      <button onClick={(e) => handleDropdownToggle(e, item.name)} className="hover:text-[#BEA46A] p-1">
+                      <button
+                        onClick={(e) => handleDropdownToggle(e, item.name)}
+                        className="hover:text-[#C6B07F] p-2 transition-colors duration-300"
+                      >
                         {openDropdown === item.name ? (
                           <ChevronUp className="w-4 h-4" />
                         ) : (
@@ -255,12 +329,12 @@ export function SiteHeader() {
                       </button>
                     </div>
                     {openDropdown === item.name && (
-                      <div className="absolute left-0 top-full bg-white shadow-lg rounded-md w-64 mt-1 z-50">
+                      <div className="absolute left-0 top-full bg-white shadow-xl rounded-lg w-64 mt-2 z-50 border border-[#C6B07F]/20 overflow-hidden animate-fade-in">
                         {item.submenu.map((sub) => (
                           <NoScrollLink
                             key={sub.name}
                             href={sub.href}
-                            className="block px-4 py-2 hover:bg-[#BEA46A] hover:text-white"
+                            className="block px-6 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] transition-all duration-300 border-b border-gray-100 last:border-b-0"
                             onClick={() => setOpenDropdown(null)}
                           >
                             {sub.name}
@@ -270,8 +344,12 @@ export function SiteHeader() {
                     )}
                   </>
                 ) : (
-                  <NoScrollLink href={item.href} className="hover:text-[#BEA46A] py-2 block">
+                  <NoScrollLink
+                    href={item.href}
+                    className="hover:text-[#C6B07F] py-3 block transition-colors duration-300 relative group"
+                  >
                     {item.name}
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C6B07F] group-hover:w-full transition-all duration-300"></span>
                   </NoScrollLink>
                 )}
               </div>
@@ -286,36 +364,51 @@ export function SiteHeader() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Zoek producten..."
-                  className="pr-8 py-2"
+                  className="pr-12 py-3 border-2 border-[#C6B07F]/30 focus:border-[#C6B07F] rounded-lg transition-colors duration-300"
                 />
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#BEA46A]"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C6B07F] hover:text-[#0F3059] transition-colors duration-300"
                 >
-                  <Search className="w-4 h-4" />
+                  <Search className="w-5 h-5" />
                 </button>
               </div>
             </form>
 
             {/* Search Results Dropdown */}
             {showSearchResults && searchResults.length > 0 && (
-              <div className="absolute top-full right-0 mt-2 w-full bg-white shadow-lg rounded-md z-50 overflow-hidden">
+              <div
+                className="absolute top-full right-0 mt-2 w-full bg-white shadow-xl rounded-lg z-50 overflow-hidden border border-[#C6B07F]/20 animate-fade-in"
+                ref={(node) => {
+                  const handleClickOutside = (e: MouseEvent) => {
+                    if (node && !node.contains(e.target as Node) && !searchRef.current?.contains(e.target as Node)) {
+                      setShowSearchResults(false)
+                    }
+                  }
+                  if (node) {
+                    document.addEventListener("mousedown", handleClickOutside)
+                  }
+                  return () => {
+                    document.removeEventListener("mousedown", handleClickOutside)
+                  }
+                }}
+              >
                 <div className="max-h-80 overflow-y-auto">
                   {searchResults.map((product) => (
                     <a
                       key={product.arcleunik}
                       href={`/product/${product.arcleunik}`}
                       onClick={(e) => handleProductClick(e, product.arcleunik)}
-                      className="block border-t border-gray-100 px-3 py-2 text-sm hover:bg-gray-50"
+                      className="block border-b border-gray-100 px-4 py-3 text-sm hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
                     >
                       {product.title || product.megatech_Titre_lib_web_nl}
                     </a>
                   ))}
                 </div>
-                <div className="p-2 border-t border-gray-100">
+                <div className="p-3 border-t border-gray-100 bg-gray-50">
                   <NoScrollLink
                     href={`/search?q=${encodeURIComponent(searchQuery)}`}
-                    className="block text-center text-sm text-[#BEA46A] hover:underline py-1"
+                    className="block text-center text-sm text-[#C6B07F] hover:text-[#0F3059] font-semibold transition-colors duration-300"
                     onClick={() => setShowSearchResults(false)}
                   >
                     Bekijk alle resultaten
@@ -325,15 +418,19 @@ export function SiteHeader() {
             )}
           </div>
 
-          {/* MOBILE SEARCH ICON & DROPDOWN */}
+          {/* Mobile Search Icon */}
           <div className="md:hidden relative">
-            <button onClick={() => setShowMobileSearch((v) => !v)} className="text-[#BEA46A]" aria-label="Zoeken">
+            <button
+              onClick={() => setShowMobileSearch((v) => !v)}
+              className="text-[#C6B07F] hover:text-[#0F3059] p-2 rounded-lg hover:bg-[#C6B07F]/10 transition-all duration-300"
+              aria-label="Zoeken"
+            >
               <Search className="w-5 h-5" />
             </button>
             {showMobileSearch && (
               <div
                 ref={mobileSearchRef}
-                className="absolute top-full right-0 mt-2 w-[90vw] max-w-xs sm:max-w-sm bg-white shadow-lg rounded-md z-50 p-4"
+                className="absolute top-full right-0 mt-2 w-[90vw] max-w-xs sm:max-w-sm bg-white shadow-xl rounded-lg z-50 p-4 border border-[#C6B07F]/20 animate-fade-in"
               >
                 <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
                   <Input
@@ -341,14 +438,14 @@ export function SiteHeader() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Zoek producten..."
-                    className="flex-1 py-2"
+                    className="flex-1 py-2 border-[#C6B07F]/30 focus:border-[#C6B07F]"
                   />
-                  <button type="submit" className="text-gray-400 hover:text-[#BEA46A]">
+                  <button type="submit" className="text-[#C6B07F] hover:text-[#0F3059] transition-colors">
                     <Search className="w-5 h-5" />
                   </button>
                   <button
                     type="button"
-                    className="ml-1 text-gray-400 hover:text-[#BEA46A]"
+                    className="ml-1 text-gray-400 hover:text-red-500 transition-colors"
                     onClick={() => {
                       setShowMobileSearch(false)
                       setShowSearchResults(false)
@@ -359,14 +456,14 @@ export function SiteHeader() {
                   </button>
                 </form>
                 {showSearchResults && (
-                  <div className="mt-2 max-h-60 overflow-y-auto -mx-4">
+                  <div className="mt-3 max-h-60 overflow-y-auto -mx-4">
                     {searchResults.length > 0 ? (
                       searchResults.map((product) => (
                         <a
                           key={product.arcleunik}
                           href={`/product/${product.arcleunik}`}
                           onClick={(e) => handleProductClick(e, product.arcleunik)}
-                          className="block border-t border-gray-100 px-4 py-2 text-sm hover:bg-gray-50"
+                          className="block border-t border-gray-100 px-4 py-3 text-sm hover:bg-[#C6B07F]/10 transition-colors"
                         >
                           {product.title || product.megatech_Titre_lib_web_nl}
                         </a>
@@ -374,10 +471,10 @@ export function SiteHeader() {
                     ) : searchQuery.length > 2 ? (
                       <div className="px-4 py-4 text-sm text-gray-500 text-center">Geen resultaten gevonden</div>
                     ) : null}
-                    <div className="border-t border-gray-100 px-4 py-2">
+                    <div className="border-t border-gray-100 px-4 py-3 bg-gray-50">
                       <NoScrollLink
                         href={`/search?q=${encodeURIComponent(searchQuery)}`}
-                        className="block text-center text-sm text-[#BEA46A] hover:underline py-1"
+                        className="block text-center text-sm text-[#C6B07F] hover:text-[#0F3059] font-semibold transition-colors"
                         onClick={() => {
                           setShowSearchResults(false)
                           setShowMobileSearch(false)
@@ -392,39 +489,58 @@ export function SiteHeader() {
             )}
           </div>
 
-          {/* User & cart */}
-          <div className="flex items-center gap-4">
+          {/* User & Cart Actions */}
+          <div className="flex items-center gap-3">
+            {/* User Menu */}
             <div className="relative" ref={userMenuRef}>
-              <button onClick={(e) => handleButtonClick(e, toggleUserMenu)}>
+              <button
+                onClick={(e) => handleButtonClick(e, toggleUserMenu)}
+                className="p-2 rounded-lg hover:bg-[#C6B07F]/10 text-[#0F3059] hover:text-[#C6B07F] transition-all duration-300"
+              >
                 <User className="w-6 h-6" />
               </button>
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-50">
+                <div className="absolute right-0 mt-2 w-56 bg-white shadow-xl rounded-lg z-50 border border-[#C6B07F]/20 overflow-hidden animate-fade-in">
                   <div className="py-2">
                     {isLoggedIn ? (
                       <>
-                        <NoScrollLink href="/account" className="block px-4 py-2 hover:bg-gray-100">
+                        <NoScrollLink
+                          href="/account"
+                          className="block px-4 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
+                        >
                           Mijn account
                         </NoScrollLink>
-                        <NoScrollLink href="/account/bestellingen" className="block px-4 py-2 hover:bg-gray-100">
+                        <NoScrollLink
+                          href="/account/bestellingen"
+                          className="block px-4 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
+                        >
                           Bestellingen
                         </NoScrollLink>
-                        <NoScrollLink href="/adressen/gegevens" className="block px-4 py-2 hover:bg-gray-100">
+                        <NoScrollLink
+                          href="/adressen/gegevens"
+                          className="block px-4 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
+                        >
                           Adressen
                         </NoScrollLink>
                         <button
                           onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
+                          className="block w-full text-left px-4 py-3 hover:bg-red-50 text-[#0E3058] hover:text-red-600 transition-all duration-300"
                         >
-                          <LogOut className="inline-block w-4 h-4 mr-1" /> Uitloggen
+                          <LogOut className="inline-block w-4 h-4 mr-2" /> Uitloggen
                         </button>
                       </>
                     ) : (
                       <>
-                        <NoScrollLink href="/login" className="block px-4 py-2 hover:bg-gray-100">
+                        <NoScrollLink
+                          href="/login"
+                          className="block px-4 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
+                        >
                           Inloggen
                         </NoScrollLink>
-                        <NoScrollLink href="/zakelijk" className="block px-4 py-2 hover:bg-gray-100">
+                        <NoScrollLink
+                          href="/zakelijk"
+                          className="block px-4 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
+                        >
                           Registreren
                         </NoScrollLink>
                       </>
@@ -433,10 +549,15 @@ export function SiteHeader() {
                 </div>
               )}
             </div>
-            <button onClick={(e) => handleButtonClick(e, toggleCart)} className="relative">
+
+            {/* Shopping Cart */}
+            <button
+              onClick={(e) => handleButtonClick(e, toggleCart)}
+              className="relative p-2 rounded-lg hover:bg-[#C6B07F]/10 text-[#0F3059] hover:text-[#C6B07F] transition-all duration-300"
+            >
               <ShoppingCart className="w-6 h-6" />
               {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs w-6 h-6 flex items-center justify-center rounded-full font-bold shadow-lg animate-pulse">
                   {totalItems}
                 </span>
               )}
@@ -445,152 +566,203 @@ export function SiteHeader() {
         </div>
       </header>
 
-      {/* Backdrop overlay */}
+      {/* Enhanced Mobile Menu - Left Sidebar */}
       {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[98] backdrop-blur-sm"
-          onClick={() => setIsMobileMenuOpen(false)}
-        ></div>
-      )}
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[98]"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
 
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-y-0 left-0 z-[99] bg-white overflow-y-auto w-full md:w-3/4 shadow-xl animate-slide-in"
-          style={{ width: "75%" }}
-        >
-          <div className="flex items-center justify-between p-4 border-b">
-            <Image src="/logos/logo-xlgroothandelbv.png" alt="XL Logo" width={160} height={48} />
-            <div className="flex items-center gap-3">
-              <button onClick={(e) => handleButtonClick(e, toggleMobileMenu)}>
-                <X className="w-6 h-6" />
+          {/* Sidebar Menu - LEFT SIDE */}
+          <div className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-gradient-to-br from-[#0F3059] via-[#1a4a7a] to-[#0F3059] z-[99] shadow-2xl transform transition-transform duration-300 ease-out translate-x-0 overflow-y-auto animate-slide-in-left">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-[#C6B07F]/30 bg-gradient-to-r from-[#C6B07F]/10 to-[#d4c291]/10">
+              <Image src="/logos/logo-wit.png" alt="XL Logo" width={140} height={40} className="object-contain" />
+              <button
+                onClick={(e) => handleButtonClick(e, toggleMobileMenu)}
+                className="p-2 rounded-lg hover:bg-[#C6B07F]/20 transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
               </button>
             </div>
-          </div>
-          <div className="p-4">
-            <div className="space-y-6">
-              {menuItemsList.map((item) => (
-                <div key={item.name} className="mb-2">
-                  {item.submenu?.length ? (
-                    <>
-                      <div className="flex items-center justify-between w-full">
-                        <NoScrollLink
-                          href={item.href}
-                          className="font-bold text-lg py-2 hover:text-[#BEA46A] transition-colors"
-                          onClick={() => {
-                            setIsMobileMenuOpen(false)
-                            setOpenMobileDropdown(null)
-                          }}
-                        >
-                          {item.name}
-                        </NoScrollLink>
-                        <button
-                          onClick={() => handleMobileDropdownToggle(item.name)}
-                          className="p-2 hover:text-[#BEA46A] transition-colors"
-                        >
-                          {openMobileDropdown === item.name ? (
-                            <ChevronUp className="w-5 h-5" />
-                          ) : (
-                            <ChevronDown className="w-5 h-5" />
-                          )}
-                        </button>
-                      </div>
-                      {openMobileDropdown === item.name && (
-                        <div className="mt-2 ml-4 space-y-3">
-                          {item.submenu.map((sub) => (
-                            <NoScrollLink
-                              key={sub.name}
-                              href={sub.href}
-                              className="block text-base font-semibold text-gray-600 hover:text-[#BEA46A] transition-colors py-2"
-                              onClick={() => {
-                                setOpenMobileDropdown(null)
-                                setIsMobileMenuOpen(false)
-                              }}
-                            >
-                              {sub.name}
-                            </NoScrollLink>
-                          ))}
+
+            {/* Welcome Section */}
+            <div className="p-6 border-b border-[#C6B07F]/20">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-white font-semibold">Welkom bij XL Groothandel</span>
+              </div>
+              {isLoggedIn ? (
+                <div className="bg-gradient-to-r from-[#C6B07F]/20 to-[#d4c291]/20 p-4 rounded-lg border border-[#C6B07F]/30">
+                  <p className="text-[#C6B07F] font-semibold text-sm">✓ Ingelogd</p>
+                  <p className="text-white/80 text-xs">Toegang tot alle prijzen en functies</p>
+                </div>
+              ) : (
+                <div className="bg-gradient-to-r from-blue-500/20 to-blue-600/20 p-4 rounded-lg border border-blue-400/30">
+                  <p className="text-blue-300 font-semibold text-sm">Nog geen account?</p>
+                  <p className="text-white/80 text-xs mb-3">Maak direct een zakelijke account aan</p>
+                  <NoScrollLink
+                    href="/zakelijk"
+                    className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-[#C6B07F] to-[#d4c291] text-[#0F3059] text-xs font-semibold rounded-lg hover:from-[#d4c291] hover:to-[#C6B07F] transition-all duration-300 hover:scale-105"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Account aanmaken →
+                  </NoScrollLink>
+                </div>
+              )}
+            </div>
+
+            {/* Navigation Menu */}
+            <div className="p-6">
+              <div className="space-y-2">
+                {/* Home Link */}
+                <NoScrollLink
+                  href="/"
+                  className="flex items-center gap-4 font-semibold text-lg py-4 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <FontAwesomeIcon icon={faHome} className="w-6 h-6" />
+                  <span>Home</span>
+                </NoScrollLink>
+
+                {/* Menu Items with FontAwesome Icons */}
+                {menuItemsList.map((item) => (
+                  <div key={item.name} className="border-b border-[#C6B07F]/10 pb-2">
+                    {item.submenu?.length ? (
+                      <>
+                        <div className="flex items-center justify-between w-full">
+                          <NoScrollLink
+                            href={item.href}
+                            className="flex items-center gap-4 font-semibold text-lg py-4 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300 flex-1"
+                            onClick={() => {
+                              setIsMobileMenuOpen(false)
+                              setOpenMobileDropdown(null)
+                            }}
+                          >
+                            <FontAwesomeIcon icon={getMenuIcon(item.name)} className="w-6 h-6" />
+                            <span>{item.name}</span>
+                          </NoScrollLink>
+                          <button
+                            onClick={() => handleMobileDropdownToggle(item.name)}
+                            className="p-3 hover:bg-[#C6B07F]/20 transition-colors rounded-lg text-white"
+                          >
+                            {openMobileDropdown === item.name ? (
+                              <ChevronUp className="w-5 h-5" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5" />
+                            )}
+                          </button>
                         </div>
-                      )}
+                        {openMobileDropdown === item.name && (
+                          <div className="mt-2 ml-6 space-y-1 animate-fade-in">
+                            {item.submenu.map((sub) => (
+                              <NoScrollLink
+                                key={sub.name}
+                                href={sub.href}
+                                className="block text-base font-medium text-white/80 hover:text-[#C6B07F] transition-colors py-3 px-4 rounded-lg hover:bg-[#C6B07F]/10"
+                                onClick={() => {
+                                  setOpenMobileDropdown(null)
+                                  setIsMobileMenuOpen(false)
+                                }}
+                              >
+                                {sub.name}
+                              </NoScrollLink>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <NoScrollLink
+                        href={item.href}
+                        className="flex items-center gap-4 font-semibold text-lg py-4 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <FontAwesomeIcon icon={getMenuIcon(item.name)} className="w-6 h-6" />
+                        <span>{item.name}</span>
+                      </NoScrollLink>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Account Section */}
+              <div className="border-t border-[#C6B07F]/20 pt-6 mt-6">
+                <h3 className="text-[#C6B07F] font-bold text-sm uppercase tracking-wide mb-4">Account & Service</h3>
+                <div className="space-y-2">
+                  {isLoggedIn ? (
+                    <>
+                      <NoScrollLink
+                        href="/account"
+                        className="flex items-center gap-4 font-semibold text-base py-3 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <FontAwesomeIcon icon={faUser} className="w-5 h-5" />
+                        <span>Mijn Account</span>
+                      </NoScrollLink>
+                      <NoScrollLink
+                        href="/account/bestellingen"
+                        className="flex items-center gap-4 font-semibold text-base py-3 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <FontAwesomeIcon icon={faShoppingCart} className="w-5 h-5" />
+                        <span>Bestellingen</span>
+                      </NoScrollLink>
+                      <button
+                        onClick={(e) => {
+                          handleButtonClick(e, () => {
+                            setIsMobileMenuOpen(false)
+                            handleLogout(e)
+                          })
+                        }}
+                        className="flex items-center gap-4 font-semibold text-base py-3 px-4 w-full text-red-300 hover:bg-red-500/20 hover:text-red-200 rounded-lg transition-all duration-300"
+                      >
+                        <FontAwesomeIcon icon={faSignOutAlt} className="w-5 h-5" />
+                        <span>Uitloggen</span>
+                      </button>
                     </>
                   ) : (
                     <NoScrollLink
-                      href={item.href}
-                      className="font-bold text-lg block py-2 hover:text-[#BEA46A] transition-colors"
+                      href="/login"
+                      className="flex items-center gap-4 font-semibold text-base py-3 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      {item.name}
+                      <FontAwesomeIcon icon={faUser} className="w-5 h-5" />
+                      <span>Inloggen</span>
                     </NoScrollLink>
                   )}
-                </div>
-              ))}
 
-              {/* Divider */}
-              <div className="border-t border-gray-200 my-6"></div>
-
-              {/* Bottom menu items moved under primary menu */}
-              <div className="grid grid-cols-1 gap-4">
-                {isLoggedIn ? (
-                  <>
-                    <NoScrollLink
-                      href="/account"
-                      className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-[#BEA46A] hover:text-white rounded-md transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <User className="w-6 h-6" />
-                      <span>Mijn Account</span>
-                    </NoScrollLink>
-                    <NoScrollLink
-                      href="/account/bestellingen"
-                      className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-[#BEA46A] hover:text-white rounded-md transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <ShoppingCart className="w-6 h-6" />
-                      <span>Bestellingen</span>
-                    </NoScrollLink>
-                    <button
-                      onClick={(e) => {
-                        handleButtonClick(e, () => {
-                          setIsMobileMenuOpen(false)
-                          handleLogout(e)
-                        })
-                      }}
-                      className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-red-500 hover:text-white rounded-md transition-colors text-red-500"
-                    >
-                      <LogOut className="w-6 h-6" />
-                      <span>Uitloggen</span>
-                    </button>
-                  </>
-                ) : (
-                  <NoScrollLink
-                    href="/login"
-                    className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-[#BEA46A] hover:text-white rounded-md transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                  <button
+                    onClick={(e) => {
+                      handleButtonClick(e, () => {
+                        setIsMobileMenuOpen(false)
+                        setIsCartOpen(true)
+                      })
+                    }}
+                    className="flex items-center gap-4 font-semibold text-base py-3 px-4 w-full text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300 relative"
                   >
-                    <User className="w-6 h-6" />
-                    <span>Inloggen</span>
-                  </NoScrollLink>
-                )}
-                <button
-                  onClick={(e) => {
-                    handleButtonClick(e, () => {
-                      setIsMobileMenuOpen(false)
-                      setIsCartOpen(true)
-                    })
-                  }}
-                  className="flex items-center gap-3 font-bold text-lg py-3 px-4 hover:bg-[#BEA46A] hover:text-white rounded-md transition-colors relative"
-                >
-                  <ShoppingCart className="w-6 h-6" />
-                  <span>Winkelwagen</span>
-                  {totalItems > 0 && (
-                    <span className="absolute top-3 left-7 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                      {totalItems}
-                    </span>
-                  )}
-                </button>
+                    <FontAwesomeIcon icon={faShoppingCart} className="w-5 h-5" />
+                    <span>Winkelwagen</span>
+                    {totalItems > 0 && (
+                      <span className="absolute top-2 left-7 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">
+                        {totalItems}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Footer Info */}
+              <div className="border-t border-[#C6B07F]/20 pt-6 mt-6">
+                <div className="text-center">
+                  <p className="text-white/60 text-xs mb-2">XL Groothandel B.V.</p>
+                  <p className="text-[#C6B07F] text-xs font-semibold">900+ Producten • Snelle Levering</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       <SideCart
@@ -603,6 +775,42 @@ export function SiteHeader() {
           setIsCartOpen(false)
         }}
       />
+
+      {/* Custom CSS for animations */}
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes slideInLeft {
+          from {
+            transform: translateX(-100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .animate-slide-in-left {
+          animation: slideInLeft 0.3s ease-out forwards;
+        }
+
+        /* Prevent body scroll when menu is open */
+        body.mobile-menu-open {
+          overflow: hidden;
+        }
+      `}</style>
     </>
   )
 }

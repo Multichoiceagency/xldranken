@@ -173,8 +173,8 @@ export default function ProductCard({ product }: { product: ProductProps }) {
         onClick={navigateToProductPage}
       >
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#C6B07F] to-[#0F3059]"></div>
+        <div className="absolute inset-0 opacity-5 bg-white">
+          <div className="absolute inset-0 bg-gradient-to-br bg-white"></div>
         </div>
 
         <Image
@@ -204,7 +204,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
       </div>
 
       {/* Content Section */}
-      <div className="flex flex-col p-4 sm:p-5 flex-grow bg-gradient-to-b from-white to-gray-50/50">
+      <div className="flex flex-col p-4 sm:p-5 flex-grow bg-gradient-to-b bg-white">
         {/* Product Title */}
         <h3
           className="text-left font-bold text-[#0F3059] min-h-[3rem] line-clamp-2 text-sm sm:text-base cursor-pointer mb-3 hover:text-[#C6B07F] transition-colors duration-300 leading-tight"
@@ -243,8 +243,8 @@ export default function ProductCard({ product }: { product: ProductProps }) {
               }
             })()
           ) : (
-            <div className="bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-3 rounded-lg border border-gray-300">
-              <span className="text-gray-600 text-sm font-medium">Prijzen zichtbaar na inloggen</span>
+            <div className="bg-white px-3 py-2 rounded-lg">
+              <span className="text-gray-500 text-sm font-medium"></span>
             </div>
           )}
         </div>
@@ -331,19 +331,18 @@ export default function ProductCard({ product }: { product: ProductProps }) {
         {/* Login Prompt for Non-Authenticated Users */}
         {!loading && !isLoggedIn && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 text-center">
-            <p className="text-sm text-blue-800 mb-2">Log in om te bestellen</p>
             <Button
               onClick={() => router.push("/login")}
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-indigo-600 hover:to-blue-500 text-white font-semibold py-2 rounded-lg transition-all duration-300 hover:scale-105"
+              className="w-full bg-gradient-to-r from-[#FFF2CD] to-[#0F3059] hover:from-[#0F3059] hover:to-[#FFF2CD] text-white font-semibold py-2 rounded-lg transition-all duration-100 hover:scale-110"
             >
-              Inloggen
+              Log in om te bestellen
             </Button>
           </div>
         )}
       </div>
 
       {/* Bottom Gradient Border */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C6B07F] via-[#d4c291] to-[#C6B07F] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C6B07F] via-[#d4c291] to-[#C6B07F] opacity-0 group-hover:opacity-100 transition-opacity duration-100"></div>
     </div>
   )
 }

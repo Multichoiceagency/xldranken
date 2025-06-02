@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import { categorizeProduc } from "./product-categorizer"
+import { categorizeProduct } from "./product-categorizer"
 
 export interface CartItem {
   id: string
@@ -15,6 +15,8 @@ export interface CartItem {
   fam2id?: string // Add fam2id for categorization in emails
   quantity: number
   tauxTvaArticleEcommerce?: string // Field for product-specific VAT rate
+  category?: string
+  matchType?: "exact" | "partial" | "fallback" | "existing"
 }
 
 interface CartContextType {
@@ -152,19 +154,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       // IMPORTANT: Preserve the exact fam2id from the product
       // Do not attempt to categorize it unless it's undefined
-      const itemWithCategory = {
-        ...item,
-        // Only use categorization if fam2id is completely missing
-        fam2id: item.fam2id !== undefined ? item.fam2id : categorizeProduc(item.name, item.volume),
-        // Handle image URLs properly - don't truncate base64 images
-        image: item.image?.startsWith("data:image")
-          ? item.image // Keep base64 images intact
-          : item.image?.length > 500
-            ? item.image.substring(0, 500)
-            : item.image,
+      let itemWithCategory = { ...item }
+
+      // Only use categorization if fam2id is completely missing
+      if (item.fam2id === undefined) {
+        const result = categorizeProduct(item.name, item.volume)
+        itemWithCategory = {
+          ...item,
+          fam2id: result.fam2id,
+          category: result.categoryName,
+          matchType: result.matchType,
+        }
+        console.log(
+          `Cart: Auto-categorizing "${item.name}" -> fam2id: ${result.fam2id} (${result.categoryName}) [${result.matchType}]`,
+        )
+      } else {
+        console.log(`Cart: Using existing fam2id for "${item.name}" -> fam2id: ${item.fam2id}`)
       }
 
-      console.log(`Adding to cart: ${item.name} -> fam2id: ${itemWithCategory.fam2id} (original: ${item.fam2id})`)
+      // Handle image URLs properly - don't truncate base64 images
+      itemWithCategory.image = item.image?.startsWith("data:image")
+        ? item.image // Keep base64 images intact
+        : item.image?.length > 500
+          ? item.image.substring(0, 500)
+          : item.image
 
       if (existingItem) {
         return prevCart.map((cartItem) =>

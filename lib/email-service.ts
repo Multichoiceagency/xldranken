@@ -3,10 +3,9 @@ import {
   type OrderConfirmationData,
   generateOrderConfirmationHTML,
   generateOrderConfirmationText,
-  categoryMapping,
 } from "./email-templates"
 import { generateCompletePackingSlipPDF, groupItemsByCategory, type CompletePackingSlipData } from "./pdf-generator"
-import { categorizeProduct } from "./product-categorizer"
+import { categorizeProduct, getCategoryName } from "./product-categorizer"
 
 // Re-export the type for convenience
 export type { OrderConfirmationData } from "./email-templates"
@@ -35,81 +34,70 @@ const createTransporter = () => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
     },
-    pool: true,
-    maxConnections: 5,
-    maxMessages: 100,
-    connectionTimeout: 60000,
-    greetingTimeout: 30000,
-    socketTimeout: 60000,
+    // Optimized connection settings
+    pool: false, // Disable pooling for faster single sends
+    maxConnections: 1,
+    maxMessages: 1,
+    connectionTimeout: 30000, // 30 seconds
+    greetingTimeout: 15000, // 15 seconds
+    socketTimeout: 30000, // 30 seconds
+    // Add retry logic
+    retryDelay: 1000,
+    // Disable some features for speed
+    disableFileAccess: true,
+    disableUrlAccess: true,
   })
 }
 
 // Update the sendOrderConfirmationEmail function to preserve exact fam2id values
 export async function sendOrderConfirmationEmail(data: OrderConfirmationData): Promise<boolean> {
+  const timeout = 25000 // 25 second timeout
+
   try {
     console.log("=== SENDING CUSTOMER EMAIL ===")
     console.log(`Customer: ${data.customerEmail}`)
     console.log(`Order: ${data.orderNumber}`)
-    console.log(`Items before processing: ${data.items.length}`)
 
-    // Log the categoryMapping to see what mappings are available
-    console.log("Category Mapping in email service:", categoryMapping)
-
-    // Before generating HTML content, ensure all products have fam2id
-    console.log("Checking products for email...")
-    const categorizedItems = data.items.map((item) => {
-      // IMPORTANT: Only categorize if fam2id is completely missing
-      if (item.fam2id === undefined) {
-        const categorizedFam2id = categorizeProduct(item.name, item.volume)
-        console.log(
-          `Auto-categorized (fallback): ${item.name} -> fam2id: ${categorizedFam2id} -> category: ${categoryMapping[categorizedFam2id] || "UNKNOWN"}`,
-        )
-        return { ...item, fam2id: categorizedFam2id }
-      }
-
-      console.log(
-        `Preserving original fam2id: ${item.name} -> ${item.fam2id} -> category: ${categoryMapping[item.fam2id] || "UNKNOWN"}`,
-      )
-      return item
+    // Create timeout promise
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error("Email timeout after 25 seconds")), timeout)
     })
 
-    // Create a new data object with processed items
-    const emailData = {
-      ...data,
-      items: categorizedItems,
-    }
+    // Create email sending promise
+    const emailPromise = (async () => {
+      // Process items quickly without extensive logging
+      const categorizedItems = data.items.map((item) => {
+        if (item.fam2id === undefined) {
+          const result = categorizeProduct(item.name, item.volume)
+          const fam2id = typeof result === "string" ? result : result.fam2id
+          const categoryName = getCategoryName(fam2id)
+          return { ...item, fam2id, category: categoryName }
+        }
+        return { ...item, category: getCategoryName(item.fam2id) }
+      })
 
-    console.log(`Items after processing: ${emailData.items.length}`)
-    console.log(`Categories found: ${[...new Set(emailData.items.map((item) => item.fam2id))].join(", ")}`)
-    console.log(
-      `Category names: ${[...new Set(emailData.items.map((item) => categoryMapping[item.fam2id || "21"] || "UNKNOWN"))].join(", ")}`,
-    )
+      const emailData = { ...data, items: categorizedItems }
+      const htmlContent = generateOrderConfirmationHTML(emailData)
+      const textContent = generateOrderConfirmationText(emailData)
+      const transporter = createTransporter()
 
-    // Log each item with its category for debugging
-    emailData.items.forEach((item, index) => {
-      console.log(
-        `Item ${index}: ${item.name}, fam2id: ${item.fam2id}, category: ${categoryMapping[item.fam2id || "21"] || "UNKNOWN"}`,
-      )
-    })
+      console.log("Sending customer email...")
+      const info = await transporter.sendMail({
+        from: `"XL Groothandel B.V." <${process.env.EMAIL_FROM}>`,
+        to: data.customerEmail,
+        subject: `Orderbevestiging ${data.orderNumber} - XL Groothandel`,
+        text: textContent,
+        html: htmlContent,
+      })
 
-    const htmlContent = generateOrderConfirmationHTML(emailData)
-    const textContent = generateOrderConfirmationText(emailData)
-    const transporter = createTransporter()
+      transporter.close()
+      return info
+    })()
 
-    console.log("Verifying SMTP connection for customer email...")
-    await transporter.verify()
-    console.log("SMTP connection verified")
+    // Race between email sending and timeout
+    await Promise.race([emailPromise, timeoutPromise])
 
-    const info = await transporter.sendMail({
-      from: `"XL Groothandel B.V." <${process.env.EMAIL_FROM}>`,
-      to: data.customerEmail,
-      subject: `Orderbevestiging ${data.orderNumber} - XL Groothandel`,
-      text: textContent,
-      html: htmlContent,
-    })
-
-    console.log(`✅ Customer email sent successfully: ${info.messageId}`)
-    transporter.close()
+    console.log(`✅ Customer email sent successfully`)
     return true
   } catch (error) {
     console.error("❌ Error sending customer email:", error)
@@ -122,201 +110,203 @@ export async function sendOrderConfirmationEmail(data: OrderConfirmationData): P
 
 // Update the sendCompletePackingSlipToAdmin function to preserve exact fam2id values
 export async function sendCompletePackingSlipToAdmin(data: OrderConfirmationData): Promise<boolean> {
+  const timeout = 45000 // 45 second timeout for admin email (larger due to PDF)
+
   try {
     console.log("=== SENDING ADMIN EMAIL WITH PDF ===")
     console.log(`Order: ${data.orderNumber}`)
-    console.log(`Admin email configured: ${process.env.EMAIL_TO}`)
-    console.log(`Items count: ${data.items?.length || 0}`)
 
-    // Check admin email configuration
     if (!process.env.EMAIL_TO) {
       console.error("❌ EMAIL_TO not configured - cannot send admin email")
-      console.error(
-        "Available env vars:",
-        Object.keys(process.env).filter((key) => key.startsWith("EMAIL")),
-      )
       return false
     }
 
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-      console.error("❌ Email credentials not configured")
-      return false
-    }
-
-    // Ensure all items have fam2id, but preserve original values exactly
-    const categorizedItems = data.items.map((item) => {
-      // IMPORTANT: Only categorize if fam2id is completely missing
-      if (item.fam2id === undefined) {
-        const categorizedFam2id = categorizeProduct(item.name, item.volume)
-        console.log(
-          `Admin PDF: Auto-categorized (fallback): ${item.name} -> fam2id: ${categorizedFam2id} -> category: ${categoryMapping[categorizedFam2id] || "UNKNOWN"}`,
-        )
-        return { ...item, fam2id: categorizedFam2id }
-      }
-
-      console.log(
-        `Admin PDF: Preserving original fam2id: ${item.name} -> ${item.fam2id} -> category: ${categoryMapping[item.fam2id] || "UNKNOWN"}`,
-      )
-      return item
+    // Create timeout promise
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error("Admin email timeout after 45 seconds")), timeout)
     })
 
-    // Create a new data object with processed items
-    const emailData = {
-      ...data,
-      items: categorizedItems,
-    }
+    // Create email sending promise
+    const emailPromise = (async () => {
+      // Process items quickly
+      const categorizedItems = data.items.map((item) => {
+        if (item.fam2id === undefined) {
+          const result = categorizeProduct(item.name, item.volume)
+          const fam2id = typeof result === "string" ? result : result.fam2id
+          const categoryName = getCategoryName(fam2id)
+          return { ...item, fam2id, category: categoryName }
+        }
+        return { ...item, category: getCategoryName(item.fam2id) }
+      })
 
-    const transporter = createTransporter()
-    const groupedItems = groupItemsByCategory(emailData.items)
-    const categoryCount = Object.keys(groupedItems).length
+      const emailData = { ...data, items: categorizedItems }
+      const transporter = createTransporter()
+      const groupedItems = groupItemsByCategory(emailData.items)
 
-    console.log(`Processing ${categoryCount} categories for PDF:`, Object.keys(groupedItems))
+      console.log("Generating customer content...")
+      const customerHtmlContent = generateOrderConfirmationHTML(emailData)
+      const customerTextContent = generateOrderConfirmationText(emailData)
 
-    // Generate customer content
-    console.log("Generating customer HTML content...")
-    const customerHtmlContent = generateOrderConfirmationHTML(emailData)
-    const customerTextContent = generateOrderConfirmationText(emailData)
+      console.log("Generating PDF...")
+      const packingSlipData: CompletePackingSlipData = {
+        orderNumber: emailData.orderNumber,
+        customerName: emailData.customerName,
+        customerEmail: emailData.customerEmail,
+        deliveryAddress: emailData.deliveryAddress,
+        deliveryDate: emailData.deliveryDate,
+        deliveryOption: emailData.deliveryOption,
+        deliveryInstructions: emailData.deliveryInstructions,
+        items: emailData.items,
+        totalAmount: emailData.total,
+      }
 
-    // Generate PDF
-    console.log("Generating PDF...")
-    const packingSlipData: CompletePackingSlipData = {
-      orderNumber: emailData.orderNumber,
-      customerName: emailData.customerName,
-      customerEmail: emailData.customerEmail,
-      deliveryAddress: emailData.deliveryAddress,
-      deliveryDate: emailData.deliveryDate,
-      deliveryOption: emailData.deliveryOption,
-      deliveryInstructions: emailData.deliveryInstructions,
-      items: emailData.items,
-      totalAmount: emailData.total,
-    }
+      const pdfBuffer = generateCompletePackingSlipPDF(packingSlipData)
+      console.log(`✅ PDF generated: ${pdfBuffer.length} bytes`)
 
-    const pdfBuffer = generateCompletePackingSlipPDF(packingSlipData)
-    console.log(`✅ PDF generated successfully: ${pdfBuffer.length} bytes`)
+      // Validate PDF quickly
+      if (pdfBuffer.length === 0 || pdfBuffer.toString("ascii", 0, 4) !== "%PDF") {
+        throw new Error("Invalid PDF generated")
+      }
 
-    // Validate PDF
-    if (pdfBuffer.length === 0) {
-      throw new Error("Generated PDF is empty")
-    }
+      // Create detailed admin email with complete order information
+      const adminEmailContent = `
+NIEUWE BESTELLING - ${data.orderNumber}
+========================================
+Klant: ${data.customerName} (${data.customerEmail})
+Totaal: €${data.total.toFixed(2)}
+Bezorging: ${data.deliveryOption === "delivery" ? "Bezorgen" : "Afhalen"} op ${data.deliveryDate}
+${data.deliveryAddress ? `Adres: ${data.deliveryAddress}\n` : ""}
+${data.deliveryInstructions ? `Instructies: ${data.deliveryInstructions}\n` : ""}
 
-    const pdfHeader = pdfBuffer.toString("ascii", 0, 4)
-    if (pdfHeader !== "%PDF") {
-      throw new Error(`Invalid PDF header: ${pdfHeader}`)
-    }
-    console.log("✅ PDF validation passed")
-
-    // Admin email content
-    const adminEmailContent = `
-NIEUWE BESTELLING ONTVANGEN - ADMIN KOPIE
-=========================================
-
-BESTELLING: ${data.orderNumber}
-KLANT: ${data.customerName} (${data.customerEmail})
-TOTAAL: €${data.total.toFixed(2)}
-BEZORGING: ${data.deliveryOption === "delivery" ? "Bezorgen" : "Afhalen"} op ${data.deliveryDate}
-
-CATEGORIEËN (${categoryCount}):
+BESTELDE PRODUCTEN:
+------------------
 ${Object.entries(groupedItems)
-  .map(([categoryName, items], index) => {
-    const categoryItemCount = items.reduce((sum, item) => sum + item.quantity, 0)
+  .map(([category, items]) => {
     const categoryTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    return `${index + 1}. ${categoryName}: ${categoryItemCount} stuks - €${categoryTotal.toFixed(2)}`
+    const itemsList = items
+      .map((item) => `  • ${item.quantity}x ${item.name} (€${item.price.toFixed(2)}/st)`)
+      .join("\n")
+
+    return `${category} - €${categoryTotal.toFixed(2)}:\n${itemsList}\n`
   })
   .join("\n")}
 
-TOTAAL: ${data.items.reduce((sum, item) => sum + item.quantity, 0)} stuks
+TOTAAL: ${data.items.reduce((sum, item) => sum + item.quantity, 0)} stuks - €${data.total.toFixed(2)}
 
-${data.deliveryAddress ? `ADRES: ${data.deliveryAddress}\n` : ""}
-${data.deliveryInstructions ? `INSTRUCTIES: ${data.deliveryInstructions}\n` : ""}
-
-ACTIES VEREIST:
-==============
-1. Print bijgevoegde pakbon PDF uit
-2. Start order picking volgens pakbon
-3. Bereid bestelling voor volgens bezorgoptie
-4. Bevestig wanneer bestelling klaar is
-
-BIJLAGEN:
-========
-- pakbon-order-picking-${data.orderNumber}.pdf (voor magazijn)
-
-HIERONDER: Orderbevestiging zoals klant ontvangt
-===============================================
-
-${customerTextContent}
+Zie bijgevoegde pakbon PDF voor order picking.
 `
 
-    console.log("Verifying SMTP connection for admin email...")
-    await transporter.verify()
-    console.log("SMTP connection verified")
-
-    const mailOptions = {
-      from: `"XL Groothandel System" <${process.env.EMAIL_FROM}>`,
-      to: process.env.EMAIL_TO,
-      subject: `📦 BESTELLING ${data.orderNumber} - Admin Kopie + Pakbon PDF`,
-      text: adminEmailContent,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h2 style="color: #ff6b35; margin: 0 0 10px 0;">📦 NIEUWE BESTELLING - ADMIN KOPIE</h2>
-            <p style="margin: 0; color: #666;">
-              Orderbevestiging + pakbon PDF voor order picking
-            </p>
-          </div>
-          
-          <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
-            <h3 style="margin: 0 0 10px 0; color: #856404;">⚠️ ACTIES VEREIST:</h3>
-            <ul style="margin: 0; color: #856404;">
-              <li>Print de bijgevoegde pakbon PDF</li>
-              <li>Start order picking volgens pakbon</li>
-              <li>Bereid bestelling voor volgens bezorgoptie</li>
-            </ul>
-          </div>
-
-          <div style="border: 2px solid #ff6b35; border-radius: 8px; overflow: hidden;">
-            <div style="background: #ff6b35; color: white; padding: 15px;">
-              <h3 style="margin: 0;">ORDERBEVESTIGING (zoals klant ontvangt):</h3>
+      console.log("Sending admin email...")
+      const info = await transporter.sendMail({
+        from: `"XL Groothandel System" <${process.env.EMAIL_FROM}>`,
+        to: process.env.EMAIL_TO,
+        subject: `📦 BESTELLING ${data.orderNumber} - Admin Kopie + Pakbon PDF`,
+        text: adminEmailContent,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #ff6b35; margin: 0 0 10px 0;">📦 NIEUWE BESTELLING</h2>
+              <p style="margin: 0; color: #666;">Order: ${data.orderNumber}</p>
             </div>
-            <div style="padding: 20px;">
-              ${customerHtmlContent}
+            
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <h3 style="margin: 0 0 10px 0; color: #856404;">⚠️ ACTIES VEREIST:</h3>
+              <ul style="margin: 0; color: #856404;">
+                <li>Print de bijgevoegde pakbon PDF</li>
+                <li>Start order picking volgens pakbon</li>
+              </ul>
+            </div>
+
+            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <h3>Order Details:</h3>
+              <p><strong>Klant:</strong> ${data.customerName}</p>
+              <p><strong>Email:</strong> ${data.customerEmail}</p>
+              <p><strong>Totaal:</strong> €${data.total.toFixed(2)}</p>
+              <p><strong>Items:</strong> ${data.items.reduce((sum, item) => sum + item.quantity, 0)} stuks</p>
+              ${data.deliveryAddress ? `<p><strong>Adres:</strong> ${data.deliveryAddress}</p>` : ""}
+              ${data.deliveryInstructions ? `<p><strong>Instructies:</strong> ${data.deliveryInstructions}</p>` : ""}
+            </div>
+
+            <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+              <div style="background: #f8f9fa; padding: 10px 15px; border-bottom: 1px solid #ddd;">
+                <h3 style="margin: 0; color: #ff6b35;">Bestelde Producten</h3>
+              </div>
+              <div style="padding: 0;">
+                ${Object.entries(groupedItems)
+                  .map(([category, items]) => {
+                    const categoryTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+                    const itemsList = items
+                      .map(
+                        (item) => `
+                          <tr>
+                            <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.quantity}x</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">€${item.price.toFixed(
+                              2,
+                            )}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">€${(
+                              item.price * item.quantity
+                            ).toFixed(2)}</td>
+                          </tr>
+                        `,
+                      )
+                      .join("")
+
+                    return `
+                      <div style="margin-bottom: 15px;">
+                        <h4 style="margin: 0; padding: 10px 15px; background: #f0f0f0; color: #333;">${category} - €${categoryTotal.toFixed(
+                          2,
+                        )}</h4>
+                        <table style="width: 100%; border-collapse: collapse;">
+                          <thead>
+                            <tr style="background: #f8f9fa;">
+                              <th style="padding: 8px; text-align: left;">Aantal</th>
+                              <th style="padding: 8px; text-align: left;">Product</th>
+                              <th style="padding: 8px; text-align: right;">Prijs</th>
+                              <th style="padding: 8px; text-align: right;">Subtotaal</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            ${itemsList}
+                          </tbody>
+                        </table>
+                      </div>
+                    `
+                  })
+                  .join("")}
+              </div>
+              <div style="background: #f8f9fa; padding: 10px 15px; border-top: 1px solid #ddd; text-align: right;">
+                <strong>TOTAAL: €${data.total.toFixed(2)}</strong>
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid #ddd; padding-top: 15px; color: #666; font-size: 12px;">
+              <p>Deze email is automatisch gegenereerd. Zie bijgevoegde pakbon PDF voor order picking.</p>
             </div>
           </div>
-        </div>
-      `,
-      attachments: [
-        {
-          filename: `pakbon-order-picking-${data.orderNumber}.pdf`,
-          content: pdfBuffer,
-          contentType: "application/pdf",
-          contentDisposition: "attachment" as const,
-        },
-      ],
-    }
+        `,
+        attachments: [
+          {
+            filename: `pakbon-${data.orderNumber}.pdf`,
+            content: pdfBuffer,
+            contentType: "application/pdf",
+          },
+        ],
+      })
 
-    console.log("Sending admin email with options:", {
-      from: mailOptions.from,
-      to: mailOptions.to,
-      subject: mailOptions.subject,
-      attachmentCount: mailOptions.attachments.length,
-      attachmentSize: pdfBuffer.length,
-    })
+      transporter.close()
+      return info
+    })()
 
-    const info = await transporter.sendMail(mailOptions)
+    // Race between email sending and timeout
+    await Promise.race([emailPromise, timeoutPromise])
 
-    console.log(`✅ Admin email sent successfully!`)
-    console.log(`Message ID: ${info.messageId}`)
-    console.log(`Response: ${info.response}`)
-    console.log(`Accepted: ${JSON.stringify(info.accepted)}`)
-    console.log(`Rejected: ${JSON.stringify(info.rejected)}`)
-
-    transporter.close()
+    console.log(`✅ Admin email sent successfully`)
     return true
   } catch (error) {
     console.error("❌ CRITICAL ERROR sending admin email:", error)
     if (error instanceof Error) {
-      console.error("Error name:", error.name)
-      console.error("Error message:", error.message)
-      console.error("Error stack:", error.stack)
+      console.error("Error details:", error.message)
     }
     return false
   }

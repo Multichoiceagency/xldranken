@@ -2,8 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { handleOrders } from "@/lib/api"
 import type { CartItem } from "@/lib/cart-context"
 import type { OrderConfirmationData } from "@/lib/email-service"
-import { categorizeProduc } from "@/lib/product-categorizer"
-import { categoryMapping } from "@/lib/email-templates"
+import { categorizeProduct, getCategoryName } from "@/lib/product-categorizer"
 
 interface ProcessOrderRequest {
   cart: CartItem[]
@@ -54,15 +53,6 @@ export async function POST(request: NextRequest) {
 
     console.log(`Order totals - Subtotal: €${subtotal.toFixed(2)}, Total: €${total.toFixed(2)}`)
 
-    // Log the categoryMapping to see what mappings are available
-    console.log("Category Mapping in API:", categoryMapping)
-
-    // Log each item with its fam2id for debugging
-    console.log("Cart items with fam2id:")
-    orderData.cart.forEach((item, index) => {
-      console.log(`Item ${index}: ${item.name}, fam2id: ${item.fam2id || "undefined"}, volume: ${item.volume}`)
-    })
-
     // Update the email data preparation to preserve original fam2id values
     // Prepare email data - preserve original fam2id values
     const emailData: OrderConfirmationData = {
@@ -81,22 +71,19 @@ export async function POST(request: NextRequest) {
       deliveryOption: orderData.deliveryOption,
       deliveryAddress: orderData.deliveryAddress,
       items: orderData.cart.map((item) => {
-        // Log the original fam2id for debugging
-        console.log(`Processing item for email: ${item.name}, original fam2id: ${item.fam2id || "undefined"}`)
-
         // Only categorize if fam2id is completely missing
         if (item.fam2id === undefined) {
-          const fam2id = categorizeProduc(item.name, item.volume)
-          console.log(
-            `API categorized (fallback): ${item.name} -> fam2id: ${fam2id} -> category: ${categoryMapping[fam2id] || "UNKNOWN"}`,
-          )
-          return { ...item, fam2id }
+          const result = categorizeProduct(item.name, item.volume)
+          const fam2id = typeof result === "string" ? result : result.fam2id
+          const categoryName = getCategoryName(fam2id)
+          console.log(`API categorized: ${item.name} -> fam2id: ${fam2id} -> category: ${categoryName}`)
+          return { ...item, fam2id, category: categoryName }
         }
 
-        console.log(
-          `Preserving original fam2id: ${item.name} -> ${item.fam2id} -> category: ${categoryMapping[item.fam2id] || "UNKNOWN"}`,
-        )
-        return item
+        // If fam2id exists, preserve it and add category name
+        const categoryName = getCategoryName(item.fam2id)
+        console.log(`API preserved: ${item.name} -> fam2id: ${item.fam2id} -> category: ${categoryName}`)
+        return { ...item, category: categoryName }
       }),
       subtotal,
       total,
@@ -111,25 +98,20 @@ export async function POST(request: NextRequest) {
       deliveryAddress: emailData.deliveryAddress,
     })
 
-    // Log each item with its category for debugging
-    console.log("Email items with categories:")
-    emailData.items.forEach((item, index) => {
-      console.log(
-        `Item ${index}: ${item.name}, fam2id: ${item.fam2id || "undefined"}, category: ${categoryMapping[item.fam2id || "21"] || "UNKNOWN"}`,
-      )
-    })
-
     // Send emails via API route - DIRECT CALL
     console.log("=== CALLING EMAIL API DIRECTLY ===")
 
     // Import the email functions directly to avoid HTTP call issues
     const { sendOrderConfirmationEmail, sendCompletePackingSlipToAdmin } = await import("@/lib/email-service")
 
-    let emailSent = false
-    let adminEmailSent = false
+    // Start admin email in background to avoid blocking the response
+    const adminEmailPromise = sendCompletePackingSlipToAdmin(emailData).catch((error) => {
+      console.error("Admin email error (background):", error)
+      return false
+    })
 
-    // Send customer email
-    console.log("Sending customer email...")
+    // Send customer email and wait for it
+    let emailSent = false
     try {
       emailSent = await sendOrderConfirmationEmail(emailData)
       console.log(`Customer email result: ${emailSent}`)
@@ -137,27 +119,22 @@ export async function POST(request: NextRequest) {
       console.error("Customer email error:", error)
     }
 
-    // Send admin email with PDF
-    console.log("Sending admin email with PDF...")
-    try {
-      adminEmailSent = await sendCompletePackingSlipToAdmin(emailData)
-      console.log(`Admin email result: ${adminEmailSent}`)
-    } catch (error) {
-      console.error("Admin email error:", error)
-    }
-
-    // Return success with order details
+    // Return success with order details immediately
     const result = {
       success: true,
       orderNumber,
       total: total.toFixed(2),
       emailSent,
-      adminEmailSent,
-      message: `Order processed - Customer: ${emailSent ? "sent" : "failed"}, Admin: ${adminEmailSent ? "sent" : "failed"}`,
+      message: `Order processed - Customer email: ${emailSent ? "sent" : "failed"}, Admin email: sending in background`,
     }
 
     console.log("=== PROCESS ORDER COMPLETED ===")
     console.log("Final result:", result)
+
+    // Continue processing admin email in background
+    adminEmailPromise.then((adminEmailSent) => {
+      console.log(`Admin email result (background): ${adminEmailSent}`)
+    })
 
     return NextResponse.json(result)
   } catch (error) {

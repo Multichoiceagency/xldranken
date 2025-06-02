@@ -1,7 +1,6 @@
 import { jsPDF } from "jspdf"
 import type { CartItem } from "@/lib/cart-context"
-import { categoryMapping } from "./email-templates"
-import { categorizeProduc } from "./product-categorizer"
+import { categorizeProduct, getCategoryName } from "./product-categorizer"
 
 export interface CompletePackingSlipData {
   orderNumber: string
@@ -15,7 +14,7 @@ export interface CompletePackingSlipData {
   totalAmount: number
 }
 
-// Update the groupItemsByCategory function to preserve exact fam2id values
+// Update the groupItemsByCategory function to work with the new matching setup
 export function groupItemsByCategory(items: CartItem[]): Record<string, CartItem[]> {
   console.log("Grouping items by category, total items:", items.length)
 
@@ -24,32 +23,28 @@ export function groupItemsByCategory(items: CartItem[]): Record<string, CartItem
     console.log(`Item ${index}: ${item.name}, fam2id: ${item.fam2id || "undefined"}, volume: ${item.volume}`)
   })
 
-  // Log the categoryMapping to see what mappings are available
-  console.log("Category Mapping:", categoryMapping)
-
   // First, ensure all items have a valid fam2id
   const itemsWithValidFam2id = items.map((item) => {
     // IMPORTANT: Always preserve the exact fam2id if it exists
     if (item.fam2id !== undefined) {
-      console.log(
-        `Using existing fam2id: ${item.name} -> ${item.fam2id} -> category: ${categoryMapping[item.fam2id] || "UNKNOWN"}`,
-      )
+      console.log(`Using existing fam2id: ${item.name} -> ${item.fam2id} -> category: ${getCategoryName(item.fam2id)}`)
       return item
     }
 
     // Only if fam2id is completely missing, use the categorization function as fallback
-    const newFam2id = categorizeProduc(item.name, item.volume)
+    const result = categorizeProduct(item.name, item.volume)
+    const fam2id = typeof result === "string" ? result : result.fam2id
     console.log(
-      `Auto-categorized (fallback): ${item.name} -> fam2id: ${newFam2id} -> category: ${categoryMapping[newFam2id] || "UNKNOWN"}`,
+      `Auto-categorized (fallback): ${item.name} -> fam2id: ${fam2id} -> category: ${getCategoryName(fam2id)}`,
     )
-    return { ...item, fam2id: newFam2id }
+    return { ...item, fam2id }
   })
 
   // Now group by category name
   const grouped = itemsWithValidFam2id.reduce(
     (acc, item) => {
       // Get the category name from the mapping using the item's fam2id
-      const categoryName = categoryMapping[item.fam2id || "21"] || "OVERIGE PRODUCTEN"
+      const categoryName = getCategoryName(item.fam2id || "21")
 
       console.log(`Grouping: ${item.name} into category "${categoryName}" (fam2id: ${item.fam2id})`)
 
@@ -211,10 +206,6 @@ export function generateCompletePackingSlipPDF(data: CompletePackingSlipData): B
     sortedCategories.forEach(([categoryName, items]) => {
       // Calculate total quantity for this category
       const categoryQuantity = items.reduce((sum, item) => sum + item.quantity, 0)
-
-      console.log(
-        `Rendering category "${categoryName}" with ${items.length} items (${categoryQuantity} total quantity)`,
-      )
 
       // Category header
       if (yPosition > 270) {

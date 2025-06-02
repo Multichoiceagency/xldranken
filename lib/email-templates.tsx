@@ -1,5 +1,5 @@
 import type { CartItem } from "@/lib/cart-context"
-import { categorizeProduc } from "./product-categorizer" // Fix the import path
+import { categorizeProduct, getCategoryName } from "./product-categorizer"
 
 // Updated category mapping based on fam2id - with clearer distinctions
 export const categoryMapping: Record<string, string> = {
@@ -47,9 +47,10 @@ export function generateOrderConfirmationHTML(data: OrderConfirmationData): stri
   const itemsWithCategories = data.items.map((item) => {
     // IMPORTANT: Only categorize if fam2id is completely missing
     if (item.fam2id === undefined) {
-      const newFam2id = categorizeProduc(item.name, item.volume)
-      console.log(`Email generation: Auto-categorizing "${item.name}" -> fam2id: ${newFam2id} (fallback)`)
-      return { ...item, fam2id: newFam2id }
+      const result = categorizeProduct(item.name, item.volume)
+      const fam2id = typeof result === "string" ? result : result.fam2id
+      console.log(`Email generation: Auto-categorizing "${item.name}" -> fam2id: ${fam2id} (fallback)`)
+      return { ...item, fam2id }
     }
 
     console.log(`Email generation: Using existing fam2id for "${item.name}" -> fam2id: ${item.fam2id}`)
@@ -68,7 +69,7 @@ export function generateOrderConfirmationHTML(data: OrderConfirmationData): stri
     (acc, item) => {
       // Make sure fam2id is not undefined before using it as an index
       const fam2id = item.fam2id || "21" // Default to NON-FOOD if missing
-      const categoryName = categoryMapping[fam2id] || "OVERIGE PRODUCTEN"
+      const categoryName = getCategoryName(fam2id)
 
       console.log(`Email categorization: Item "${item.name}" with fam2id "${fam2id}" -> category "${categoryName}"`)
 

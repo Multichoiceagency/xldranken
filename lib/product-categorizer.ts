@@ -910,7 +910,7 @@ const productData = {
   "20": [
     // FOOD
     "balisto paars/groen 20x37gr",
-    "bierbeker 50st",
+    "bierbeker 50st", // Note: Could be NON-FOOD, but often associated with events/food service
     "bitterballen 20%",
     "bounty 24x57gr",
     "buggles chips 24x30gr",
@@ -1006,7 +1006,7 @@ const productData = {
     "a7 bami bak",
     "aanmaak blok",
     "aanstekers 50st",
-    "ajax 5l",
+    "ajax 5l", // Also in SCHOONMAAK
     "alu bak 1 vaks hoog 1000 st.",
     "alu bak kapsalon + deksel 250cc",
     "alu bak kapsalon klien deksel 250c",
@@ -1020,9 +1020,9 @@ const productData = {
     "aluminium bakjes 250cc 100 stk",
     "amsterdam glazen 12st",
     "amsterdam glazen 6st",
-    "bierbekers 1000st doos",
-    "bierbekers 50st los",
-    "bierbekers heineken 1250 st",
+    "bierbekers 1000st doos", // Could be argued as FOOD related in context
+    "bierbekers 50st los", // Could be argued as FOOD related in context
+    "bierbekers heineken 1250 st", // Could be argued as FOOD related in context
     "bierfluit 12st",
     "catering folie 30cm 4st",
     "catering folie 45cm 4st",
@@ -1030,16 +1030,16 @@ const productData = {
     "deuk wisky glazen 12st",
     "deuk wisky glazen 6st",
     "dranken blok x10",
-    "dreft 1x8.1l",
-    "dweilmop 400g",
-    "easy spray xl",
-    "glassex 12x750ml",
-    "glorix 15x750ml",
-    "glorix 1l",
-    "grillreiniger 1l",
+    "dreft 1x8.1l", // Also in SCHOONMAAK
+    "dweilmop 400g", // Also in SCHOONMAAK
+    "easy spray xl", // Also in SCHOONMAAK
+    "glassex 12x750ml", // Also in SCHOONMAAK
+    "glorix 15x750ml", // Also in SCHOONMAAK
+    "glorix 1l", // Also in SCHOONMAAK
+    "grillreiniger 1l", // Also in SCHOONMAAK
     "hamburgerbak groot 500st",
     "hamburgerbox hp 4*125",
-    "handzeep 1x6st",
+    "handzeep 1x6st", // Also in SCHOONMAAK
     "hemdraag tas 45cm",
     "hemdraag tas 60cm",
     "inpakzak 0.5/1/1.5/2",
@@ -1049,44 +1049,44 @@ const productData = {
     "kofiee bekers 100 stk",
     "kofiie bekers 1000 stk",
     "kofiie bekers 2500 stk",
-    "komo vuilniszakken 15 rl",
-    "komo vuilniszakken 20 rl",
-    "latex handschoenen",
-    "lolly mr bubble",
+    "komo vuilniszakken 15 rl", // Also in SCHOONMAAK
+    "komo vuilniszakken 20 rl", // Also in SCHOONMAAK
+    "latex handschoenen", // Also in SCHOONMAAK
+    "lolly mr bubble", // Could be FOOD
     "magretron deksel 650cc",
     "magretronbak 500cc",
     "magretronbak 650cc",
     "magretronbak deksel 500cc",
-    "melk cupjes 200 st",
+    "melk cupjes 200 st", // Could be FOOD
     "menu bak 100st",
-    "mop 350g",
-    "mop 50cm",
+    "mop 350g", // Also in SCHOONMAAK
+    "mop 50cm", // Also in SCHOONMAAK
     "plastic bord 100st",
     "plastic lepel 10x100 doos",
     "plastic vork 10x100 doos",
-    "poetsrol 1x6",
+    "poetsrol 1x6", // Also in SCHOONMAAK
     "rietjes",
     "roer staafjes karton 1000st",
-    "roze doek",
+    "roze doek", // Also in SCHOONMAAK
     "salade bak 375cc + vast deksel 600s",
     "saus bak 28cc 1000stk",
     "sauscup 10cc",
     "sauscup 30cc",
     "sauscup 80cc + deksel 1000st combi",
-    "schuurspons xl 10 st",
+    "schuurspons xl 10 st", // Also in SCHOONMAAK
     "servetten 8x8 pak",
     "shot glazen 12st",
     "shot glazen 6st",
     "soepkom + deksel 460cc",
     "speel kaarten katja 52",
     "speel kaarten katja hoskin",
-    "spons 20x25gr",
-    "staal borstel 1x2st",
-    "sun bierglas reiniger",
+    "spons 20x25gr", // Also in SCHOONMAAK
+    "staal borstel 1x2st", // Also in SCHOONMAAK
+    "sun bierglas reiniger", // Also in SCHOONMAAK
     "tanden stokers",
-    "thee doek 6st",
-    "toiletpapier perfex 24x6",
-    "wc papier 24x8st",
+    "thee doek 6st", // Also in SCHOONMAAK
+    "toiletpapier perfex 24x6", // Also in SCHOONMAAK
+    "wc papier 24x8st", // Also in SCHOONMAAK
   ],
   "22": [
     // SCHOONMAAK
@@ -1312,28 +1312,90 @@ export function categorizeProductExact(
         categoryName,
         matchType: "exact",
         matchedProduct: volumeMatch,
-        confidence: 0.9,
+        confidence: 0.92, // Slightly higher confidence for volume match
       }
     }
   }
 
-  // STEP 4: Try partial matching with higher threshold (limit iterations for speed)
+  // STEP 3.5: AGGRESSIVE Special handling for blik products
+  if (normalizedName.includes("blik")) {
+    // Check for explicit non-drink blik items first to avoid miscategorizing them
+    if (
+      normalizedName.includes("non-food") ||
+      normalizedName.includes("schoonmaak") ||
+      normalizedName.includes("verf")
+    ) {
+      // Let it fall through to other matching or fallback if it's clearly not a drink
+    } else if (normalizedName.includes("bier") || normalizedName.includes("beer")) {
+      console.log(`✅ AGGRESSIVE BLIK MATCH (BIER): POOLSE BIER BLIK (fam2id: 4)`)
+      return {
+        fam2id: "4",
+        categoryName: "POOLSE BIER BLIK",
+        matchType: "partial",
+        confidence: 0.9, // High confidence for this rule
+      }
+    } else if (
+      normalizedName.includes("cola") ||
+      normalizedName.includes("fanta") ||
+      normalizedName.includes("sprite") ||
+      normalizedName.includes("pepsi") ||
+      normalizedName.includes("energy") ||
+      normalizedName.includes("red bull") ||
+      normalizedName.includes("frisdrank") ||
+      normalizedName.includes("soda") ||
+      normalizedName.includes("ice tea") ||
+      normalizedName.includes("chocomel") // Chocomel in blik is a drink
+    ) {
+      console.log(`✅ AGGRESSIVE BLIK MATCH (FRISDRANK): FRISDRANKEN (fam2id: 6)`)
+      return {
+        fam2id: "6",
+        categoryName: "FRISDRANKEN",
+        matchType: "partial",
+        confidence: 0.9, // High confidence
+      }
+    } else if (
+      normalizedName.includes("mix") ||
+      normalizedName.includes("bacardi") ||
+      normalizedName.includes("smirnoff") ||
+      normalizedName.includes("gordon") ||
+      normalizedName.includes("jack")
+    ) {
+      console.log(`✅ AGGRESSIVE BLIK MATCH (MIX DRANK): MIX DRANK (fam2id: 5)`)
+      return {
+        fam2id: "5",
+        categoryName: "MIX DRANK",
+        matchType: "partial",
+        confidence: 0.9, // High confidence
+      }
+    } else if (!normalizedName.includes("food") || normalizedName.includes("chocomel blik")) {
+      // If it's "blik" and not clearly "food" (unless it's a drinkable food like chocomel)
+      console.log(`✅ AGGRESSIVE GENERAL BLIK MATCH: FRISDRANKEN (fam2id: 6) - Defaulting to drink for generic blik`)
+      return {
+        fam2id: "6", // Default to FRISDRANKEN for unknown blik items
+        categoryName: "FRISDRANKEN",
+        matchType: "partial",
+        confidence: 0.8, // Reasonably high confidence for this aggressive rule
+      }
+    }
+  }
+
+  // STEP 4: Try partial matching with a relatively high threshold
   let bestMatch: Product | null = null
   let bestScore = 0
   let iterations = 0
-  const maxIterations = 500 // Limit for performance
+  const maxIterationsPartial = 500
 
   for (const product of products) {
-    if (iterations++ > maxIterations) break
+    if (iterations++ > maxIterationsPartial) break
 
     const similarity = calculateSimilarity(normalizedName, normalizeProductName(product.name))
-    if (similarity > bestScore && similarity > 0.85) {
+    if (similarity > bestScore && similarity > 0.88) {
       bestScore = similarity
       bestMatch = product
     }
   }
 
-  if (bestMatch && bestScore > 0.85) {
+  if (bestMatch && bestScore > 0.88) {
     const categoryName = getCategoryName(bestMatch.fam2id)
     console.log(
       `✅ PARTIAL MATCH: "${bestMatch.name}" fam2id=${bestMatch.fam2id}, category=${categoryName}, confidence=${bestScore.toFixed(2)}`,
@@ -1347,14 +1409,15 @@ export function categorizeProductExact(
     }
   }
 
-  // STEP 5: Quick substring matching (limited iterations)
+  // STEP 5: Quick substring matching
   iterations = 0
+  const maxIterationsSubstring = 200
   for (const product of products) {
-    if (iterations++ > 200) break // Even more limited for substring matching
+    if (iterations++ > maxIterationsSubstring) break
 
     const productNormalized = normalizeProductName(product.name)
     if (productNormalized.includes(normalizedName) || normalizedName.includes(productNormalized)) {
-      if (Math.abs(productNormalized.length - normalizedName.length) <= 10) {
+      if (Math.abs(productNormalized.length - normalizedName.length) <= 7) {
         const categoryName = getCategoryName(product.fam2id)
         console.log(`✅ SUBSTRING MATCH: "${product.name}" fam2id=${product.fam2id}, category=${categoryName}`)
         return {
@@ -1380,75 +1443,221 @@ export function categorizeProductExact(
   }
 }
 
-// Fallback categorization for unknown products
+// AGGRESSIVE Fallback categorization function
 function fallbackCategorization(productName: string, volume?: string): string {
   const name = productName.toLowerCase()
   const vol = volume?.toLowerCase() || ""
-  const fullText = `${name} ${vol}`.toLowerCase()
+  const fullText = `${name} ${vol}`.trim()
 
-  console.log(`🔄 Fallback categorization for: "${fullText}"`)
+  console.log(`🔄 AGGRESSIVE Fallback categorization for: "${fullText}"`)
 
+  // Highest priority: Kratten/Statiegeld
   if (fullText.includes("krat") || fullText.includes("crate") || fullText.includes("statiegeld")) {
-    console.log(`   → KRATTEN (contains krat/crate/statiegeld)`)
-    return "23" // KRATTEN
+    console.log(`   → KRATTEN (fam2id: 23)`)
+    return "23"
   }
 
+  // AGGRESSIVE BLIK HANDLING - Comes very early
+  if (fullText.includes("blik")) {
+    if (
+      fullText.includes("non-food") ||
+      fullText.includes("schoonmaak") ||
+      fullText.includes("verf") ||
+      (fullText.includes("food") && !fullText.includes("chocomel"))
+    ) {
+      // If it's explicitly a non-drink item in a can, let it fall to other rules or NON-FOOD
+      console.log(`   → Blik identified as non-drink, deferring...`)
+    } else if (fullText.includes("bier") || fullText.includes("beer")) {
+      console.log(`   → POOLSE BIER BLIK (fam2id: 4) - Fallback Blik Rule`)
+      return "4"
+    } else if (
+      fullText.includes("cola") ||
+      fullText.includes("fanta") ||
+      fullText.includes("sprite") ||
+      fullText.includes("pepsi") ||
+      fullText.includes("red bull") ||
+      fullText.includes("energy") ||
+      fullText.includes("frisdrank") ||
+      fullText.includes("soda") ||
+      fullText.includes("ice tea") ||
+      fullText.includes("chocomel") // chocomel in blik
+    ) {
+      console.log(`   → FRISDRANKEN (fam2id: 6) - Fallback Blik Rule`)
+      return "6"
+    } else if (
+      fullText.includes("mix") ||
+      fullText.includes("bacardi") ||
+      fullText.includes("smirnoff") ||
+      fullText.includes("gordon") ||
+      fullText.includes("jack")
+    ) {
+      console.log(`   → MIX DRANK (fam2id: 5) - Fallback Blik Rule`)
+      return "5"
+    } else {
+      // Aggressive default for unspecified "blik" items
+      console.log(`   → FRISDRANKEN (fam2id: 6) - AGGRESSIVE DEFAULT FOR GENERIC BLIK`)
+      return "6" // Default most other "blik" items to FRISDRANKEN
+    }
+  }
+
+  // Other specific categories
   if (fullText.includes("bier") || fullText.includes("beer")) {
-    if (fullText.includes("blik")) {
-      console.log(`   → POOLSE BIER BLIK (contains bier + blik)`)
-      return "4" // POOLSE BIER BLIK
-    }
     if (fullText.includes("fles")) {
-      console.log(`   → POOLSE BIER FLES (contains bier + fles)`)
-      return "3" // POOLSE BIER FLES
+      console.log(`   → POOLSE BIER FLES (fam2id: 3)`)
+      return "3"
     }
-    console.log(`   → NL BIER (contains bier)`)
-    return "2" // NL BIER
+    console.log(`   → NL BIER (fam2id: 2)`) // Default for non-blik, non-fles bier
+    return "2"
   }
 
-  if (fullText.includes("wijn") || fullText.includes("wine") || fullText.includes("75cl")) {
-    console.log(`   → WIJN (contains wijn/wine/75cl)`)
-    return "13" // WIJN
+  if (
+    fullText.includes("wijn") ||
+    fullText.includes("wine") ||
+    fullText.includes("75cl") ||
+    fullText.includes("martini") ||
+    fullText.includes("prosecco") ||
+    fullText.includes("carlo rossi")
+  ) {
+    console.log(`   → WIJN (fam2id: 13)`)
+    return "13"
   }
 
   if (
     fullText.includes("vodka") ||
     fullText.includes("whisky") ||
-    fullText.includes("40%") ||
-    fullText.includes("37.5%")
+    fullText.includes("rum") ||
+    fullText.includes("gin") ||
+    fullText.includes("jenever") ||
+    fullText.includes("likeur") ||
+    fullText.includes("licor") ||
+    fullText.includes("jagermeister") ||
+    fullText.includes("baileys") ||
+    fullText.includes("cognac") ||
+    fullText.includes("soplica") ||
+    fullText.includes("absolut") ||
+    fullText.includes("smirnoff") ||
+    fullText.includes("jack daniels") ||
+    fullText.includes("johnnie walker") ||
+    fullText.includes("sterke") ||
+    (fullText.includes("drank") && (fullText.includes("40%") || fullText.includes("37.5%")))
   ) {
-    console.log(`   → STERKE DRANK (contains vodka/whisky/40%/37.5%)`)
-    return "16" // STERKE DRANK
+    console.log(`   → STERKE DRANK (fam2id: 16)`)
+    return "16"
   }
 
   if (
     fullText.includes("cola") ||
     fullText.includes("fanta") ||
     fullText.includes("sprite") ||
-    fullText.includes("pepsi")
+    fullText.includes("pepsi") ||
+    fullText.includes("frisdrank") ||
+    fullText.includes("soda") ||
+    fullText.includes("energy") ||
+    fullText.includes("red bull") ||
+    fullText.includes("ice tea") ||
+    fullText.includes("minute maid") ||
+    fullText.includes("appelsap") ||
+    fullText.includes("sinas") ||
+    fullText.includes("cassis") ||
+    fullText.includes("chocomel") // Chocomel not in blik
   ) {
-    console.log(`   → FRISDRANKEN (contains cola/fanta/sprite/pepsi)`)
-    return "6" // FRISDRANKEN
+    console.log(`   → FRISDRANKEN (fam2id: 6)`)
+    return "6"
   }
 
-  if (fullText.includes("cocktail") || fullText.includes("mojito") || fullText.includes("margarita")) {
-    console.log(`   → COCKTAILS (contains cocktail/mojito/margarita)`)
-    return "10" // COCKTAILS
+  if (
+    fullText.includes("water") ||
+    fullText.includes("spa") ||
+    fullText.includes("chaudfontaine") ||
+    fullText.includes("sourcy") ||
+    fullText.includes("erikli") ||
+    fullText.includes("bar le duc")
+  ) {
+    console.log(`   → WATER (fam2id: 7)`)
+    return "7"
   }
 
-  if (fullText.includes("chips") || fullText.includes("chocolade") || fullText.includes("saus")) {
-    console.log(`   → FOOD (contains chips/chocolade/saus)`)
-    return "20" // FOOD
+  if (
+    fullText.includes("cocktail") ||
+    fullText.includes("mojito") ||
+    fullText.includes("margarita") ||
+    fullText.includes("pina colada") ||
+    fullText.includes("breezer") ||
+    (fullText.includes("mix") &&
+      (fullText.includes("fruit") || fullText.includes("berry") || fullText.includes("le coq")))
+  ) {
+    console.log(`   → COCKTAILS (fam2id: 10)`)
+    return "10"
   }
 
-  console.log(`   → NON-FOOD (default fallback)`)
-  return "21" // NON-FOOD
+  if (
+    fullText.includes("koffie") ||
+    fullText.includes("thee") ||
+    fullText.includes("cacao") ||
+    fullText.includes("cappuccino") ||
+    fullText.includes("nescafe") ||
+    fullText.includes("pickwick")
+  ) {
+    console.log(`   → KOFFIE THEE (fam2id: 18)`)
+    return "18"
+  }
+
+  if (fullText.includes("houtskool")) {
+    console.log(`   → HOUTSKOOL (fam2id: 19)`)
+    return "19"
+  }
+
+  if (
+    fullText.includes("chips") ||
+    fullText.includes("chocolade") ||
+    fullText.includes("saus") ||
+    fullText.includes("snack") ||
+    fullText.includes("frikandel") ||
+    fullText.includes("kroket") ||
+    fullText.includes("hamburger") ||
+    fullText.includes("brood") ||
+    fullText.includes("ijs") ||
+    fullText.includes("yoghurt") ||
+    fullText.includes("melk") ||
+    fullText.includes("olie") ||
+    fullText.includes("zout") ||
+    fullText.includes("suiker") ||
+    fullText.includes("mayo") ||
+    fullText.includes("ketchup") ||
+    fullText.includes("mosterd") ||
+    fullText.includes("frites") ||
+    (fullText.includes("food") && !fullText.includes("non-food"))
+  ) {
+    console.log(`   → FOOD (fam2id: 20)`)
+    return "20"
+  }
+
+  if (
+    fullText.includes("schoonmaak") ||
+    fullText.includes("ajax") ||
+    fullText.includes("dreft") ||
+    fullText.includes("glorix") ||
+    fullText.includes("wc papier") ||
+    fullText.includes("handzeep") ||
+    fullText.includes("glassex") ||
+    fullText.includes("grillreiniger") ||
+    fullText.includes("poetsrol") ||
+    fullText.includes("dweil") ||
+    fullText.includes("spons")
+  ) {
+    console.log(`   → SCHOONMAAK (fam2id: 22)`)
+    return "22"
+  }
+
+  // Default to NON-FOOD if no other category fits
+  console.log(`   → NON-FOOD (default fallback, fam2id: 21)`)
+  return "21"
 }
 
 export function getCategoryName(fam2id: string): string {
   return fam2idMapping[fam2id] || categoryMapping[fam2id] || "OVERIGE PRODUCTEN"
 }
 
-// Export main functions - make sure categorizeProduct is properly exported
+// Export main functions
 export const categorizeProduct = categorizeProductExact
 export default categorizeProductExact

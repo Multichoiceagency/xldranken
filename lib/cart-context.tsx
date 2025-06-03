@@ -16,7 +16,7 @@ export interface CartItem {
   quantity: number
   tauxTvaArticleEcommerce?: string // Field for product-specific VAT rate
   category?: string
-  matchType?: "exact" | "partial" | "fallback" | "existing"
+  matchType?: "exact" | "partial" | "fallback" | "existing" | "id_match"
 }
 
 interface CartContextType {
@@ -158,7 +158,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
       // Only use categorization if fam2id is completely missing
       if (item.fam2id === undefined) {
-        const result = categorizeProduct(item.name, item.volume)
+        const result = categorizeProduct(item.name, item.volume, item.arcleunik)
         itemWithCategory = {
           ...item,
           fam2id: result.fam2id,
@@ -166,7 +166,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           matchType: result.matchType,
         }
         console.log(
-          `Cart: Auto-categorizing "${item.name}" -> fam2id: ${result.fam2id} (${result.categoryName}) [${result.matchType}]`,
+          `Cart: Auto-categorizing "${item.name}" (arcleunik: ${item.arcleunik || "N/A"}) -> fam2id: ${result.fam2id} (${result.categoryName}) [${result.matchType}]`,
         )
       } else {
         console.log(`Cart: Using existing fam2id for "${item.name}" -> fam2id: ${item.fam2id}`)

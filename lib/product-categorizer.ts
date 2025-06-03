@@ -9,6 +9,26 @@ interface Product {
   volume?: string
 }
 
+// --- NEW ---
+// Direct mapping from arcleunik (productId) to fam2id
+// IMPORTANT: This map needs to be populated with your actual arcleunik-to-fam2id data.
+// Example:
+// const arcleunikToFam2idMap: Record<string, string> = {
+//   "ARTICLE001": "1", // Example: arcleunik "ARTICLE001" maps to fam2id "1" (BIER)
+//   "ARTICLE002": "6", // Example: arcleunik "ARTICLE002" maps to fam2id "6" (FRISDRANKEN)
+//   // ... add all your known arcleunik to fam2id mappings here
+// };
+// For now, it's an empty object. You MUST populate this for ID-based categorization to work.
+const arcleunikToFam2idMap: Record<string, string> = {
+  // === POPULATE THIS SECTION WITH YOUR DATA ===
+  // "unique_product_id_1": "fam2id_for_product_1",
+  // "unique_product_id_2": "fam2id_for_product_2",
+  // e.g. "102030": "4", // Assuming '102030' is an arcleunik for a POOLSE BIER BLIK
+  // "COKEBLIK330": "6", // Coca Cola 330ml can -> FRISDRANKEN
+  // ============================================
+}
+console.log(`ℹ️ Loaded ${Object.keys(arcleunikToFam2idMap).length} arcleunik to fam2id mappings.`)
+
 // Define the products data directly with proper fam2id mapping
 const productData = {
   "1": [
@@ -910,7 +930,7 @@ const productData = {
   "20": [
     // FOOD
     "balisto paars/groen 20x37gr",
-    "bierbeker 50st", // Note: Could be NON-FOOD, but often associated with events/food service
+    "bierbeker 50st",
     "bitterballen 20%",
     "bounty 24x57gr",
     "buggles chips 24x30gr",
@@ -1006,7 +1026,7 @@ const productData = {
     "a7 bami bak",
     "aanmaak blok",
     "aanstekers 50st",
-    "ajax 5l", // Also in SCHOONMAAK
+    "ajax 5l",
     "alu bak 1 vaks hoog 1000 st.",
     "alu bak kapsalon + deksel 250cc",
     "alu bak kapsalon klien deksel 250c",
@@ -1020,9 +1040,9 @@ const productData = {
     "aluminium bakjes 250cc 100 stk",
     "amsterdam glazen 12st",
     "amsterdam glazen 6st",
-    "bierbekers 1000st doos", // Could be argued as FOOD related in context
-    "bierbekers 50st los", // Could be argued as FOOD related in context
-    "bierbekers heineken 1250 st", // Could be argued as FOOD related in context
+    "bierbekers 1000st doos",
+    "bierbekers 50st los",
+    "bierbekers heineken 1250 st",
     "bierfluit 12st",
     "catering folie 30cm 4st",
     "catering folie 45cm 4st",
@@ -1030,16 +1050,16 @@ const productData = {
     "deuk wisky glazen 12st",
     "deuk wisky glazen 6st",
     "dranken blok x10",
-    "dreft 1x8.1l", // Also in SCHOONMAAK
-    "dweilmop 400g", // Also in SCHOONMAAK
-    "easy spray xl", // Also in SCHOONMAAK
-    "glassex 12x750ml", // Also in SCHOONMAAK
-    "glorix 15x750ml", // Also in SCHOONMAAK
-    "glorix 1l", // Also in SCHOONMAAK
-    "grillreiniger 1l", // Also in SCHOONMAAK
+    "dreft 1x8.1l",
+    "dweilmop 400g",
+    "easy spray xl",
+    "glassex 12x750ml",
+    "glorix 15x750ml",
+    "glorix 1l",
+    "grillreiniger 1l",
     "hamburgerbak groot 500st",
     "hamburgerbox hp 4*125",
-    "handzeep 1x6st", // Also in SCHOONMAAK
+    "handzeep 1x6st",
     "hemdraag tas 45cm",
     "hemdraag tas 60cm",
     "inpakzak 0.5/1/1.5/2",
@@ -1049,44 +1069,44 @@ const productData = {
     "kofiee bekers 100 stk",
     "kofiie bekers 1000 stk",
     "kofiie bekers 2500 stk",
-    "komo vuilniszakken 15 rl", // Also in SCHOONMAAK
-    "komo vuilniszakken 20 rl", // Also in SCHOONMAAK
-    "latex handschoenen", // Also in SCHOONMAAK
-    "lolly mr bubble", // Could be FOOD
+    "komo vuilniszakken 15 rl",
+    "komo vuilniszakken 20 rl",
+    "latex handschoenen",
+    "lolly mr bubble",
     "magretron deksel 650cc",
     "magretronbak 500cc",
     "magretronbak 650cc",
     "magretronbak deksel 500cc",
-    "melk cupjes 200 st", // Could be FOOD
+    "melk cupjes 200 st",
     "menu bak 100st",
-    "mop 350g", // Also in SCHOONMAAK
-    "mop 50cm", // Also in SCHOONMAAK
+    "mop 350g",
+    "mop 50cm",
     "plastic bord 100st",
     "plastic lepel 10x100 doos",
     "plastic vork 10x100 doos",
-    "poetsrol 1x6", // Also in SCHOONMAAK
+    "poetsrol 1x6",
     "rietjes",
     "roer staafjes karton 1000st",
-    "roze doek", // Also in SCHOONMAAK
+    "roze doek",
     "salade bak 375cc + vast deksel 600s",
     "saus bak 28cc 1000stk",
     "sauscup 10cc",
     "sauscup 30cc",
     "sauscup 80cc + deksel 1000st combi",
-    "schuurspons xl 10 st", // Also in SCHOONMAAK
+    "schuurspons xl 10 st",
     "servetten 8x8 pak",
     "shot glazen 12st",
     "shot glazen 6st",
     "soepkom + deksel 460cc",
     "speel kaarten katja 52",
     "speel kaarten katja hoskin",
-    "spons 20x25gr", // Also in SCHOONMAAK
-    "staal borstel 1x2st", // Also in SCHOONMAAK
-    "sun bierglas reiniger", // Also in SCHOONMAAK
+    "spons 20x25gr",
+    "staal borstel 1x2st",
+    "sun bierglas reiniger",
     "tanden stokers",
-    "thee doek 6st", // Also in SCHOONMAAK
-    "toiletpapier perfex 24x6", // Also in SCHOONMAAK
-    "wc papier 24x8st", // Also in SCHOONMAAK
+    "thee doek 6st",
+    "toiletpapier perfex 24x6",
+    "wc papier 24x8st",
   ],
   "22": [
     // SCHOONMAAK
@@ -1136,13 +1156,10 @@ const productData = {
 // String similarity calculation
 function calculateSimilarity(str1: string, str2: string): number {
   if (!str1 || !str2) return 0
-
   const longer = str1.length > str2.length ? str1 : str2
   const shorter = str1.length > str2.length ? str2 : str1
   const longerLength = longer.length
-
   if (longerLength === 0) return 1.0
-
   const distance = editDistance(longer, shorter)
   return (longerLength - distance) / longerLength
 }
@@ -1150,7 +1167,6 @@ function calculateSimilarity(str1: string, str2: string): number {
 function editDistance(str1: string, str2: string): number {
   str1 = str1.toLowerCase()
   str2 = str2.toLowerCase()
-
   const costs = new Array()
   for (let i = 0; i <= str1.length; i++) {
     let lastValue = i
@@ -1171,47 +1187,40 @@ function editDistance(str1: string, str2: string): number {
   return costs[str2.length]
 }
 
-// Load products from the data and transform into Product objects
 const products: Product[] = Object.entries(productData).flatMap(([fam2id, productNames]) =>
   productNames.map((name) => ({
-    id: name,
+    id: name, // This 'id' is the product name, not a unique productId
     name,
     price: 0,
     fam2id,
   })),
 )
 
-// Create lookup maps
 const productNameToProduct: Map<string, Product> = new Map()
 const normalizedNameToProduct: Map<string, Product> = new Map()
 
-// Normalization function
 function normalizeProductName(productName: string): string {
   return productName
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, " ") // Multiple spaces to single space
-    .replace(/\+\s*statie/g, "+statie") // Normalize statiegeld
+    .replace(/\s+/g, " ")
+    .replace(/\+\s*statie/g, "+statie")
     .replace(/\+ statie/g, "+statie")
-    .replace(/\s*%\s*/g, "%") // Normalize percentages
-    .replace(/\s*x\s*/g, "x") // Normalize multiplication
-    .replace(/,(\d)/g, ".$1") // Comma to dot for decimals
-    .replace(/\s*cl\s*/g, "cl") // Normalize cl
-    .replace(/\s*ml\s*/g, "ml") // Normalize ml
-    .replace(/\s*l\s*/g, "l") // Normalize l
-    .replace(/\s*kg\s*/g, "kg") // Normalize kg
-    .replace(/\s*gr\s*/g, "gr") // Normalize gr
+    .replace(/\s*%\s*/g, "%")
+    .replace(/\s*x\s*/g, "x")
+    .replace(/,(\d)/g, ".$1")
+    .replace(/\s*cl\s*/g, "cl")
+    .replace(/\s*ml\s*/g, "ml")
+    .replace(/\s*l\s*/g, "l")
+    .replace(/\s*kg\s*/g, "kg")
+    .replace(/\s*gr\s*/g, "gr")
 }
 
-// Build lookup maps
 console.log(`🔄 Building product lookup maps from ${products.length} products...`)
-
 products.forEach((product) => {
   productNameToProduct.set(product.name.toLowerCase(), product)
-
   const normalizedName = normalizeProductName(product.name)
   normalizedNameToProduct.set(normalizedName, product)
-
   if (normalizedName.includes("+statie")) {
     const withoutStatie = normalizedName.replace(/\+statie/g, "").trim()
     if (!normalizedNameToProduct.has(withoutStatie)) {
@@ -1219,12 +1228,10 @@ products.forEach((product) => {
     }
   }
 })
-
 console.log(
   `✅ Built lookup maps: ${productNameToProduct.size} original names, ${normalizedNameToProduct.size} normalized names`,
 )
 
-// Mapping from fam2id to category names
 export const fam2idMapping: Record<string, string> = {
   "1": "BIER",
   "2": "NL BIER",
@@ -1244,17 +1251,36 @@ export const fam2idMapping: Record<string, string> = {
   "23": "KRATTEN",
 }
 
-// EXACT MATCHING FUNCTION
+// --- MODIFIED categorizeProductExact function ---
 export function categorizeProductExact(
   productName: string,
   volume?: string,
+  arcleunik?: string, // Added arcleunik as an optional parameter
 ): {
   fam2id: string
   categoryName: string
-  matchType: "exact" | "partial" | "fallback"
+  matchType: "exact" | "partial" | "fallback" | "id_match" // Added "id_match"
   matchedProduct?: Product
   confidence: number
 } {
+  // STEP 0: Try direct match with arcleunik (productId)
+  if (arcleunik && arcleunikToFam2idMap[arcleunik]) {
+    const fam2id = arcleunikToFam2idMap[arcleunik]
+    const categoryName = getCategoryName(fam2id)
+    console.log(`✅ ARCLEUNIK MATCH (ID_MATCH): arcleunik="${arcleunik}" -> fam2id=${fam2id}, category=${categoryName}`)
+    return {
+      fam2id,
+      categoryName,
+      matchType: "id_match", // New matchType for ID-based categorization
+      confidence: 1.0, // Highest confidence for direct ID match
+    }
+  }
+  if (arcleunik) {
+    console.log(
+      `ℹ️ Arcleunik "${arcleunik}" provided but not found in arcleunikToFam2idMap. Proceeding with name/volume matching.`,
+    )
+  }
+
   if (!productName) {
     return {
       fam2id: "21",
@@ -1264,15 +1290,12 @@ export function categorizeProductExact(
     }
   }
 
-  console.log(`🔍 Categorizing product: "${productName}" (volume: "${volume || "N/A"}")`)
-
+  console.log(`🔍 Categorizing by name/volume: "${productName}" (volume: "${volume || "N/A"}")`)
   const originalName = productName.trim()
   const normalizedName = normalizeProductName(productName)
-
   console.log(`   Original: "${originalName}"`)
   console.log(`   Normalized: "${normalizedName}"`)
 
-  // STEP 1: Try exact match with original name (case-insensitive)
   const exactOriginalMatch = productNameToProduct.get(originalName.toLowerCase())
   if (exactOriginalMatch) {
     const categoryName = getCategoryName(exactOriginalMatch.fam2id)
@@ -1282,11 +1305,10 @@ export function categorizeProductExact(
       categoryName,
       matchType: "exact",
       matchedProduct: exactOriginalMatch,
-      confidence: 1.0,
+      confidence: 0.99, // Slightly less than ID match
     }
   }
 
-  // STEP 2: Try exact match with normalized name
   const exactNormalizedMatch = normalizedNameToProduct.get(normalizedName)
   if (exactNormalizedMatch) {
     const categoryName = getCategoryName(exactNormalizedMatch.fam2id)
@@ -1300,7 +1322,6 @@ export function categorizeProductExact(
     }
   }
 
-  // STEP 3: Try with volume included
   if (volume) {
     const nameWithVolume = `${normalizedName} ${normalizeProductName(volume)}`.trim()
     const volumeMatch = normalizedNameToProduct.get(nameWithVolume)
@@ -1312,28 +1333,21 @@ export function categorizeProductExact(
         categoryName,
         matchType: "exact",
         matchedProduct: volumeMatch,
-        confidence: 0.92, // Slightly higher confidence for volume match
+        confidence: 0.92,
       }
     }
   }
 
-  // STEP 3.5: AGGRESSIVE Special handling for blik products
   if (normalizedName.includes("blik")) {
-    // Check for explicit non-drink blik items first to avoid miscategorizing them
     if (
       normalizedName.includes("non-food") ||
       normalizedName.includes("schoonmaak") ||
       normalizedName.includes("verf")
     ) {
-      // Let it fall through to other matching or fallback if it's clearly not a drink
+      // Let it fall through
     } else if (normalizedName.includes("bier") || normalizedName.includes("beer")) {
       console.log(`✅ AGGRESSIVE BLIK MATCH (BIER): POOLSE BIER BLIK (fam2id: 4)`)
-      return {
-        fam2id: "4",
-        categoryName: "POOLSE BIER BLIK",
-        matchType: "partial",
-        confidence: 0.9, // High confidence for this rule
-      }
+      return { fam2id: "4", categoryName: "POOLSE BIER BLIK", matchType: "partial", confidence: 0.9 }
     } else if (
       normalizedName.includes("cola") ||
       normalizedName.includes("fanta") ||
@@ -1344,15 +1358,10 @@ export function categorizeProductExact(
       normalizedName.includes("frisdrank") ||
       normalizedName.includes("soda") ||
       normalizedName.includes("ice tea") ||
-      normalizedName.includes("chocomel") // Chocomel in blik is a drink
+      normalizedName.includes("chocomel")
     ) {
       console.log(`✅ AGGRESSIVE BLIK MATCH (FRISDRANK): FRISDRANKEN (fam2id: 6)`)
-      return {
-        fam2id: "6",
-        categoryName: "FRISDRANKEN",
-        matchType: "partial",
-        confidence: 0.9, // High confidence
-      }
+      return { fam2id: "6", categoryName: "FRISDRANKEN", matchType: "partial", confidence: 0.9 }
     } else if (
       normalizedName.includes("mix") ||
       normalizedName.includes("bacardi") ||
@@ -1361,40 +1370,25 @@ export function categorizeProductExact(
       normalizedName.includes("jack")
     ) {
       console.log(`✅ AGGRESSIVE BLIK MATCH (MIX DRANK): MIX DRANK (fam2id: 5)`)
-      return {
-        fam2id: "5",
-        categoryName: "MIX DRANK",
-        matchType: "partial",
-        confidence: 0.9, // High confidence
-      }
+      return { fam2id: "5", categoryName: "MIX DRANK", matchType: "partial", confidence: 0.9 }
     } else if (!normalizedName.includes("food") || normalizedName.includes("chocomel blik")) {
-      // If it's "blik" and not clearly "food" (unless it's a drinkable food like chocomel)
       console.log(`✅ AGGRESSIVE GENERAL BLIK MATCH: FRISDRANKEN (fam2id: 6) - Defaulting to drink for generic blik`)
-      return {
-        fam2id: "6", // Default to FRISDRANKEN for unknown blik items
-        categoryName: "FRISDRANKEN",
-        matchType: "partial",
-        confidence: 0.8, // Reasonably high confidence for this aggressive rule
-      }
+      return { fam2id: "6", categoryName: "FRISDRANKEN", matchType: "partial", confidence: 0.8 }
     }
   }
 
-  // STEP 4: Try partial matching with a relatively high threshold
   let bestMatch: Product | null = null
   let bestScore = 0
   let iterations = 0
   const maxIterationsPartial = 500
-
   for (const product of products) {
     if (iterations++ > maxIterationsPartial) break
-
     const similarity = calculateSimilarity(normalizedName, normalizeProductName(product.name))
     if (similarity > bestScore && similarity > 0.88) {
       bestScore = similarity
       bestMatch = product
     }
   }
-
   if (bestMatch && bestScore > 0.88) {
     const categoryName = getCategoryName(bestMatch.fam2id)
     console.log(
@@ -1409,12 +1403,10 @@ export function categorizeProductExact(
     }
   }
 
-  // STEP 5: Quick substring matching
   iterations = 0
   const maxIterationsSubstring = 200
   for (const product of products) {
     if (iterations++ > maxIterationsSubstring) break
-
     const productNormalized = normalizeProductName(product.name)
     if (productNormalized.includes(normalizedName) || normalizedName.includes(productNormalized)) {
       if (Math.abs(productNormalized.length - normalizedName.length) <= 7) {
@@ -1431,7 +1423,6 @@ export function categorizeProductExact(
     }
   }
 
-  // STEP 6: Fallback categorization
   const fallbackResult = fallbackCategorization(productName, volume)
   const categoryName = getCategoryName(fallbackResult)
   console.log(`⚠️ FALLBACK: fam2id=${fallbackResult}, category=${categoryName}`)
@@ -1443,21 +1434,17 @@ export function categorizeProductExact(
   }
 }
 
-// AGGRESSIVE Fallback categorization function
 function fallbackCategorization(productName: string, volume?: string): string {
   const name = productName.toLowerCase()
   const vol = volume?.toLowerCase() || ""
   const fullText = `${name} ${vol}`.trim()
-
   console.log(`🔄 AGGRESSIVE Fallback categorization for: "${fullText}"`)
 
-  // Highest priority: Kratten/Statiegeld
   if (fullText.includes("krat") || fullText.includes("crate") || fullText.includes("statiegeld")) {
     console.log(`   → KRATTEN (fam2id: 23)`)
     return "23"
   }
 
-  // AGGRESSIVE BLIK HANDLING - Comes very early
   if (fullText.includes("blik")) {
     if (
       fullText.includes("non-food") ||
@@ -1465,7 +1452,6 @@ function fallbackCategorization(productName: string, volume?: string): string {
       fullText.includes("verf") ||
       (fullText.includes("food") && !fullText.includes("chocomel"))
     ) {
-      // If it's explicitly a non-drink item in a can, let it fall to other rules or NON-FOOD
       console.log(`   → Blik identified as non-drink, deferring...`)
     } else if (fullText.includes("bier") || fullText.includes("beer")) {
       console.log(`   → POOLSE BIER BLIK (fam2id: 4) - Fallback Blik Rule`)
@@ -1480,7 +1466,7 @@ function fallbackCategorization(productName: string, volume?: string): string {
       fullText.includes("frisdrank") ||
       fullText.includes("soda") ||
       fullText.includes("ice tea") ||
-      fullText.includes("chocomel") // chocomel in blik
+      fullText.includes("chocomel")
     ) {
       console.log(`   → FRISDRANKEN (fam2id: 6) - Fallback Blik Rule`)
       return "6"
@@ -1494,22 +1480,19 @@ function fallbackCategorization(productName: string, volume?: string): string {
       console.log(`   → MIX DRANK (fam2id: 5) - Fallback Blik Rule`)
       return "5"
     } else {
-      // Aggressive default for unspecified "blik" items
       console.log(`   → FRISDRANKEN (fam2id: 6) - AGGRESSIVE DEFAULT FOR GENERIC BLIK`)
-      return "6" // Default most other "blik" items to FRISDRANKEN
+      return "6"
     }
   }
 
-  // Other specific categories
   if (fullText.includes("bier") || fullText.includes("beer")) {
     if (fullText.includes("fles")) {
       console.log(`   → POOLSE BIER FLES (fam2id: 3)`)
       return "3"
     }
-    console.log(`   → NL BIER (fam2id: 2)`) // Default for non-blik, non-fles bier
+    console.log(`   → NL BIER (fam2id: 2)`)
     return "2"
   }
-
   if (
     fullText.includes("wijn") ||
     fullText.includes("wine") ||
@@ -1521,7 +1504,6 @@ function fallbackCategorization(productName: string, volume?: string): string {
     console.log(`   → WIJN (fam2id: 13)`)
     return "13"
   }
-
   if (
     fullText.includes("vodka") ||
     fullText.includes("whisky") ||
@@ -1544,7 +1526,6 @@ function fallbackCategorization(productName: string, volume?: string): string {
     console.log(`   → STERKE DRANK (fam2id: 16)`)
     return "16"
   }
-
   if (
     fullText.includes("cola") ||
     fullText.includes("fanta") ||
@@ -1559,12 +1540,11 @@ function fallbackCategorization(productName: string, volume?: string): string {
     fullText.includes("appelsap") ||
     fullText.includes("sinas") ||
     fullText.includes("cassis") ||
-    fullText.includes("chocomel") // Chocomel not in blik
+    fullText.includes("chocomel")
   ) {
     console.log(`   → FRISDRANKEN (fam2id: 6)`)
     return "6"
   }
-
   if (
     fullText.includes("water") ||
     fullText.includes("spa") ||
@@ -1576,7 +1556,6 @@ function fallbackCategorization(productName: string, volume?: string): string {
     console.log(`   → WATER (fam2id: 7)`)
     return "7"
   }
-
   if (
     fullText.includes("cocktail") ||
     fullText.includes("mojito") ||
@@ -1589,7 +1568,6 @@ function fallbackCategorization(productName: string, volume?: string): string {
     console.log(`   → COCKTAILS (fam2id: 10)`)
     return "10"
   }
-
   if (
     fullText.includes("koffie") ||
     fullText.includes("thee") ||
@@ -1601,12 +1579,10 @@ function fallbackCategorization(productName: string, volume?: string): string {
     console.log(`   → KOFFIE THEE (fam2id: 18)`)
     return "18"
   }
-
   if (fullText.includes("houtskool")) {
     console.log(`   → HOUTSKOOL (fam2id: 19)`)
     return "19"
   }
-
   if (
     fullText.includes("chips") ||
     fullText.includes("chocolade") ||
@@ -1631,7 +1607,6 @@ function fallbackCategorization(productName: string, volume?: string): string {
     console.log(`   → FOOD (fam2id: 20)`)
     return "20"
   }
-
   if (
     fullText.includes("schoonmaak") ||
     fullText.includes("ajax") ||
@@ -1649,7 +1624,6 @@ function fallbackCategorization(productName: string, volume?: string): string {
     return "22"
   }
 
-  // Default to NON-FOOD if no other category fits
   console.log(`   → NON-FOOD (default fallback, fam2id: 21)`)
   return "21"
 }
@@ -1658,6 +1632,5 @@ export function getCategoryName(fam2id: string): string {
   return fam2idMapping[fam2id] || categoryMapping[fam2id] || "OVERIGE PRODUCTEN"
 }
 
-// Export main functions
 export const categorizeProduct = categorizeProductExact
 export default categorizeProductExact

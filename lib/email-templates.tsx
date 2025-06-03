@@ -35,27 +35,42 @@ export interface OrderConfirmationData {
   deliveryInstructions?: string
 }
 
-// Update the generateOrderConfirmationHTML function to preserve exact fam2id values
-// Ensure all items have fam2id before grouping, but ALWAYS preserve original values exactly
-export function generateOrderConfirmationHTML(data: OrderConfirmationData): string {
+// Updated function to use live GUID-based categorization
+export async function generateOrderConfirmationHTML(data: OrderConfirmationData): Promise<string> {
   console.log("Starting email HTML generation with items:", data.items.length)
-
-  // Log the categoryMapping to see what mappings are available
   console.log("Category Mapping in email template:", categoryMapping)
 
-  // Ensure all items have fam2id before grouping, but ALWAYS preserve original values exactly
-  const itemsWithCategories = data.items.map((item) => {
-    // IMPORTANT: Only categorize if fam2id is completely missing
-    if (item.fam2id === undefined) {
-      const result = categorizeProduct(item.name, item.volume)
-      const fam2id = typeof result === "string" ? result : result.fam2id
-      console.log(`Email generation: Auto-categorizing "${item.name}" -> fam2id: ${fam2id} (fallback)`)
-      return { ...item, fam2id }
-    }
+  // Use live categorization for items that need it
+  const itemsWithCategories = await Promise.all(
+    data.items.map(async (item) => {
+      // IMPORTANT: Only categorize if fam2id is completely missing
+      if (item.fam2id === undefined || item.fam2id === null || item.fam2id === "") {
+        console.log(`Email generation: Live categorizing "${item.name}" with GUID: ${item.guid || "N/A"}`)
 
-    console.log(`Email generation: Using existing fam2id for "${item.name}" -> fam2id: ${item.fam2id}`)
-    return item
-  })
+        try {
+          const result = await categorizeProduct(
+            item.name,
+            item.volume,
+            item.arcleunik || item.volume,
+            item.fam2id,
+            item.guid, // Use GUID for live API lookup
+          )
+
+          const fam2id = typeof result === "string" ? result : result.fam2id
+          const matchType = typeof result === "string" ? "fallback" : result.matchType
+
+          console.log(`Email generation: Live categorized "${item.name}" -> fam2id: ${fam2id} (${matchType})`)
+          return { ...item, fam2id }
+        } catch (error) {
+          console.error(`Email generation: Error categorizing "${item.name}":`, error)
+          return { ...item, fam2id: "21" } // Fallback to NON-FOOD
+        }
+      }
+
+      console.log(`Email generation: Using existing fam2id for "${item.name}" -> fam2id: ${item.fam2id}`)
+      return item
+    }),
+  )
 
   // Log each item with its category for debugging
   itemsWithCategories.forEach((item, index) => {
@@ -71,7 +86,9 @@ export function generateOrderConfirmationHTML(data: OrderConfirmationData): stri
       const fam2id = item.fam2id || "21" // Default to NON-FOOD if missing
       const categoryName = getCategoryName(fam2id)
 
-      console.log(`Email categorization: Item "${item.name}" with fam2id "${fam2id}" -> category "${categoryName}"`)
+      console.log(
+        `EMAIL categorization: Item "${item.name}" with fam2id "${fam2id}" -> category "${categoryName}" (from fam2idMapping)`,
+      )
 
       if (!acc[categoryName]) {
         acc[categoryName] = []
@@ -82,7 +99,16 @@ export function generateOrderConfirmationHTML(data: OrderConfirmationData): stri
     {} as Record<string, CartItem[]>,
   )
 
-  console.log(`Email categories found: ${Object.keys(groupedItems).join(", ")}`)
+  console.log(`EMAIL categories found: ${Object.keys(groupedItems).join(", ")}`)
+
+  // Log the final grouping for debugging with fam2id verification
+  Object.entries(groupedItems).forEach(([category, items]) => {
+    console.log(`EMAIL category "${category}" has ${items.length} items:`)
+    items.forEach((item) => {
+      const expectedCategory = getCategoryName(item.fam2id || "21")
+      console.log(`  - ${item.name} (fam2id: ${item.fam2id} -> ${expectedCategory})`)
+    })
+  })
 
   // Log the final grouping for debugging
   Object.entries(groupedItems).forEach(([category, items]) => {
@@ -102,6 +128,7 @@ export function generateOrderConfirmationHTML(data: OrderConfirmationData): stri
             <div style="font-weight: 600; color: #374151; margin-bottom: 4px;">${item.name}</div>
             <div style="font-size: 12px; color: #6b7280;">
               Art.nr: ${item.arcleunik || "N/A"} | SKU: #${item.volume}
+              ${item.guid ? ` | GUID: ${item.guid.substring(0, 8)}...` : ""}
             </div>
           </td>
           <td style="padding: 12px 8px; text-align: center; color: #374151;">
@@ -243,11 +270,32 @@ export function generateOrderConfirmationHTML(data: OrderConfirmationData): stri
   `
 }
 
-export function generateOrderConfirmationText(data: OrderConfirmationData): string {
-  // Group items by fam2id, prioritizing existing fam2id values
-  const groupedItems = data.items.reduce(
+export async function generateOrderConfirmationText(data: OrderConfirmationData): Promise<string> {
+  // Use live categorization for items that need it
+  const itemsWithCategories = await Promise.all(
+    data.items.map(async (item) => {
+      if (item.fam2id === undefined || item.fam2id === null || item.fam2id === "") {
+        try {
+          const result = await categorizeProduct(
+            item.name,
+            item.volume,
+            item.arcleunik || item.volume,
+            item.fam2id,
+            item.guid,
+          )
+          const fam2id = typeof result === "string" ? result : result.fam2id
+          return { ...item, fam2id }
+        } catch (error) {
+          return { ...item, fam2id: "21" }
+        }
+      }
+      return item
+    }),
+  )
+
+  // Group items by fam2id
+  const groupedItems = itemsWithCategories.reduce(
     (acc, item) => {
-      // Make sure fam2id is not undefined before using it as an index
       const fam2id = item.fam2id || "21"
       const categoryName = categoryMapping[fam2id] || "OVERIGE PRODUCTEN"
 
@@ -292,6 +340,9 @@ BESTELDE PRODUCTEN:
     items.forEach((item) => {
       text += `• ${item.name}\n`
       text += `  Art.nr: ${item.arcleunik || "N/A"} | SKU: #${item.volume}\n`
+      if (item.guid) {
+        text += `  GUID: ${item.guid}\n`
+      }
       text += `  ${item.quantity}x €${item.price.toFixed(2)} = €${(item.price * item.quantity).toFixed(2)}\n\n`
     })
 

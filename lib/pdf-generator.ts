@@ -14,31 +14,54 @@ export interface CompletePackingSlipData {
   totalAmount: number
 }
 
-// Update the groupItemsByCategory function to work with the new matching setup
-export function groupItemsByCategory(items: CartItem[]): Record<string, CartItem[]> {
-  console.log("Grouping items by category, total items:", items.length)
+// Updated groupItemsByCategory function to use live GUID-based categorization
+export async function groupItemsByCategory(items: CartItem[]): Promise<Record<string, CartItem[]>> {
+  console.log("Grouping items by category using live API, total items:", items.length)
 
-  // Debug the items to see what fam2id values we have
+  // Debug the items to see what data we have
   items.forEach((item, index) => {
-    console.log(`Item ${index}: ${item.name}, fam2id: ${item.fam2id || "undefined"}, volume: ${item.volume}`)
-  })
-
-  // First, ensure all items have a valid fam2id
-  const itemsWithValidFam2id = items.map((item) => {
-    // IMPORTANT: Always preserve the exact fam2id if it exists
-    if (item.fam2id !== undefined) {
-      console.log(`Using existing fam2id: ${item.name} -> ${item.fam2id} -> category: ${getCategoryName(item.fam2id)}`)
-      return item
-    }
-
-    // Only if fam2id is completely missing, use the categorization function as fallback
-    const result = categorizeProduct(item.name, item.volume)
-    const fam2id = typeof result === "string" ? result : result.fam2id
     console.log(
-      `Auto-categorized (fallback): ${item.name} -> fam2id: ${fam2id} -> category: ${getCategoryName(fam2id)}`,
+      `Item ${index}: ${item.name}, fam2id: ${item.fam2id || "undefined"}, GUID: ${item.guid || "N/A"}, volume: ${item.volume}`,
     )
-    return { ...item, fam2id }
   })
+
+  // Use live categorization for items that need it
+  const itemsWithValidFam2id = await Promise.all(
+    items.map(async (item) => {
+      // IMPORTANT: Always preserve the exact fam2id if it exists
+      if (item.fam2id !== undefined && item.fam2id !== null && item.fam2id !== "") {
+        console.log(
+          `Using existing fam2id: ${item.name} -> ${item.fam2id} -> category: ${getCategoryName(item.fam2id)}`,
+        )
+        return item
+      }
+
+      // Use live categorization with GUID for missing fam2id
+      try {
+        console.log(`Live categorizing: ${item.name} with GUID: ${item.guid || "N/A"}`)
+
+        const result = await categorizeProduct(
+          item.name,
+          item.volume,
+          item.arcleunik || item.volume,
+          item.fam2id,
+          item.guid, // Use GUID for live API lookup
+        )
+
+        const fam2id = typeof result === "string" ? result : result.fam2id
+        const matchType = typeof result === "string" ? "fallback" : result.matchType
+
+        console.log(
+          `Live categorized: ${item.name} -> fam2id: ${fam2id} -> category: ${getCategoryName(fam2id)} (${matchType})`,
+        )
+
+        return { ...item, fam2id }
+      } catch (error) {
+        console.error(`Error in live categorization for ${item.name}:`, error)
+        return { ...item, fam2id: "21" } // Fallback to NON-FOOD
+      }
+    }),
+  )
 
   // Now group by category name
   const grouped = itemsWithValidFam2id.reduce(
@@ -46,7 +69,9 @@ export function groupItemsByCategory(items: CartItem[]): Record<string, CartItem
       // Get the category name from the mapping using the item's fam2id
       const categoryName = getCategoryName(item.fam2id || "21")
 
-      console.log(`Grouping: ${item.name} into category "${categoryName}" (fam2id: ${item.fam2id})`)
+      console.log(
+        `PDF Grouping: ${item.name} -> fam2id: ${item.fam2id} -> category: "${categoryName}" (from fam2idMapping)`,
+      )
 
       // Initialize the category array if it doesn't exist
       if (!acc[categoryName]) {
@@ -60,24 +85,27 @@ export function groupItemsByCategory(items: CartItem[]): Record<string, CartItem
     {} as Record<string, CartItem[]>,
   )
 
-  // Log the final grouping results
-  console.log("Final grouped categories:", Object.keys(grouped))
+  // Log the final grouping results with fam2id verification
+  console.log("PDF Final grouped categories:", Object.keys(grouped))
   Object.entries(grouped).forEach(([category, categoryItems]) => {
-    console.log(`Category "${category}" has ${categoryItems.length} items:`)
-    categoryItems.forEach((item) => console.log(`  - ${item.name} (fam2id: ${item.fam2id})`))
+    console.log(`PDF Category "${category}" has ${categoryItems.length} items:`)
+    categoryItems.forEach((item) => {
+      const expectedCategory = getCategoryName(item.fam2id || "21")
+      console.log(`  - ${item.name} (fam2id: ${item.fam2id} -> ${expectedCategory})`)
+    })
   })
 
   return grouped
 }
 
-// Update the generateCompletePackingSlipPDF function to better handle categories
-export function generateCompletePackingSlipPDF(data: CompletePackingSlipData): Buffer {
+// Updated generateCompletePackingSlipPDF function to use live categorization
+export async function generateCompletePackingSlipPDF(data: CompletePackingSlipData): Promise<Buffer> {
   try {
-    console.log("Starting PDF generation for order:", data.orderNumber)
+    console.log("Starting PDF generation with live categorization for order:", data.orderNumber)
 
-    // Group items by category first
-    const groupedItems = groupItemsByCategory(data.items)
-    console.log("Grouped items by category:", Object.keys(groupedItems))
+    // Group items by category using live API categorization
+    const groupedItems = await groupItemsByCategory(data.items)
+    console.log("Grouped items by category using live API:", Object.keys(groupedItems))
 
     const doc = new jsPDF()
 
@@ -152,7 +180,7 @@ export function generateCompletePackingSlipPDF(data: CompletePackingSlipData): B
     // Main products table header
     doc.setFontSize(12)
     doc.setTextColor(255, 107, 53)
-    doc.text("PRODUCTEN OVERZICHT", 20, yPosition)
+    doc.text("PRODUCTEN OVERZICHT (Live API Categorization)", 20, yPosition)
     yPosition += 10
 
     // Table headers with adjusted column widths
@@ -283,8 +311,12 @@ export function generateCompletePackingSlipPDF(data: CompletePackingSlipData): B
         doc.setTextColor(0, 0, 0)
         doc.setFont("helvetica", "bold")
 
-        // Format product name with quantity
-        const productText = `${item.quantity}x ${item.name}`
+        // Format product name with quantity and GUID info
+        let productText = `${item.quantity}x ${item.name}`
+        if (item.guid) {
+          productText += ` [GUID: ${item.guid.substring(0, 8)}...]`
+        }
+
         const maxNameLength = 60
         const displayName =
           productText.length > maxNameLength ? productText.substring(0, maxNameLength - 3) + "..." : productText
@@ -318,7 +350,7 @@ export function generateCompletePackingSlipPDF(data: CompletePackingSlipData): B
 
     doc.setFontSize(10)
     doc.setTextColor(255, 107, 53)
-    doc.text("CATEGORIE OVERZICHT", 20, yPosition)
+    doc.text("CATEGORIE OVERZICHT (Live API Results)", 20, yPosition)
     yPosition += 8
 
     // Summary table header
@@ -410,7 +442,7 @@ export function generateCompletePackingSlipPDF(data: CompletePackingSlipData): B
       doc.setFontSize(7)
       doc.setTextColor(100, 100, 100)
       doc.setFont("helvetica", "normal")
-      doc.text("Deze pakbon is automatisch gegenereerd voor order picking.", 20, yPosition)
+      doc.text("Deze pakbon is automatisch gegenereerd met live API categorization.", 20, yPosition)
       doc.text(`Gegenereerd op: ${new Date().toLocaleString("nl-NL")}`, 20, yPosition + 6)
     }
 
@@ -418,10 +450,10 @@ export function generateCompletePackingSlipPDF(data: CompletePackingSlipData): B
     const pdfOutput = doc.output("arraybuffer")
     const pdfBuffer = Buffer.from(pdfOutput)
 
-    console.log(`PDF generated successfully, size: ${pdfBuffer.length} bytes`)
+    console.log(`PDF generated successfully with live categorization, size: ${pdfBuffer.length} bytes`)
     return pdfBuffer
   } catch (error) {
-    console.error("Error generating PDF:", error)
+    console.error("Error generating PDF with live categorization:", error)
     throw new Error(`PDF generation failed: ${error instanceof Error ? error.message : "Unknown error"}`)
   }
 }

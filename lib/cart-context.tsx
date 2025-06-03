@@ -11,12 +11,13 @@ export interface CartItem {
   image: string
   volume: string
   productCode: string
-  arcleunik?: string // Added arcleunik property
-  fam2id?: string // Add fam2id for categorization in emails
+  arcleunik?: string
+  fam2id?: string
+  guid?: string // Add GUID field
   quantity: number
-  tauxTvaArticleEcommerce?: string // Field for product-specific VAT rate
+  tauxTvaArticleEcommerce?: string
   category?: string
-  matchType?: "exact" | "partial" | "fallback" | "existing" | "id_match"
+  matchType?: "api_exact" | "existing" | "exact" | "partial" | "fallback" | "id_match" | "api_error"
 }
 
 interface CartContextType {
@@ -39,22 +40,20 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 const createMinimalCart = (cart: CartItem[]) => {
   return cart.map((item) => ({
     id: item.id,
-    name: item.name.substring(0, 50), // Limit name length
+    name: item.name.substring(0, 50),
     price: item.price,
     quantity: item.quantity,
     fam2id: item.fam2id,
     arcleunik: item.arcleunik,
     volume: item.volume,
-    // Exclude image and other large fields
+    guid: item.guid,
   }))
 }
 
 // Helper function to safely store cart data
 const safelyStoreCart = (cart: CartItem[]) => {
-  // First try with full data
   try {
     const cartString = JSON.stringify(cart)
-    // Check if the string is too large (5MB is the typical limit)
     if (cartString.length > 4000000) {
       throw new Error("Cart data too large for localStorage")
     }
@@ -63,7 +62,6 @@ const safelyStoreCart = (cart: CartItem[]) => {
   } catch (error) {
     console.warn("Could not save full cart to localStorage:", error)
 
-    // Try with minimal data
     try {
       const minimalCart = createMinimalCart(cart)
       localStorage.setItem("cart", JSON.stringify(minimalCart))
@@ -72,7 +70,6 @@ const safelyStoreCart = (cart: CartItem[]) => {
     } catch (minError) {
       console.error("Failed to save minimal cart to localStorage:", minError)
 
-      // Last resort: try sessionStorage (clears when browser is closed)
       try {
         const ultraMinimalCart = cart.map((item) => ({
           id: item.id,
@@ -111,14 +108,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (!storageAvailable) return
 
     try {
-      // Try localStorage first
       const savedCart = localStorage.getItem("cart")
       if (savedCart) {
         setCart(JSON.parse(savedCart))
         return
       }
 
-      // Fall back to sessionStorage
       const sessionCart = sessionStorage.getItem("cart")
       if (sessionCart) {
         setCart(JSON.parse(sessionCart))
@@ -132,59 +127,92 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!storageAvailable || cart.length === 0) return
 
-    // Limit cart size to prevent storage issues
     if (cart.length > 100) {
       console.warn("Cart exceeds maximum size limit (100 items), removing oldest items")
-      setCart((prevCart) => prevCart.slice(-100)) // Keep only the 100 most recent items
+      setCart((prevCart) => prevCart.slice(-100))
       return
     }
 
-    // Attempt to store the cart
     const stored = safelyStoreCart(cart)
-
     if (!stored) {
       console.error("Failed to store cart in any available storage")
     }
   }, [cart, storageAvailable])
 
-  // Update the addToCart function to preserve the exact fam2id from the product
+  // Updated addToCart function to work with API structure
   const addToCart = (item: Omit<CartItem, "quantity">) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((cartItem) => cartItem.id === item.id)
-
-      // IMPORTANT: Preserve the exact fam2id from the product
-      // Do not attempt to categorize it unless it's undefined
-      let itemWithCategory = { ...item }
-
-      // Only use categorization if fam2id is completely missing
-      if (item.fam2id === undefined) {
-        const result = categorizeProduct(item.name, item.volume, item.arcleunik)
-        itemWithCategory = {
-          ...item,
-          fam2id: result.fam2id,
-          category: result.categoryName,
-          matchType: result.matchType,
-        }
-        console.log(
-          `Cart: Auto-categorizing "${item.name}" (arcleunik: ${item.arcleunik || "N/A"}) -> fam2id: ${result.fam2id} (${result.categoryName}) [${result.matchType}]`,
-        )
-      } else {
-        console.log(`Cart: Using existing fam2id for "${item.name}" -> fam2id: ${item.fam2id}`)
-      }
-
-      // Handle image URLs properly - don't truncate base64 images
-      itemWithCategory.image = item.image?.startsWith("data:image")
-        ? item.image // Keep base64 images intact
-        : item.image?.length > 500
-          ? item.image.substring(0, 500)
-          : item.image
 
       if (existingItem) {
         return prevCart.map((cartItem) =>
           cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem,
         )
       }
-      return [...prevCart, { ...itemWithCategory, quantity: 1 }]
+
+      // For new items, we'll add them immediately and categorize asynchronously
+      const newItem = { ...item, quantity: 1 }
+
+      // Perform live categorization asynchronously
+      const performLiveCategorization = async () => {
+        try {
+          const actualArcleunik = item.arcleunik || item.volume
+
+          console.log(`🛒 Adding to cart with live categorization: "${item.name}"`)
+          console.log(`   ID: ${item.id}`)
+          console.log(`   GUID: ${item.guid || "N/A"}`)
+          console.log(`   Volume (arcleunik): ${item.volume}`)
+          console.log(`   Existing fam2id: ${item.fam2id}`)
+
+          // Use live categorization
+          const result = await categorizeProduct(
+            item.name,
+            item.volume,
+            actualArcleunik,
+            item.fam2id,
+            item.guid, // Pass GUID for live API lookup
+          )
+
+          console.log(
+            `🔄 Live categorization result: "${item.name}" -> ${result.categoryName} (${result.matchType}, confidence: ${result.confidence.toFixed(3)})`,
+          )
+
+          // Update the cart item with categorization results
+          setCart((currentCart) =>
+            currentCart.map((cartItem) =>
+              cartItem.id === item.id
+                ? {
+                    ...cartItem,
+                    arcleunik: actualArcleunik,
+                    fam2id: result.fam2id,
+                    category: result.categoryName,
+                    matchType: result.matchType as "api_exact" | "id_match" | "api_error" | "fallback" | "existing" | "exact" | "partial",
+                  }
+                : cartItem,
+            ),
+          )
+        } catch (error) {
+          console.error("Error in live categorization:", error)
+          // Fallback: update with basic info
+          setCart((currentCart) =>
+            currentCart.map((cartItem) =>
+              cartItem.id === item.id
+                ? {
+                    ...cartItem,
+                    arcleunik: item.arcleunik || item.volume,
+                    category: "NON-FOOD",
+                    matchType: "api_error" as const,
+                  }
+                : cartItem,
+            ),
+          )
+        }
+      }
+
+      // Start live categorization
+      performLiveCategorization()
+
+      return [...prevCart, newItem]
     })
   }
 
@@ -220,7 +248,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const getCartTotal = () => {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
     const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const totalPriceExclVAT = totalPrice / 1.21 // Assuming 21% VAT
+    const totalPriceExclVAT = totalPrice / 1.21
 
     return {
       totalItems,

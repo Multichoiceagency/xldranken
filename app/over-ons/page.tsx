@@ -17,7 +17,7 @@ export default function OverOnsPage() {
         <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/50 to-background"></div>
         <div className="absolute inset-0 z-0">
           <Image
-            src="/winkel/winkel1.png"
+            src="/winkel/IMG_8702.JPG"
             alt="XL Groothandel winkel"
             fill
             className="h-full w-full object-cover"
@@ -58,7 +58,7 @@ export default function OverOnsPage() {
                   </p>
                 </div>
                 <div className="md:w-1/2 relative h-64 md:h-80 w-full rounded-lg overflow-hidden">
-                  <Image src="/winkel/winkel2.jpeg" alt="XL Groothandel assortiment" fill className="object-cover" />
+                  <Image src="/winkel/IMG_8847.jpg" alt="XL Groothandel assortiment" fill className="object-cover" />
                 </div>
               </div>
             </div>
@@ -78,7 +78,7 @@ export default function OverOnsPage() {
                 </p>
               </div>
               <div className="mt-6 relative h-48 w-full rounded-lg overflow-hidden">
-                <Image src="/winkel/winkel2.jpeg" alt="XL Groothandel kwaliteit" fill className="object-cover" />
+                <Image src="/winkel/IMG_8847.jpg" alt="XL Groothandel kwaliteit" fill className="object-cover" />
               </div>
             </div>
 
@@ -95,7 +95,7 @@ export default function OverOnsPage() {
                 </p>
               </div>
               <div className="mt-6 relative h-48 w-full rounded-lg overflow-hidden">
-                <Image src="/winkel/winkel3.jpeg" alt="XL Groothandel voor bedrijven" fill className="object-cover" />
+                <Image src="/winkel/IMG_8696.JPG" alt="XL Groothandel voor bedrijven" fill className="object-cover" />
               </div>
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function OverOnsPage() {
             <div className="flex flex-col md:flex-row gap-8">
               <div className="md:w-1/2">
                 <div className="relative h-64 md:h-full w-full rounded-lg overflow-hidden">
-                  <Image src="/winkel/winkel3.jpeg" alt="XL Groothandel winkel" fill className="object-cover" />
+                  <Image src="/winkel/IMG_8696.JPG" alt="XL Groothandel winkel" fill className="object-cover" />
                 </div>
               </div>
               <div className="md:w-1/2">

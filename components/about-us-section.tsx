@@ -63,7 +63,7 @@ export function AboutUsSection() {
 
               {/* Main Image */}
               <Image
-                src="/winkel/winkel2.jpeg"
+                src="/winkel/IMG_8847.jpg"
                 alt="XL Groothandel Winkel"
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-110 animate-fade-in-scale"

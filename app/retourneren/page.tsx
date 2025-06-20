@@ -60,7 +60,7 @@ export default function RetournerenPage() {
         <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/50 to-background"></div>
         <div className="absolute inset-0 z-0">
           <Image
-            src="/winkel/winkel1.png"
+            src="/winkel/IMG_8702.JPG"
             alt="XL Groothandel retourneren"
             fill
             className="h-full w-full object-cover"

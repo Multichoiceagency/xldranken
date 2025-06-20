@@ -227,7 +227,7 @@ export default function ContactPage() {
       <div className="relative">
         <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/50 to-background"></div>
         <div className="absolute inset-0 z-0">
-          <Image src="/winkel/winkel3.jpeg" alt="XL Groothandel showroom" fill className="object-cover" priority />
+          <Image src="/winkel/IMG_8696.JPG" alt="XL Groothandel showroom" fill className="object-cover" priority />
         </div>
         <div className="relative z-20 container mx-auto px-4 py-12 md:py-16">
           <div className="max-w-3xl">
@@ -603,7 +603,7 @@ export default function ContactPage() {
 
                   <Card className="shadow-lg border-0 overflow-hidden">
                     <div className="relative h-48 w-full">
-                      <Image src="/winkel/winkel3.jpeg" alt="XL Groothandel winkel" fill className="object-cover" />
+                      <Image src="/winkel/IMG_8696.JPG" alt="XL Groothandel winkel" fill className="object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                         <div className="p-4 text-white">
                           <h3 className="font-bold text-xl">Onze Winkel</h3>

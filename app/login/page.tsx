@@ -75,7 +75,7 @@ export default function LoginPage() {
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/winkel/winkel1.png"
+          src="/winkel/IMG_8702.JPG"
           alt="Winkel achtergrond"
           fill
           className="object-cover"

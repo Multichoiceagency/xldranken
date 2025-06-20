@@ -1,16 +1,15 @@
-// components/ScrollReset.tsx
 "use client"
 
 import { useEffect } from "react"
-import { usePathname } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 
 export default function ScrollReset() {
-  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    // Scroll direct naar boven bij route change
-    window.scrollTo(0, 0)
-  }, [pathname])
+    // Scroll naar boven bij elke URL parameter wijziging
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [searchParams])
 
   return null
 }

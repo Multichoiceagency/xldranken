@@ -29,7 +29,7 @@ export default function ZakelijkAccountPage() {
         <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/70 via-black/50 to-background"></div>
         <div className="absolute inset-0 z-0">
           <Image
-            src="/winkel/winkel3.jpeg"
+            src="/winkel/IMG_8696.JPG"
             alt="XL Groothandel zakelijk account"
             fill
             className="h-full w-full object-cover"
@@ -293,7 +293,7 @@ export default function ZakelijkAccountPage() {
                 </div>
               </div>
               <div className="md:w-1/3 relative h-48 md:h-auto w-full rounded-lg overflow-hidden">
-                <Image src="/winkel/winkel2.jpeg" alt="XL Groothandel zakelijk team" fill className="object-cover" />
+                <Image src="/winkel/IMG_8847.jpg" alt="XL Groothandel zakelijk team" fill className="object-cover" />
               </div>
             </div>
           </div>

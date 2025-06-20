@@ -10,6 +10,51 @@ const sleep = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+class LRUCache<K, V> {
+  private capacity: number
+  private cache: Map<K, V>
+
+  constructor(capacity: number) {
+    this.capacity = capacity
+    this.cache = new Map<K, V>()
+  }
+
+  get(key: K): V | undefined {
+    if (!this.cache.has(key)) {
+      return undefined
+    }
+    const value = this.cache.get(key)!
+    // Move to end (most recently used)
+    this.cache.delete(key)
+    this.cache.set(key, value)
+    return value
+  }
+
+  put(key: K, value: V): void {
+    if (this.cache.has(key)) {
+      // If key exists, delete it to update its position
+      this.cache.delete(key)
+    } else if (this.cache.size >= this.capacity) {
+      // If cache is full, delete the least recently used item (first item in map)
+      const leastRecentlyUsedKey = this.cache.keys().next().value
+      if (leastRecentlyUsedKey !== undefined) {
+        this.cache.delete(leastRecentlyUsedKey)
+      }
+    }
+    this.cache.set(key, value)
+  }
+
+  clear(): void {
+    this.cache.clear()
+  }
+}
+
+// Instantiate caches (you can adjust capacity as needed)
+const productsByFam1IDCache = new LRUCache<string, ProductProps[]>(50)
+const productsByFam2IDCache = new LRUCache<string, ProductProps[]>(50)
+const customerByIdCache = new LRUCache<string, any>(30) // Using 'any' for simplicity, replace with actual customer type
+const customerOrderDetailsCache = new LRUCache<string, any>(30) // Using 'any' for simplicity, replace with actual order details type
+
 export const menuItemsList = [
   {
     name: "ALCOHOL",
@@ -159,10 +204,16 @@ export async function handleOrders(cart: any[], customerData: any) {
 }
 
 export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[]> {
+  const cacheKey = `fam1ID:${fam1ID}`
+  const cachedData = productsByFam1IDCache.get(cacheKey)
+  if (cachedData) {
+    console.log("Fetching products by fam1ID from CACHE for:", fam1ID)
+    return cachedData
+  }
+
   try {
-    // Construct the URL for products
     const url = `${PRODUCT_API_URL}?apikey=${API_KEY}&fam1ID=${fam1ID}`
-    console.log("Fetching products by fam1ID from URL:", url) // Debug log
+    console.log("Fetching products by fam1ID from API from URL:", url)
 
     const response = await fetch(url)
 
@@ -171,26 +222,29 @@ export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[
     }
 
     const data = await response.json()
+    const products = Array.isArray(data.result?.product) ? data.result.product : []
 
-    // Ensure products is always an array
-    return Array.isArray(data.result?.product) ? data.result.product : []
+    productsByFam1IDCache.put(cacheKey, products)
+    return products
   } catch (error) {
     console.error("Error fetching products by fam1ID:", error)
     return []
   }
 }
 
-// Updated to handle larger batch sizes
 export async function getProductsByFam2ID(fam2ID: string, limit = 100, page = 1): Promise<ProductProps[]> {
+  const cacheKey = `fam2ID:${fam2ID}-limit:${limit}-page:${page}`
+  const cachedData = productsByFam2IDCache.get(cacheKey)
+  if (cachedData) {
+    console.log(`Fetching products by fam2ID from CACHE for: ${fam2ID}, limit: ${limit}, page: ${page}`)
+    return cachedData
+  }
+
   try {
     const url = `${PRODUCT_API_URL}?apikey=${API_KEY}&fam2ID=${fam2ID}&limit=${limit}&page=${page}`
+    console.log("Fetching products by fam2ID from API from URL:", url)
 
-    // Log the final URL with all parameters
-    console.log("Fetching products from URL:", url)
-
-    // Add a delay before fetching (300ms)
     await sleep(300)
-
     const response = await fetch(url.toString())
 
     if (!response.ok) {
@@ -198,18 +252,13 @@ export async function getProductsByFam2ID(fam2ID: string, limit = 100, page = 1)
     }
 
     const data = await response.json()
-
-    // Add a delay after fetching (200ms)
     await sleep(200)
 
-    // Ensure products is always an array
     const products = Array.isArray(data.result?.product) ? data.result.product : []
-
-    // Return products without adding any additional fields
-    // We'll use arcleunik as the unique identifier
+    productsByFam2IDCache.put(cacheKey, products)
     return products
   } catch (error) {
-    console.error("Error fetching products:", error)
+    console.error("Error fetching products by fam2ID:", error)
     return []
   }
 }
@@ -365,40 +414,35 @@ export async function getProductsCount(fam2ID: string): Promise<number> {
 }
 
 export async function getCustomerById(id: string) {
-  try {
-    // Ensure id is a string
-    const customerId = String(id)
+  const customerId = String(id)
+  const cacheKey = `customer:${customerId}`
+  const cachedData = customerByIdCache.get(cacheKey)
+  if (cachedData) {
+    console.log("Fetching customer by ID from CACHE for:", customerId)
+    return cachedData
+  }
 
-    // Use customer API URL for customer endpoints
+  try {
     const url = `${CUSTOMER_API_URL}?apikey=${API_KEY}&clcleunik=${customerId}`
-    console.log("Fetching customer by ID from URL:", url) // Debug log
+    console.log("Fetching customer by ID from API from URL:", url)
 
     const response = await fetch(url)
-
-    // Log the response status for debugging
     console.log(`Customer API response status: ${response.status} ${response.statusText}`)
 
     if (!response.ok) {
-      // Instead of throwing immediately, log more details
       console.error(`Customer API error: ${response.status} ${response.statusText}`)
       console.error(`Customer ID: ${customerId}`)
       console.error(`API URL: ${url}`)
-
-      // Try to get error details from response body
       try {
         const errorData = await response.json()
         console.error("Error response:", errorData)
       } catch (e) {
         console.error("Could not parse error response")
       }
-
-      // Now throw the error
       throw new Error(`API Error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
-
-    // Log the response data for debugging
     console.log("Customer API response data:", data)
 
     if (!data.success || !data.result?.customer || data.result.customer.length === 0) {
@@ -406,7 +450,9 @@ export async function getCustomerById(id: string) {
       throw new Error("Customer not found")
     }
 
-    return data.result.customer[0]
+    const customer = data.result.customer[0]
+    customerByIdCache.put(cacheKey, customer)
+    return customer
   } catch (error) {
     console.error("Error fetching customer by ID:", error)
     throw error
@@ -550,13 +596,17 @@ export async function getCustomerOrder(clcleunik: string): Promise<any[]> {
   }
 }
 
-// Update the getCustomerOrderDetails function to properly handle the API response
-
 export async function getCustomerOrderDetails(guid: string) {
+  const cacheKey = `orderDetails:${guid}`
+  const cachedData = customerOrderDetailsCache.get(cacheKey)
+  if (cachedData) {
+    console.log("Fetching order details from CACHE for GUID:", guid)
+    return cachedData
+  }
+
   try {
-    // Use customer API URL for customer endpoints
     const url = `${process.env.NEXT_PUBLIC_CUSTOMER_ORDER_DETAILS_API_URL}apikey=${API_KEY}&guid=${guid}`
-    console.log("Fetching order details from URL:", url) // Debug log
+    console.log("Fetching order details from API from URL:", url)
 
     const response = await fetch(url)
 
@@ -571,13 +621,15 @@ export async function getCustomerOrderDetails(guid: string) {
       throw new Error("Order details not found")
     }
 
-    console.log("Order details retrieved successfully:", {
+    console.log("Order details retrieved successfully from API:", {
       guid,
       hasLines: !!data.result.order.lines,
       lineCount: data.result.order.lines?.length || 0,
     })
 
-    return data.result.order
+    const orderDetails = data.result.order
+    customerOrderDetailsCache.put(cacheKey, orderDetails)
+    return orderDetails
   } catch (error) {
     console.error("Error fetching order details:", error)
     throw error
@@ -669,9 +721,9 @@ export async function addLinesToOrder(orderID: any, orderLines: any[]) {
   console.log("adding order lines for order: ", orderID)
   for (const orderLine of orderLines) {
     const url = `${process.env.NEXT_PUBLIC_ORDERS_ADD_LINES_TO_ORDER_URL}apikey=${API_KEY}
-    &arcleunik=${orderLine.volume}
-    &guid=${orderID}
-    &qty=${orderLine.quantity}`
+  &arcleunik=${orderLine.volume}
+  &guid=${orderID}
+  &qty=${orderLine.quantity}`
 
     try {
       const res = await fetch(url, {
@@ -709,10 +761,10 @@ export async function getOrderTotal(orderID: any) {
 export async function sendToMegawin(orderID: any) {
   console.log("Sending order to megawin....")
   const url = `${process.env.NEXT_PUBLIC_ORDERS_SEND_TO_MEGAWIN_URL}apikey=${API_KEY}
-  &guid=${orderID}
-  &modeLivraison=1
-  &deliverydate=2025-05-01
-  &deliverycomment=TEST-API-DIAZ`
+&guid=${orderID}
+&modeLivraison=1
+&deliverydate=2025-05-01
+&deliverycomment=TEST-API-DIAZ`
 
   try {
     const res = await fetch(url, {
@@ -722,4 +774,13 @@ export async function sendToMegawin(orderID: any) {
   } catch (error) {
     console.error("Error adding line to order:", error)
   }
+}
+
+export function clearAllAPICaches() {
+  console.log("Clearing all API caches...")
+  productsByFam1IDCache.clear()
+  productsByFam2IDCache.clear()
+  customerByIdCache.clear()
+  customerOrderDetailsCache.clear()
+  console.log("All API caches cleared.")
 }

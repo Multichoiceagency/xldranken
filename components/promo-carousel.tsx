@@ -15,7 +15,7 @@ const promos = [
     discount: "900+ PRODUCTEN",
     media: {
       type: "image",
-      src: "/winkel/winkel2.jpeg",
+      src: "/winkel/IMG_8847.jpg",
     },
     buttonText: "Registereer nu",
     href: "/zakelijk",
@@ -39,7 +39,7 @@ const promos = [
     discount: "Levering door heel Nederland",
     media: {
       type: "image",
-      src: "/winkel/winkel3.jpeg",
+      src: "/winkel/IMG_8696.JPG",
     },
     buttonText: " Bekijk Cocktails",
     href: "/categorie/cocktails",

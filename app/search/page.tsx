@@ -9,6 +9,44 @@ import type { ProductProps } from "@/types/product"
 import { useCart } from "@/lib/cart-context"
 import { useAuthContext } from "@/context/AuthContext"
 
+// Helper function to transform raw API product data (same as in lib/api.ts)
+function transformApiProduct(apiProduct: any): ProductProps {
+  const prixVenteNum = Number(apiProduct.prix_vente_groupe || 0)
+  const prixPromoNum =
+    apiProduct.prix_en_promo && !isNaN(Number(apiProduct.prix_en_promo)) ? Number(apiProduct.prix_en_promo) : null
+
+  let currentPrice = prixVenteNum
+  if (prixPromoNum !== null && prixPromoNum < prixVenteNum) {
+    currentPrice = prixPromoNum
+  }
+
+  let arcleunikValue = apiProduct.arcleunik
+  if (arcleunikValue === null || arcleunikValue === undefined || String(arcleunikValue).trim() === "") {
+    console.warn(
+      `Search result product with title "${apiProduct.title || "Unknown"}" (productCode: ${
+        apiProduct.productCode || "N/A"
+      }) missing 'arcleunik'. Assigning random key.`,
+    )
+    arcleunikValue = `search_random_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+  } else {
+    arcleunikValue = String(arcleunikValue)
+  }
+
+  return {
+    arcleunik: arcleunikValue,
+    id: apiProduct.id ? String(apiProduct.id) : undefined,
+    sku: apiProduct.sku ? String(apiProduct.sku) : undefined,
+    title: apiProduct.title || apiProduct.megatech_Titre_lib_web_nl || "Product",
+    productCode: apiProduct.code_article || apiProduct.arcleunik || "",
+    fam1ID: apiProduct.fam1ID || "",
+    fam2ID: apiProduct.fam2ID || apiProduct.fam2id || "",
+    prix_vente_groupe: apiProduct.prix_vente_groupe,
+    prix_en_promo: apiProduct.prix_en_promo,
+    price: currentPrice, // This is the calculated current price
+    photo1_base64: apiProduct.photo1_base64,
+  }
+}
+
 export default function SearchPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -54,36 +92,26 @@ export default function SearchPage() {
           )
 
           const data = await response.json()
-          console.log("API Response:", data.result?.product?.[0]) // Log the first product for debugging
+          console.log("Search API Response:", data.result?.product?.[0]) // Log the first product for debugging
 
-          // Transform API response to match ProductProps
+          // Transform API response using our standardized function
           const transformedResults = (data.result?.product || []).map((item: any) => {
             // Debug log the raw API item to see available price fields
-            console.log("Raw API item:", {
+            console.log("Raw search API item:", {
               arcleunik: item.arcleunik,
               title: item.title,
+              prix_vente_groupe: item.prix_vente_groupe,
+              prix_en_promo: item.prix_en_promo,
               prix_promo_ttc: item.prix_promo_ttc,
               prix_vente_ttc: item.prix_vente_ttc,
-              prix_vente_groupe: item.prix_vente_groupe,
-              // Log other potential price fields
               prix_public: item.prix_public,
               prix_achat: item.prix_achat,
             })
 
-            // Try to get the best available price
-            const price = item.prix_vente_groupe || item.prix_promo_ttc || item.prix_vente_ttc || 0
-
-            return {
-              arcleunik: item.arcleunik,
-              title: item.title || item.megatech_Titre_lib_web_nl || "Product",
-              photo1_base64: item.photo1_base64 || "",
-              prix_vente_groupe: price, // Use the resolved price
-              productCode: item.code_article || item.arcleunik,
-              fam2id: item.fam2id,
-              // Add any other required fields for ProductProps
-            }
+            return transformApiProduct(item)
           })
 
+          console.log(`Search transformed ${transformedResults.length} products`)
           setSearchResults(transformedResults)
         } else {
           setSearchResults([])

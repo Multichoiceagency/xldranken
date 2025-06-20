@@ -24,82 +24,78 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
-    if (!product) return
+    if (!product || !product.arcleunik) return // Added guard for product.arcleunik
 
     const inCart = isInCart(product.arcleunik)
-    const quantity = inCart ? cart.find((item) => item.id === product.arcleunik)?.quantity || 0 : 0
+    // Ensure item.id is compared with product.arcleunik if arcleunik is the primary key for cart items
+    const itemInCart = cart.find((item) => item.arcleunik === product.arcleunik)
+    const quantity = itemInCart ? itemInCart.quantity : 0
 
     setInCartInfo({ inCart, quantity })
 
-    // Only update quantity input if item is in cart, otherwise keep user's input
     if (inCart && quantity > 0) {
       setQuantityInput(quantity.toString())
     } else if (!inCart) {
-      // Reset to 1 when item is not in cart
       setQuantityInput("1")
     }
   }, [cart, isInCart, product])
 
   if (!product) return <p className="text-gray-500">Product niet beschikbaar</p>
 
-  // Replace the getImageSrc function with this simpler version that focuses on base64 handling
   const getImageSrc = () => {
-    // If we have a photo1_base64 field
     if (product.photo1_base64) {
-      // Check if it's already a complete data URL
       if (product.photo1_base64.startsWith("data:image")) {
         return product.photo1_base64
       }
-
-      // Check if it's a valid base64 string (basic validation)
       if (/^[A-Za-z0-9+/=]+$/.test(product.photo1_base64.substring(0, 20))) {
         return `data:image/jpeg;base64,${product.photo1_base64}`
       }
-
-      console.log(`Invalid base64 data for product: ${product.title}`)
+      // console.log(`Invalid base64 data for product: ${product.title}`) // Removed console.log for cleaner output
     }
-
-    // Fallback to placeholder
-    return "/placeholder.svg"
+    return `/placeholder.svg?width=300&height=300&query=${encodeURIComponent(product.title)}` // Placeholder with query
   }
 
   const imageSrc = getImageSrc()
-  const regularPrice = Number(product.prix_vente_groupe) || 0
+  // Requested pricing logic
+  const prixVente = Number(product.prix_vente_groupe || 0)
+  const prixPromo = product.prix_en_promo ? Number(product.prix_en_promo) : null
+  const currentPrice = prixPromo ?? prixVente
 
-  // Update the handleAddToCart function to use the current quantity input
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
+    if (!product.arcleunik) {
+      // Guard against missing arcleunik
+      toast({ title: "Fout", description: "Product ID ontbreekt.", variant: "destructive" })
+      return
+    }
 
     const quantity = Math.max(1, Number.parseInt(quantityInput) || 1)
-
     setIsAnimating(true)
 
-    console.log(`Adding product to cart with fam2id: ${product.fam2id || "undefined"}`)
+    // console.log(`Adding product to cart with fam2id: ${product.fam2id || "undefined"}`)
 
     if (inCartInfo.inCart) {
-      // If already in cart, update the quantity
       updateQuantity(product.arcleunik, quantity)
       toast({
         title: "Hoeveelheid bijgewerkt",
         description: `${product.title}: ${quantity} stuks`,
       })
     } else {
-      // Add new item to cart with specified quantity
       addToCart({
-        id: product.arcleunik,
+        ...product,
+        id: product.arcleunik!,
         name: product.title,
-        price: regularPrice,
+        price: currentPrice, // Use currentPrice here
         image: imageSrc,
-        volume: product.arcleunik,
+        volume: product.volume || "",
         productCode: product.productCode || "",
-        arcleunik: product.arcleunik,
+        arcleunik: product.arcleunik!,
         fam2id: product.fam2id,
       })
 
-      // If quantity is more than 1, update it after adding
       if (quantity > 1) {
         setTimeout(() => {
-          updateQuantity(product.arcleunik, quantity)
+          updateQuantity(product.arcleunik!, quantity) // Added non-null assertion as it's guarded
         }, 100)
       }
 
@@ -113,11 +109,11 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   }
 
   const handleQuantityChange = (val: number) => {
-    const newVal = Math.max(1, val) // Minimum quantity is 1
+    const newVal = Math.max(1, val)
     setQuantityInput(newVal.toString())
 
-    if (inCartInfo.inCart) {
-      // Update cart quantity if item is already in cart
+    if (inCartInfo.inCart && product.arcleunik) {
+      // Added guard for product.arcleunik
       updateQuantity(product.arcleunik, newVal)
       toast({
         title: "Hoeveelheid bijgewerkt",
@@ -128,16 +124,24 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
   const handleRemoveFromCart = (e: React.MouseEvent) => {
     e.stopPropagation()
-    removeFromCart(product.arcleunik)
-    setQuantityInput("1") // Reset to 1 when removed
-    toast({
-      title: "Product verwijderd",
-      description: `${product.title} is verwijderd uit je winkelwagen`,
-    })
+    if (product.arcleunik) {
+      // Added guard for product.arcleunik
+      removeFromCart(product.arcleunik)
+      setQuantityInput("1")
+      toast({
+        title: "Product verwijderd",
+        description: `${product.title} is verwijderd uit je winkelwagen`,
+      })
+    }
   }
 
   const navigateToProductPage = () => {
-    router.push(`/product/${product.arcleunik}`)
+    if (product.arcleunik) {
+      router.push(`/product/${product.arcleunik}`) // Using singular /product/
+    } else {
+      // console.warn("Cannot navigate: product.arcleunik is missing for product:", product.title)
+      toast({ title: "Navigatiefout", description: "Product ID niet gevonden.", variant: "destructive" })
+    }
   }
 
   return (
@@ -146,16 +150,20 @@ export default function ProductCard({ product }: { product: ProductProps }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Product Badge */}
       {inCartInfo.inCart && (
         <div className="absolute top-3 left-3 z-20 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
           In winkelwagen
         </div>
       )}
+      {/* Promo Badge - Adjusted to show only if there's a promo */}
+      {prixPromo !== null && prixPromo < prixVente && (
+        <div className="absolute top-3 right-3 z-20 bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+          Promo!
+        </div>
+      )}
 
-      {/* Quick Actions */}
       <div
-        className={`absolute top-3 right-3 z-20 flex flex-col gap-2 transition-all duration-300 ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
+        className={`absolute top-3 right-3 z-20 flex flex-col gap-2 transition-all duration-300 ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"} ${prixPromo !== null && prixPromo < prixVente ? "pt-8" : ""}`} // Adjust padding if promo badge is shown
       >
         {isLoggedIn && inCartInfo.inCart && (
           <button
@@ -167,18 +175,16 @@ export default function ProductCard({ product }: { product: ProductProps }) {
         )}
       </div>
 
-      {/* Image Section */}
       <div
         className="relative h-[200px] sm:h-[220px] md:h-[240px] w-full overflow-hidden cursor-pointer bg-white"
         onClick={navigateToProductPage}
       >
-        {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5 bg-white">
           <div className="absolute inset-0 bg-gradient-to-br bg-white"></div>
         </div>
 
         <Image
-          src={imageError ? "/placeholder.svg" : imageSrc}
+          src={imageError ? `/placeholder.svg?width=300&height=300&query=fallback` : imageSrc}
           alt={product.title}
           fill
           className={`object-contain p-4 transition-all duration-700 ${
@@ -188,12 +194,10 @@ export default function ProductCard({ product }: { product: ProductProps }) {
           onError={() => setImageError(true)}
         />
 
-        {/* Hover Overlay */}
         <div
           className={`absolute inset-0 bg-gradient-to-t from-[#0F3059]/20 via-transparent to-transparent transition-opacity duration-300 ${isHovered ? "opacity-100" : "opacity-0"}`}
         />
 
-        {/* Animation Overlay */}
         {isAnimating && (
           <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-500/20 flex items-center justify-center z-10 animate-pulse">
             <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-full p-3 animate-bounce shadow-2xl">
@@ -203,9 +207,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
         )}
       </div>
 
-      {/* Content Section */}
       <div className="flex flex-col p-4 sm:p-5 flex-grow bg-gradient-to-b bg-white">
-        {/* Product Title */}
         <h3
           className="text-left font-bold text-[#0F3059] min-h-[3rem] line-clamp-2 text-sm sm:text-base cursor-pointer mb-3 hover:text-[#C6B07F] transition-colors duration-300 leading-tight"
           onClick={navigateToProductPage}
@@ -213,7 +215,6 @@ export default function ProductCard({ product }: { product: ProductProps }) {
           {product.title}
         </h3>
 
-        {/* Price Section */}
         <div className="flex items-center justify-between mb-4 mt-auto">
           {loading ? (
             <div className="flex items-center gap-2">
@@ -222,15 +223,23 @@ export default function ProductCard({ product }: { product: ProductProps }) {
             </div>
           ) : isLoggedIn ? (
             (() => {
-              const price = Number(product.prix_vente_groupe)
-
-              // Show price if it's a valid number and greater than 0
-              if (!isNaN(price) && price > 0) {
+              if (!isNaN(currentPrice) && currentPrice > 0) {
                 return (
                   <div className="flex flex-col">
-                    <span className="text-2xl font-bold bg-gradient-to-r from-[#0F3059] to-[#1a4a7a] bg-clip-text text-transparent">
-                      €{price.toFixed(2).replace(".", ",")}
-                    </span>
+                    {prixPromo !== null && prixPromo < prixVente ? (
+                      <>
+                        <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
+                          €{currentPrice.toFixed(2).replace(".", ",")}
+                        </span>
+                        <span className="text-sm text-gray-500 line-through">
+                          €{prixVente.toFixed(2).replace(".", ",")}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-2xl font-bold bg-gradient-to-r from-[#0F3059] to-[#1a4a7a] bg-clip-text text-transparent">
+                        €{currentPrice.toFixed(2).replace(".", ",")}
+                      </span>
+                    )}
                     <span className="text-xs text-gray-500">per stuk</span>
                   </div>
                 )
@@ -249,10 +258,8 @@ export default function ProductCard({ product }: { product: ProductProps }) {
           )}
         </div>
 
-        {/* Quantity and Cart Controls */}
         {!loading && isLoggedIn && (
           <div className="space-y-3">
-            {/* Quantity Selector */}
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-[#0F3059]">Aantal:</span>
               <div className="flex items-center bg-white border-2 border-[#C6B07F]/30 rounded-xl overflow-hidden shadow-sm">
@@ -288,7 +295,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
                   }}
                   onKeyDown={(e) => e.key === "Enter" && inputRef.current?.blur()}
                   className="w-12 text-center font-bold border-0 focus:ring-0 text-[#0F3059] bg-[#C6B07F]/5 focus:bg-[#C6B07F]/10 transition-colors"
-                  style={{ fontSize: "16px" }} // Prevent mobile zoom
+                  style={{ fontSize: "16px" }}
                   aria-label="Aantal"
                 />
 
@@ -307,7 +314,6 @@ export default function ProductCard({ product }: { product: ProductProps }) {
               </div>
             </div>
 
-            {/* Add to Cart Button */}
             <Button
               className="w-full bg-gradient-to-r from-[#0F3059] to-[#1a4a7a] hover:from-[#1a4a7a] hover:to-[#0F3059] text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl transform active:scale-95 group/cart"
               onClick={handleAddToCart}
@@ -316,24 +322,23 @@ export default function ProductCard({ product }: { product: ProductProps }) {
               <span className="text-sm">{inCartInfo.inCart ? "Bijwerken" : `Voeg ${quantityInput} toe`}</span>
             </Button>
 
-            {/* Total Price Preview */}
-            {regularPrice > 0 && Number.parseInt(quantityInput) >= 1 && (
+            {currentPrice > 0 && Number.parseInt(quantityInput) >= 1 && (
               <div className="bg-gradient-to-r from-[#C6B07F]/10 to-[#d4c291]/10 border border-[#C6B07F]/20 rounded-lg p-3 text-center">
                 <span className="text-xs text-gray-600">Totaal: </span>
                 <span className="font-bold text-[#0F3059]">
-                  €{(regularPrice * Number.parseInt(quantityInput)).toFixed(2).replace(".", ",")}
+                  €{(currentPrice * Number.parseInt(quantityInput)).toFixed(2).replace(".", ",")}
                 </span>
               </div>
             )}
           </div>
         )}
 
-        {/* Login Prompt for Non-Authenticated Users */}
         {!loading && !isLoggedIn && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 text-center">
             <Button
               onClick={() => router.push("/login")}
-              className="w-full bg-gradient-to-r from-[#FFF2CD] to-[#0F3059] hover:from-[#0F3059] hover:to-[#FFF2CD] text-white font-semibold py-2 rounded-lg transition-all duration-100 hover:scale-110"
+              className="w-full bg-gradient-to-r from-[#0F3059] to-[#1a4a7a] hover:from-[#1a4a7a] hover:to-[#0F3059] text-white font-semibold py-2 rounded-lg transition-all duration-100 hover:scale-105"
+              // Original styling from your file: className="w-full bg-gradient-to-r from-[#FFF2CD] to-[#0F3059] hover:from-[#0F3059] hover:to-[#FFF2CD] text-white font-semibold py-2 rounded-lg transition-all duration-100 hover:scale-110"
             >
               Log in om te bestellen
             </Button>
@@ -341,7 +346,6 @@ export default function ProductCard({ product }: { product: ProductProps }) {
         )}
       </div>
 
-      {/* Bottom Gradient Border */}
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#C6B07F] via-[#d4c291] to-[#C6B07F] opacity-0 group-hover:opacity-100 transition-opacity duration-100"></div>
     </div>
   )

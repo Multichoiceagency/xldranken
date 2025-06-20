@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useMemo, useState, useEffect, type ChangeEvent } from "react"
+import { useMemo, useState, useEffect, type ChangeEvent, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import type { ProductProps } from "@/types/product"
 import { getProductsByFam2ID } from "@/lib/api"
@@ -19,13 +19,7 @@ interface Props {
   initialLimit: number
 }
 
-export default function ProductsGridClient({
-  initialProducts,
-  fam2Id,
-  totalProductsCount,
-  basePath,
-  initialLimit,
-}: Props) {
+function ProductsGridClientContent({ initialProducts, fam2Id, totalProductsCount, basePath, initialLimit }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -219,5 +213,19 @@ export default function ProductsGridClient({
         </div>
       )}
     </>
+  )
+}
+
+export default function ProductsGridClient(props: Props) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center py-20 min-h-[300px]">
+          <Spinner size="large" className="text-[#E2B505]" />
+        </div>
+      }
+    >
+      <ProductsGridClientContent {...props} />
+    </Suspense>
   )
 }

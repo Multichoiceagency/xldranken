@@ -2,7 +2,7 @@ import { menuItemsList, getProductsByFam2ID, getProductsCount } from "@/lib/api"
 import ProductsGridClient from "@/components/product-grid-client"
 import Hero from "@/components/Hero"
 
-const PRODUCTS_PER_PAGE_INITIAL = 20 // Define initial products to load
+const PRODUCTS_PER_PAGE_INITIAL = 900 // Define initial products to load
 
 export default async function CategoryPage(props: { params: { slug: string } }) {
   const params = await props.params
@@ -43,7 +43,7 @@ export default async function CategoryPage(props: { params: { slug: string } }) 
       <div className="container mx-auto px-4 sm:px-8 py-8">
         <ProductsGridClient
           initialProducts={initialProducts}
-          fam2Id={matched.id}
+          fam2id={matched.id}
           totalProductsCount={totalProductsCount}
           basePath={`/categorie/${slug}`}
           initialLimit={PRODUCTS_PER_PAGE_INITIAL}

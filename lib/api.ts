@@ -179,12 +179,13 @@ export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[
   }
 }
 
+
 export async function getProductsByFam2ID(fam2ID: string, limit = 100, page = 1): Promise<ProductProps[]> {
   try {
     const url = `${PRODUCT_API_URL}?apikey=${API_KEY}&fam2ID=${fam2ID}&limit=${limit}&page=${page}`
     console.log("Fetching products by fam2ID from API from URL:", url)
 
-    await sleep(300)
+    await sleep(200)
     const response = await fetch(url.toString())
 
     if (!response.ok) {

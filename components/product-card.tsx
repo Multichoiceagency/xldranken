@@ -22,7 +22,6 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [inCartInfo, setInCartInfo] = useState({ inCart: false, quantity: 0 })
   const [imageError, setImageError] = useState(false)
-  const [imageBlobUrl, setImageBlobUrl] = useState<string>("")
 
   useEffect(() => {
     if (!product || !product.arcleunik) return
@@ -40,87 +39,17 @@ export default function ProductCard({ product }: { product: ProductProps }) {
     }
   }, [cart, isInCart, product])
 
-  useEffect(() => {
-    // Early return if no base64 data
-    if (!product?.photo1_base64) {
-      setImageBlobUrl("")
-      return
-    }
-
-    const convertBase64ToBlob = () => {
-      try {
-        let base64Data: string = product.photo1_base64!
-        let mimeType = "image/jpeg" // default
-
-        // Handle data URL format
-        if (base64Data.startsWith("data:image")) {
-          const parts = base64Data.split(",")
-          if (parts.length !== 2) {
-            console.warn("Invalid data URL format")
-            return
-          }
-
-          const [header, data] = parts
-          const mimeMatch = header.match(/data:image\/([^;]+)/)
-          if (mimeMatch) {
-            mimeType = `image/${mimeMatch[1]}`
-          }
-          base64Data = data
-        }
-
-        // Validate base64 format and ensure we have data
-        if (!base64Data || !/^[A-Za-z0-9+/=]+$/.test(base64Data.substring(0, Math.min(20, base64Data.length)))) {
-          console.warn("Invalid base64 format")
-          return
-        }
-
-        // Convert base64 to blob
-        const byteCharacters = atob(base64Data)
-        const byteNumbers = new Array(byteCharacters.length)
-
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i)
-        }
-
-        const byteArray = new Uint8Array(byteNumbers)
-        const blob = new Blob([byteArray], { type: mimeType })
-        const blobUrl = URL.createObjectURL(blob)
-
-        setImageBlobUrl(blobUrl)
-      } catch (error) {
-        console.warn("Failed to convert base64 to blob:", error)
-        setImageBlobUrl("")
-      }
-    }
-
-    convertBase64ToBlob()
-
-    // Cleanup function to revoke blob URL
-    return () => {
-      if (imageBlobUrl) {
-        URL.revokeObjectURL(imageBlobUrl)
-      }
-    }
-  }, [product?.photo1_base64]) // Remove imageBlobUrl from dependencies to avoid cleanup issues
-
-  // Cleanup blob URL when component unmounts
-  useEffect(() => {
-    return () => {
-      if (imageBlobUrl) {
-        URL.revokeObjectURL(imageBlobUrl)
-      }
-    }
-  }, [imageBlobUrl])
-
   if (!product) return <p className="text-gray-500">Product niet beschikbaar</p>
 
   const getImageSrc = () => {
-    // Use blob URL if available
-    if (imageBlobUrl) {
-      return imageBlobUrl
+    if (product.photo1_base64) {
+      if (product.photo1_base64.startsWith("data:image")) {
+        return product.photo1_base64
+      }
+      if (/^[A-Za-z0-9+/=]+$/.test(product.photo1_base64.substring(0, 20))) {
+        return `data:image/jpeg;base64,${product.photo1_base64}`
+      }
     }
-
-    // Fallback to placeholder
     return `/placeholder.svg?width=300&height=300&query=${encodeURIComponent(product.title)}`
   }
 
@@ -252,9 +181,8 @@ export default function ProductCard({ product }: { product: ProductProps }) {
           className={`object-contain p-4 transition-all duration-700 ${
             isAnimating ? "scale-110 rotate-3" : isHovered ? "scale-105" : "scale-100"
           }`}
+          unoptimized
           onError={() => setImageError(true)}
-          priority={false}
-          loading="lazy"
         />
 
         <div

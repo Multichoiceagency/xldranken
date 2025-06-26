@@ -13,6 +13,7 @@ import { Providers } from "./providers"
 import ScrollReset from "@/components/ScrollReset"
 import InstallPrompt from "@/components/InstallPrompt"
 import Script from "next/script"
+import SmoothScrollProvider from "@/components/smooth-scroll-provider"
 
 const poppins = Poppins({
   subsets: ["latin-ext"],
@@ -63,7 +64,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AgeVerificationPopup />
           <SiteHeader />
           <main className="min-h-screen w-screen pb-16 md:pb-0">
-            {children}
+          <SmoothScrollProvider>
+          {children}          
+          </SmoothScrollProvider>
             <Toaster />
           </main>
           <SiteFooter />

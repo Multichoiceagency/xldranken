@@ -7,5 +7,5 @@ export default function Page({
 }: {
   searchParams: { orderNumber?: string; total?: string; emailSent?: string }
 }) {
-  return <CheckoutCompleteContent searchParams={searchParams} />
+  return <CheckoutCompleteContent searchParams={searchParams} />;
 }

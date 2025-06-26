@@ -22,12 +22,12 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [inCartInfo, setInCartInfo] = useState({ inCart: false, quantity: 0 })
   const [imageError, setImageError] = useState(false)
+  const [imageBlobUrl, setImageBlobUrl] = useState<string>("")
 
   useEffect(() => {
-    if (!product || !product.arcleunik) return // Added guard for product.arcleunik
+    if (!product || !product.arcleunik) return
 
     const inCart = isInCart(product.arcleunik)
-    // Ensure item.id is compared with product.arcleunik if arcleunik is the primary key for cart items
     const itemInCart = cart.find((item) => item.arcleunik === product.arcleunik)
     const quantity = itemInCart ? itemInCart.quantity : 0
 
@@ -40,23 +40,91 @@ export default function ProductCard({ product }: { product: ProductProps }) {
     }
   }, [cart, isInCart, product])
 
+  useEffect(() => {
+    // Early return if no base64 data
+    if (!product?.photo1_base64) {
+      setImageBlobUrl("")
+      return
+    }
+
+    const convertBase64ToBlob = () => {
+      try {
+        let base64Data: string = product.photo1_base64!
+        let mimeType = "image/jpeg" // default
+
+        // Handle data URL format
+        if (base64Data.startsWith("data:image")) {
+          const parts = base64Data.split(",")
+          if (parts.length !== 2) {
+            console.warn("Invalid data URL format")
+            return
+          }
+
+          const [header, data] = parts
+          const mimeMatch = header.match(/data:image\/([^;]+)/)
+          if (mimeMatch) {
+            mimeType = `image/${mimeMatch[1]}`
+          }
+          base64Data = data
+        }
+
+        // Validate base64 format and ensure we have data
+        if (!base64Data || !/^[A-Za-z0-9+/=]+$/.test(base64Data.substring(0, Math.min(20, base64Data.length)))) {
+          console.warn("Invalid base64 format")
+          return
+        }
+
+        // Convert base64 to blob
+        const byteCharacters = atob(base64Data)
+        const byteNumbers = new Array(byteCharacters.length)
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], { type: mimeType })
+        const blobUrl = URL.createObjectURL(blob)
+
+        setImageBlobUrl(blobUrl)
+      } catch (error) {
+        console.warn("Failed to convert base64 to blob:", error)
+        setImageBlobUrl("")
+      }
+    }
+
+    convertBase64ToBlob()
+
+    // Cleanup function to revoke blob URL
+    return () => {
+      if (imageBlobUrl) {
+        URL.revokeObjectURL(imageBlobUrl)
+      }
+    }
+  }, [product?.photo1_base64]) // Remove imageBlobUrl from dependencies to avoid cleanup issues
+
+  // Cleanup blob URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (imageBlobUrl) {
+        URL.revokeObjectURL(imageBlobUrl)
+      }
+    }
+  }, [imageBlobUrl])
+
   if (!product) return <p className="text-gray-500">Product niet beschikbaar</p>
 
   const getImageSrc = () => {
-    if (product.photo1_base64) {
-      if (product.photo1_base64.startsWith("data:image")) {
-        return product.photo1_base64
-      }
-      if (/^[A-Za-z0-9+/=]+$/.test(product.photo1_base64.substring(0, 20))) {
-        return `data:image/jpeg;base64,${product.photo1_base64}`
-      }
-      // console.log(`Invalid base64 data for product: ${product.title}`) // Removed console.log for cleaner output
+    // Use blob URL if available
+    if (imageBlobUrl) {
+      return imageBlobUrl
     }
-    return `/placeholder.svg?width=300&height=300&query=${encodeURIComponent(product.title)}` // Placeholder with query
+
+    // Fallback to placeholder
+    return `/placeholder.svg?width=300&height=300&query=${encodeURIComponent(product.title)}`
   }
 
   const imageSrc = getImageSrc()
-  // Requested pricing logic
   const prixVente = Number(product.prix_vente_groupe || 0)
   const prixPromo = product.prix_en_promo ? Number(product.prix_en_promo) : null
   const currentPrice = prixPromo ?? prixVente
@@ -64,15 +132,12 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (!product.arcleunik) {
-      // Guard against missing arcleunik
       toast({ title: "Fout", description: "Product ID ontbreekt.", variant: "destructive" })
       return
     }
 
     const quantity = Math.max(1, Number.parseInt(quantityInput) || 1)
     setIsAnimating(true)
-
-    // console.log(`Adding product to cart with fam2id: ${product.fam2id || "undefined"}`)
 
     if (inCartInfo.inCart) {
       updateQuantity(product.arcleunik, quantity)
@@ -85,7 +150,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
         ...product,
         id: product.arcleunik!,
         name: product.title,
-        price: currentPrice, // Use currentPrice here
+        price: currentPrice,
         image: imageSrc,
         volume: product.volume || "",
         productCode: product.productCode || "",
@@ -95,7 +160,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
       if (quantity > 1) {
         setTimeout(() => {
-          updateQuantity(product.arcleunik!, quantity) // Added non-null assertion as it's guarded
+          updateQuantity(product.arcleunik!, quantity)
         }, 100)
       }
 
@@ -113,7 +178,6 @@ export default function ProductCard({ product }: { product: ProductProps }) {
     setQuantityInput(newVal.toString())
 
     if (inCartInfo.inCart && product.arcleunik) {
-      // Added guard for product.arcleunik
       updateQuantity(product.arcleunik, newVal)
       toast({
         title: "Hoeveelheid bijgewerkt",
@@ -125,7 +189,6 @@ export default function ProductCard({ product }: { product: ProductProps }) {
   const handleRemoveFromCart = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (product.arcleunik) {
-      // Added guard for product.arcleunik
       removeFromCart(product.arcleunik)
       setQuantityInput("1")
       toast({
@@ -137,9 +200,8 @@ export default function ProductCard({ product }: { product: ProductProps }) {
 
   const navigateToProductPage = () => {
     if (product.arcleunik) {
-      router.push(`/product/${product.arcleunik}`) // Using singular /product/
+      router.push(`/product/${product.arcleunik}`)
     } else {
-      // console.warn("Cannot navigate: product.arcleunik is missing for product:", product.title)
       toast({ title: "Navigatiefout", description: "Product ID niet gevonden.", variant: "destructive" })
     }
   }
@@ -155,7 +217,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
           In winkelwagen
         </div>
       )}
-      {/* Promo Badge - Adjusted to show only if there's a promo */}
+
       {prixPromo !== null && prixPromo < prixVente && (
         <div className="absolute top-3 right-3 z-20 bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
           Promo!
@@ -163,7 +225,7 @@ export default function ProductCard({ product }: { product: ProductProps }) {
       )}
 
       <div
-        className={`absolute top-3 right-3 z-20 flex flex-col gap-2 transition-all duration-300 ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"} ${prixPromo !== null && prixPromo < prixVente ? "pt-8" : ""}`} // Adjust padding if promo badge is shown
+        className={`absolute top-3 right-3 z-20 flex flex-col gap-2 transition-all duration-300 ${isHovered ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"} ${prixPromo !== null && prixPromo < prixVente ? "pt-8" : ""}`}
       >
         {isLoggedIn && inCartInfo.inCart && (
           <button
@@ -190,8 +252,9 @@ export default function ProductCard({ product }: { product: ProductProps }) {
           className={`object-contain p-4 transition-all duration-700 ${
             isAnimating ? "scale-110 rotate-3" : isHovered ? "scale-105" : "scale-100"
           }`}
-          unoptimized
           onError={() => setImageError(true)}
+          priority={false}
+          loading="lazy"
         />
 
         <div
@@ -338,7 +401,6 @@ export default function ProductCard({ product }: { product: ProductProps }) {
             <Button
               onClick={() => router.push("/login")}
               className="w-full bg-gradient-to-r from-[#0F3059] to-[#1a4a7a] hover:from-[#1a4a7a] hover:to-[#0F3059] text-white font-semibold py-2 rounded-lg transition-all duration-100 hover:scale-105"
-              // Original styling from your file: className="w-full bg-gradient-to-r from-[#FFF2CD] to-[#0F3059] hover:from-[#0F3059] hover:to-[#FFF2CD] text-white font-semibold py-2 rounded-lg transition-all duration-100 hover:scale-110"
             >
               Log in om te bestellen
             </Button>

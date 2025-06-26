@@ -1,23 +1,21 @@
 "use client"
 
-import { use, Suspense } from "react"
+import { Suspense } from "react"
 import { CheckCircle, Package, Mail, Home, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 
 interface CheckoutCompleteProps {
-  searchParams: Promise<{
+  searchParams: {
     orderNumber?: string
     total?: string
     emailSent?: string
-  }>
+  }
 }
 
 function CheckoutCompleteWrapper({ searchParams }: CheckoutCompleteProps) {
-  // Use React.use() to unwrap the searchParams Promise
-  const params = use(searchParams)
-  const { orderNumber, total, emailSent } = params
+  const { orderNumber, total, emailSent } = searchParams
 
   if (!orderNumber) {
     return (
@@ -42,7 +40,6 @@ function CheckoutCompleteWrapper({ searchParams }: CheckoutCompleteProps) {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
-          {/* Success Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
               <CheckCircle className="w-12 h-12 text-green-600" />
@@ -51,7 +48,6 @@ function CheckoutCompleteWrapper({ searchParams }: CheckoutCompleteProps) {
             <p className="text-lg text-gray-600">Bedankt voor uw bestelling bij XL Groothandel</p>
           </div>
 
-          {/* Order Details Card */}
           <Card className="mb-8">
             <CardContent className="p-8">
               <div className="grid md:grid-cols-2 gap-6">
@@ -112,7 +108,6 @@ function CheckoutCompleteWrapper({ searchParams }: CheckoutCompleteProps) {
             </CardContent>
           </Card>
 
-          {/* Email Confirmation Notice */}
           <Card className="mb-8 border-blue-200 bg-blue-50">
             <CardContent className="p-6">
               <div className="flex items-start gap-3">
@@ -132,7 +127,6 @@ function CheckoutCompleteWrapper({ searchParams }: CheckoutCompleteProps) {
             </CardContent>
           </Card>
 
-          {/* Action Buttons */}
           <div className="grid md:grid-cols-2 gap-4">
             <Link href="/">
               <Button variant="outline" className="w-full h-12">
@@ -148,7 +142,6 @@ function CheckoutCompleteWrapper({ searchParams }: CheckoutCompleteProps) {
             </Link>
           </div>
 
-          {/* Contact Information */}
           <Card className="mt-8">
             <CardContent className="p-6 text-center">
               <h3 className="font-semibold text-gray-900 mb-2">Vragen over uw bestelling?</h3>

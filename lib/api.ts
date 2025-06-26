@@ -10,51 +10,6 @@ const sleep = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-class LRUCache<K, V> {
-  private capacity: number
-  private cache: Map<K, V>
-
-  constructor(capacity: number) {
-    this.capacity = capacity
-    this.cache = new Map<K, V>()
-  }
-
-  get(key: K): V | undefined {
-    if (!this.cache.has(key)) {
-      return undefined
-    }
-    const value = this.cache.get(key)!
-    // Move to end (most recently used)
-    this.cache.delete(key)
-    this.cache.set(key, value)
-    return value
-  }
-
-  put(key: K, value: V): void {
-    if (this.cache.has(key)) {
-      // If key exists, delete it to update its position
-      this.cache.delete(key)
-    } else if (this.cache.size >= this.capacity) {
-      // If cache is full, delete the least recently used item (first item in map)
-      const leastRecentlyUsedKey = this.cache.keys().next().value
-      if (leastRecentlyUsedKey !== undefined) {
-        this.cache.delete(leastRecentlyUsedKey)
-      }
-    }
-    this.cache.set(key, value)
-  }
-
-  clear(): void {
-    this.cache.clear()
-  }
-}
-
-// Instantiate caches (you can adjust capacity as needed)
-const productsByFam1IDCache = new LRUCache<string, ProductProps[]>(50)
-const productsByFam2IDCache = new LRUCache<string, ProductProps[]>(50)
-const customerByIdCache = new LRUCache<string, any>(30) // Using 'any' for simplicity, replace with actual customer type
-const customerOrderDetailsCache = new LRUCache<string, any>(30) // Using 'any' for simplicity, replace with actual order details type
-
 export const menuItemsList = [
   {
     name: "ALCOHOL",
@@ -204,13 +159,6 @@ export async function handleOrders(cart: any[], customerData: any) {
 }
 
 export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[]> {
-  const cacheKey = `fam1ID:${fam1ID}`
-  const cachedData = productsByFam1IDCache.get(cacheKey)
-  if (cachedData) {
-    console.log("Fetching products by fam1ID from CACHE for:", fam1ID)
-    return cachedData
-  }
-
   try {
     const url = `${PRODUCT_API_URL}?apikey=${API_KEY}&fam1ID=${fam1ID}`
     console.log("Fetching products by fam1ID from API from URL:", url)
@@ -224,7 +172,6 @@ export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[
     const data = await response.json()
     const products = Array.isArray(data.result?.product) ? data.result.product : []
 
-    productsByFam1IDCache.put(cacheKey, products)
     return products
   } catch (error) {
     console.error("Error fetching products by fam1ID:", error)
@@ -233,13 +180,6 @@ export async function getProductsByFam1ID(fam1ID: string): Promise<ProductProps[
 }
 
 export async function getProductsByFam2ID(fam2ID: string, limit = 100, page = 1): Promise<ProductProps[]> {
-  const cacheKey = `fam2ID:${fam2ID}-limit:${limit}-page:${page}`
-  const cachedData = productsByFam2IDCache.get(cacheKey)
-  if (cachedData) {
-    console.log(`Fetching products by fam2ID from CACHE for: ${fam2ID}, limit: ${limit}, page: ${page}`)
-    return cachedData
-  }
-
   try {
     const url = `${PRODUCT_API_URL}?apikey=${API_KEY}&fam2ID=${fam2ID}&limit=${limit}&page=${page}`
     console.log("Fetching products by fam2ID from API from URL:", url)
@@ -255,7 +195,6 @@ export async function getProductsByFam2ID(fam2ID: string, limit = 100, page = 1)
     await sleep(200)
 
     const products = Array.isArray(data.result?.product) ? data.result.product : []
-    productsByFam2IDCache.put(cacheKey, products)
     return products
   } catch (error) {
     console.error("Error fetching products by fam2ID:", error)
@@ -415,12 +354,6 @@ export async function getProductsCount(fam2ID: string): Promise<number> {
 
 export async function getCustomerById(id: string) {
   const customerId = String(id)
-  const cacheKey = `customer:${customerId}`
-  const cachedData = customerByIdCache.get(cacheKey)
-  if (cachedData) {
-    console.log("Fetching customer by ID from CACHE for:", customerId)
-    return cachedData
-  }
 
   try {
     const url = `${CUSTOMER_API_URL}?apikey=${API_KEY}&clcleunik=${customerId}`
@@ -451,7 +384,6 @@ export async function getCustomerById(id: string) {
     }
 
     const customer = data.result.customer[0]
-    customerByIdCache.put(cacheKey, customer)
     return customer
   } catch (error) {
     console.error("Error fetching customer by ID:", error)
@@ -597,13 +529,6 @@ export async function getCustomerOrder(clcleunik: string): Promise<any[]> {
 }
 
 export async function getCustomerOrderDetails(guid: string) {
-  const cacheKey = `orderDetails:${guid}`
-  const cachedData = customerOrderDetailsCache.get(cacheKey)
-  if (cachedData) {
-    console.log("Fetching order details from CACHE for GUID:", guid)
-    return cachedData
-  }
-
   try {
     const url = `${process.env.NEXT_PUBLIC_CUSTOMER_ORDER_DETAILS_API_URL}apikey=${API_KEY}&guid=${guid}`
     console.log("Fetching order details from API from URL:", url)
@@ -628,7 +553,6 @@ export async function getCustomerOrderDetails(guid: string) {
     })
 
     const orderDetails = data.result.order
-    customerOrderDetailsCache.put(cacheKey, orderDetails)
     return orderDetails
   } catch (error) {
     console.error("Error fetching order details:", error)
@@ -774,13 +698,4 @@ export async function sendToMegawin(orderID: any) {
   } catch (error) {
     console.error("Error adding line to order:", error)
   }
-}
-
-export function clearAllAPICaches() {
-  console.log("Clearing all API caches...")
-  productsByFam1IDCache.clear()
-  productsByFam2IDCache.clear()
-  customerByIdCache.clear()
-  customerOrderDetailsCache.clear()
-  console.log("All API caches cleared.")
 }

@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { getCustomerOrder } from "@/lib/api"
+import { getCustomerOrder } from "@/lib/api_gisteren"
 import { Card } from "@/components/ui/card"
 import { OrdersTableWithProducts } from "@/components/orders-table-with-products"
 

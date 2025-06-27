@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle, ShoppingBag, FileText, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useCart } from "@/lib/cart-context"
-import Confetti from "react-confetti"
 
 export default function ThankYouPage() {
   const searchParams = useSearchParams()
@@ -18,7 +17,6 @@ export default function ThankYouPage() {
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   })
 
-  const [showConfetti, setShowConfetti] = useState(true)
 
   // Get order details from URL parameters
   const orderNumber = searchParams.get("orderNumber")
@@ -37,16 +35,8 @@ export default function ThankYouPage() {
     }
 
     window.addEventListener("resize", handleResize)
-
-    // Stop confetti after 8 seconds
-    const timer = setTimeout(() => {
-      setShowConfetti(false)
-    }, 8000)
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      clearTimeout(timer)
-    }
+    
+    return () => window.removeEventListener("resize", handleResize)
   }, [clearCart])
 
   // If no order number is provided, redirect to home
@@ -74,15 +64,6 @@ export default function ThankYouPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 relative overflow-hidden">
-      {showConfetti && (
-        <Confetti
-          width={windowSize.width}
-          height={windowSize.height}
-          recycle={true}
-          numberOfPieces={200}
-          gravity={0.15}
-        />
-      )}
 
       <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">

@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import dynamic from "next/dynamic"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getProductsByFam2ID } from "@/lib/api"
+import { getProductsByFam2ID } from "@/lib/api_gisteren"
 import { InstallApp } from "../components/install-app"
 
 // Dynamically import components with lazy loading

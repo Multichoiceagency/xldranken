@@ -20,7 +20,7 @@ import {
   faCubes,
 } from "@fortawesome/free-solid-svg-icons"
 import { useCart } from "@/lib/cart-context"
-import { menuItemsList } from "@/lib/api"
+import { menuItemsList } from "@/lib/api_gisteren"
 import { SideCart } from "@/components/side-cart"
 import { useAuthContext } from "@/context/AuthContext"
 import { signOut } from "next-auth/react"
@@ -229,43 +229,58 @@ export function SiteHeader() {
   return (
     <>
       {/* Top Banner */}
-      <div className="bg-gradient-to-r from-[#C6B07F] to-[#d4c291] text-white py-3 text-sm px-4 shadow-sm">
-        <div className="container mx-auto px-4 flex justify-between items-center">
+      <div className="bg-gradient-to-r from-[#C6B07F] to-[#d4c291] text-white py-2 sm:py-3 text-xs sm:text-sm px-2 sm:px-4 shadow-sm">
+        <div className="container mx-auto px-2 sm:px-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="font-semibold">Meer dan 900+ producten</span>
           </div>
-          <div className="hidden md:flex gap-6">
+          <div className="hidden sm:flex md:gap-4 lg:gap-6">
             {isLoggedIn ? (
               <>
-                <NoScrollLink href="/account" className="hover:text-white/80 transition-colors font-medium">
+                <NoScrollLink
+                  href="/account"
+                  className="hover:text-white/80 transition-colors font-medium text-xs lg:text-sm"
+                >
                   Mijn account
                 </NoScrollLink>
                 <NoScrollLink
                   href="/account/bestellingen"
-                  className="hover:text-white/80 transition-colors font-medium"
+                  className="hover:text-white/80 transition-colors font-medium text-xs lg:text-sm"
                 >
                   Bestellingen
                 </NoScrollLink>
-                <NoScrollLink href="/account/adressen" className="hover:text-white/80 transition-colors font-medium">
+                <NoScrollLink
+                  href="/account/adressen"
+                  className="hover:text-white/80 transition-colors font-medium text-xs lg:text-sm"
+                >
                   Adressen
                 </NoScrollLink>
                 <button
                   onClick={handleLogout}
-                  className="hover:text-red-200 transition-colors font-bold text-[#0E3058]"
+                  className="hover:text-red-200 transition-colors font-bold text-[#0E3058] text-xs lg:text-sm"
                 >
                   Uitloggen
                 </button>
               </>
             ) : (
               <>
-                <NoScrollLink href="/login" className="hover:text-white/80 transition-colors font-medium">
+                <NoScrollLink
+                  href="/login"
+                  className="hover:text-white/80 transition-colors font-medium text-xs lg:text-sm"
+                >
                   Inloggen
                 </NoScrollLink>
-                <NoScrollLink href="/zakelijk" className="hover:text-white/80 transition-colors font-medium">
+                <NoScrollLink
+                  href="/zakelijk"
+                  className="hover:text-white/80 transition-colors font-medium text-xs lg:text-sm"
+                >
                   Registreren
                 </NoScrollLink>
-                <NoScrollLink href="/klantenservice" className="hover:text-white/80 transition-colors font-medium">
+                <NoScrollLink
+                  href="/klantenservice"
+                  className="hover:text-white/80 transition-colors font-medium text-xs lg:text-sm"
+                >
                   Klantenservice
                 </NoScrollLink>
               </>
@@ -276,29 +291,29 @@ export function SiteHeader() {
 
       {/* Main Header */}
       <header className="sticky top-0 z-50 bg-white shadow-lg border-b border-[#C6B07F]/20">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 flex items-center justify-between lg:justify-start gap-2 sm:gap-4 relative">
           {/* Logo Section */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-4 flex-1 lg:flex-initial">
             <button
               onClick={(e) => handleButtonClick(e, toggleMobileMenu)}
-              className="lg:hidden p-2 rounded-lg hover:bg-[#C6B07F]/10 transition-colors"
+              className="lg:hidden p-1 sm:p-2 rounded-lg hover:bg-[#C6B07F]/10 transition-colors absolute left-2 sm:left-4"
             >
-              <Menu className="w-6 h-6 text-[#0F3059]" />
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-[#0F3059]" />
             </button>
             <NoScrollLink href="/" className="flex-shrink-0">
               <Image
                 src="/logos/logo-xlgroothandelbv.png"
                 alt="XL Logo"
-                width={200}
-                height={56}
-                className="object-contain hover:scale-105 transition-transform duration-300"
+                width={160}
+                height={45}
+                className="sm:w-[180px] sm:h-[50px] lg:w-[200px] lg:h-[56px] object-contain hover:scale-105 transition-transform duration-300"
                 priority
               />
             </NoScrollLink>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex flex-1 justify-center gap-8 font-semibold">
+          <nav className="hidden lg:flex flex-1 justify-center items-center gap-4 xl:gap-6 2xl:gap-8 font-semibold max-w-4xl mx-auto">
             {menuItemsList.map((item) => (
               <div
                 key={item.name}
@@ -312,29 +327,29 @@ export function SiteHeader() {
                     <div className="flex items-center">
                       <NoScrollLink
                         href={item.href}
-                        className="hover:text-[#C6B07F] py-3 mr-1 transition-colors duration-300 relative group"
+                        className="hover:text-[#C6B07F] py-3 px-2 xl:px-3 mr-1 transition-colors duration-300 relative group text-sm xl:text-base whitespace-nowrap"
                       >
                         {item.name}
                         <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C6B07F] group-hover:w-full transition-all duration-300"></span>
                       </NoScrollLink>
                       <button
                         onClick={(e) => handleDropdownToggle(e, item.name)}
-                        className="hover:text-[#C6B07F] p-2 transition-colors duration-300"
+                        className="hover:text-[#C6B07F] p-1 xl:p-2 transition-colors duration-300"
                       >
                         {openDropdown === item.name ? (
-                          <ChevronUp className="w-4 h-4" />
+                          <ChevronUp className="w-3 h-3 xl:w-4 xl:h-4" />
                         ) : (
-                          <ChevronDown className="w-4 h-4" />
+                          <ChevronDown className="w-3 h-3 xl:w-4 xl:h-4" />
                         )}
                       </button>
                     </div>
                     {openDropdown === item.name && (
-                      <div className="absolute left-0 top-full bg-white shadow-xl rounded-lg w-64 mt-2 z-50 border border-[#C6B07F]/20 overflow-hidden animate-fade-in">
+                      <div className="absolute left-0 top-full bg-white shadow-xl rounded-lg w-56 xl:w-64 mt-2 z-50 border border-[#C6B07F]/20 overflow-hidden animate-fade-in">
                         {item.submenu.map((sub) => (
                           <NoScrollLink
                             key={sub.name}
                             href={sub.href}
-                            className="block px-6 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] transition-all duration-300 border-b border-gray-100 last:border-b-0"
+                            className="block px-4 xl:px-6 py-2 xl:py-3 hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] transition-all duration-300 border-b border-gray-100 last:border-b-0 text-sm xl:text-base"
                             onClick={() => setOpenDropdown(null)}
                           >
                             {sub.name}
@@ -346,7 +361,7 @@ export function SiteHeader() {
                 ) : (
                   <NoScrollLink
                     href={item.href}
-                    className="hover:text-[#C6B07F] py-3 block transition-colors duration-300 relative group"
+                    className="hover:text-[#C6B07F] py-3 px-2 xl:px-3 block transition-colors duration-300 relative group text-sm xl:text-base whitespace-nowrap"
                   >
                     {item.name}
                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C6B07F] group-hover:w-full transition-all duration-300"></span>
@@ -357,20 +372,23 @@ export function SiteHeader() {
           </nav>
 
           {/* Desktop Search Field */}
-          <div className="hidden md:flex items-center flex-1 max-w-sm mx-6 relative" ref={searchRef}>
+          <div
+            className="hidden md:flex items-center flex-1 max-w-xs lg:max-w-sm xl:max-w-md mx-2 lg:mx-6 relative"
+            ref={searchRef}
+          >
             <form onSubmit={handleSearchSubmit} className="w-full">
               <div className="relative">
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Zoek producten..."
-                  className="pr-12 py-3 border-2 border-[#C6B07F]/30 focus:border-[#C6B07F] rounded-lg transition-colors duration-300"
+                  className="pr-10 lg:pr-12 py-2 lg:py-3 text-sm lg:text-base border-2 border-[#C6B07F]/30 focus:border-[#C6B07F] rounded-lg transition-colors duration-300"
                 />
                 <button
                   type="submit"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#C6B07F] hover:text-[#0F3059] transition-colors duration-300"
+                  className="absolute right-2 lg:right-3 top-1/2 transform -translate-y-1/2 text-[#C6B07F] hover:text-[#0F3059] transition-colors duration-300"
                 >
-                  <Search className="w-5 h-5" />
+                  <Search className="w-4 h-4 lg:w-5 lg:h-5" />
                 </button>
               </div>
             </form>
@@ -418,128 +436,57 @@ export function SiteHeader() {
             )}
           </div>
 
-          {/* Mobile Search Icon */}
-          <div className="md:hidden relative">
-            <button
-              onClick={() => setShowMobileSearch((v) => !v)}
-              className="text-[#C6B07F] hover:text-[#0F3059] p-2 rounded-lg hover:bg-[#C6B07F]/10 transition-all duration-300"
-              aria-label="Zoeken"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-            {showMobileSearch && (
-              <div
-                ref={mobileSearchRef}
-                className="absolute top-full right-0 mt-2 w-[90vw] max-w-xs sm:max-w-sm bg-white shadow-xl rounded-lg z-50 p-4 border border-[#C6B07F]/20 animate-fade-in"
-              >
-                <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
-                  <Input
-                    autoFocus
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Zoek producten..."
-                    className="flex-1 py-2 border-[#C6B07F]/30 focus:border-[#C6B07F]"
-                  />
-                  <button type="submit" className="text-[#C6B07F] hover:text-[#0F3059] transition-colors">
-                    <Search className="w-5 h-5" />
-                  </button>
-                  <button
-                    type="button"
-                    className="ml-1 text-gray-400 hover:text-red-500 transition-colors"
-                    onClick={() => {
-                      setShowMobileSearch(false)
-                      setShowSearchResults(false)
-                    }}
-                    aria-label="Sluit zoekvenster"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </form>
-                {showSearchResults && (
-                  <div className="mt-3 max-h-60 overflow-y-auto -mx-4">
-                    {searchResults.length > 0 ? (
-                      searchResults.map((product) => (
-                        <a
-                          key={product.arcleunik}
-                          href={`/product/${product.arcleunik}`}
-                          onClick={(e) => handleProductClick(e, product.arcleunik)}
-                          className="block border-t border-gray-100 px-4 py-3 text-sm hover:bg-[#C6B07F]/10 transition-colors"
-                        >
-                          {product.title || product.megatech_Titre_lib_web_nl}
-                        </a>
-                      ))
-                    ) : searchQuery.length > 2 ? (
-                      <div className="px-4 py-4 text-sm text-gray-500 text-center">Geen resultaten gevonden</div>
-                    ) : null}
-                    <div className="border-t border-gray-100 px-4 py-3 bg-gray-50">
-                      <NoScrollLink
-                        href={`/search?q=${encodeURIComponent(searchQuery)}`}
-                        className="block text-center text-sm text-[#C6B07F] hover:text-[#0F3059] font-semibold transition-colors"
-                        onClick={() => {
-                          setShowSearchResults(false)
-                          setShowMobileSearch(false)
-                        }}
-                      >
-                        Bekijk alle resultaten
-                      </NoScrollLink>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
           {/* User & Cart Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 flex-shrink-0">
             {/* User Menu */}
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={(e) => handleButtonClick(e, toggleUserMenu)}
-                className="p-2 rounded-lg hover:bg-[#C6B07F]/10 text-[#0F3059] hover:text-[#C6B07F] transition-all duration-300"
+                className="p-1 sm:p-2 rounded-lg hover:bg-[#C6B07F]/10 text-[#0F3059] hover:text-[#C6B07F] transition-all duration-300"
               >
-                <User className="w-6 h-6" />
+                <User className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white shadow-xl rounded-lg z-50 border border-[#C6B07F]/20 overflow-hidden animate-fade-in">
+                <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white shadow-xl rounded-lg z-50 border border-[#C6B07F]/20 overflow-hidden animate-fade-in">
                   <div className="py-2">
                     {isLoggedIn ? (
                       <>
                         <NoScrollLink
                           href="/account"
-                          className="block px-4 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
+                          className="block px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
                         >
                           Mijn account
                         </NoScrollLink>
                         <NoScrollLink
                           href="/account/bestellingen"
-                          className="block px-4 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
+                          className="block px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
                         >
                           Bestellingen
                         </NoScrollLink>
                         <NoScrollLink
                           href="/adressen/gegevens"
-                          className="block px-4 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
+                          className="block px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
                         >
                           Adressen
                         </NoScrollLink>
                         <button
                           onClick={handleLogout}
-                          className="block w-full text-left px-4 py-3 hover:bg-red-50 text-[#0E3058] hover:text-red-600 transition-all duration-300"
+                          className="block w-full text-left px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base hover:bg-red-50 text-[#0E3058] hover:text-red-600 transition-all duration-300"
                         >
-                          <LogOut className="inline-block w-4 h-4 mr-2" /> Uitloggen
+                          <LogOut className="inline-block w-3 h-3 sm:w-4 sm:h-4 mr-2" /> Uitloggen
                         </button>
                       </>
                     ) : (
                       <>
                         <NoScrollLink
                           href="/login"
-                          className="block px-4 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
+                          className="block px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
                         >
                           Inloggen
                         </NoScrollLink>
                         <NoScrollLink
                           href="/zakelijk"
-                          className="block px-4 py-3 hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
+                          className="block px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base hover:bg-gradient-to-r hover:from-[#C6B07F]/10 hover:to-[#d4c291]/10 transition-all duration-300"
                         >
                           Registreren
                         </NoScrollLink>
@@ -553,11 +500,11 @@ export function SiteHeader() {
             {/* Shopping Cart */}
             <button
               onClick={(e) => handleButtonClick(e, toggleCart)}
-              className="relative p-2 rounded-lg hover:bg-[#C6B07F]/10 text-[#0F3059] hover:text-[#C6B07F] transition-all duration-300"
+              className="relative p-1 sm:p-2 rounded-lg hover:bg-[#C6B07F]/10 text-[#0F3059] hover:text-[#C6B07F] transition-all duration-300"
             >
-              <ShoppingCart className="w-6 h-6" />
+              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs w-6 h-6 flex items-center justify-center rounded-full font-bold shadow-lg animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full font-bold shadow-lg animate-pulse">
                   {totalItems}
                 </span>
               )}
@@ -576,7 +523,7 @@ export function SiteHeader() {
           />
 
           {/* Sidebar Menu - LEFT SIDE */}
-          <div className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-gradient-to-br from-[#0F3059] via-[#1a4a7a] to-[#0F3059] z-[99] shadow-2xl transform transition-transform duration-300 ease-out translate-x-0 overflow-y-auto animate-slide-in-left">
+          <div className="fixed top-0 left-0 h-full w-72 sm:w-80 max-w-[85vw] bg-gradient-to-br from-[#0F3059] via-[#1a4a7a] to-[#0F3059] z-[99] shadow-2xl transform transition-transform duration-300 ease-out translate-x-0 overflow-y-auto animate-slide-in-left">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-[#C6B07F]/30 bg-gradient-to-r from-[#C6B07F]/10 to-[#d4c291]/10">
               <Image src="/logos/logo-wit.png" alt="XL Logo" width={140} height={40} className="object-contain" />
@@ -590,16 +537,7 @@ export function SiteHeader() {
 
             {/* Welcome Section */}
             <div className="p-6 border-b border-[#C6B07F]/20">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-white font-semibold">Welkom bij XL Groothandel</span>
-              </div>
-              {isLoggedIn ? (
-                <div className="bg-gradient-to-r from-[#C6B07F]/20 to-[#d4c291]/20 p-4 rounded-lg border border-[#C6B07F]/30">
-                  <p className="text-[#C6B07F] font-semibold text-sm">✓ Ingelogd</p>
-                  <p className="text-white/80 text-xs">Toegang tot alle prijzen en functies</p>
-                </div>
-              ) : (
+              {!isLoggedIn && (
                 <div className="bg-gradient-to-r from-blue-500/20 to-blue-600/20 p-4 rounded-lg border border-blue-400/30">
                   <p className="text-blue-300 font-semibold text-sm">Nog geen account?</p>
                   <p className="text-white/80 text-xs mb-3">Maak direct een zakelijke account aan</p>
@@ -620,7 +558,7 @@ export function SiteHeader() {
                 {/* Home Link */}
                 <NoScrollLink
                   href="/"
-                  className="flex items-center gap-4 font-semibold text-lg py-4 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
+                  className="flex items-center gap-4 font-semibold text-base py-4 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <FontAwesomeIcon icon={faHome} className="w-6 h-6" />
@@ -635,7 +573,7 @@ export function SiteHeader() {
                         <div className="flex items-center justify-between w-full">
                           <NoScrollLink
                             href={item.href}
-                            className="flex items-center gap-4 font-semibold text-lg py-4 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300 flex-1"
+                            className="flex items-center gap-4 font-semibold text-base py-4 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300 flex-1"
                             onClick={() => {
                               setIsMobileMenuOpen(false)
                               setOpenMobileDropdown(null)
@@ -661,7 +599,7 @@ export function SiteHeader() {
                               <NoScrollLink
                                 key={sub.name}
                                 href={sub.href}
-                                className="block text-base font-medium text-white/80 hover:text-[#C6B07F] transition-colors py-3 px-4 rounded-lg hover:bg-[#C6B07F]/10"
+                                className="block text-sm font-medium text-white/80 hover:text-[#C6B07F] transition-colors py-3 px-4 rounded-lg hover:bg-[#C6B07F]/10"
                                 onClick={() => {
                                   setOpenMobileDropdown(null)
                                   setIsMobileMenuOpen(false)
@@ -676,7 +614,7 @@ export function SiteHeader() {
                     ) : (
                       <NoScrollLink
                         href={item.href}
-                        className="flex items-center gap-4 font-semibold text-lg py-4 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
+                        className="flex items-center gap-4 font-semibold text-base py-4 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <FontAwesomeIcon icon={getMenuIcon(item.name)} className="w-6 h-6" />
@@ -695,7 +633,7 @@ export function SiteHeader() {
                     <>
                       <NoScrollLink
                         href="/account"
-                        className="flex items-center gap-4 font-semibold text-base py-3 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
+                        className="flex items-center gap-4 font-semibold text-sm py-3 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <FontAwesomeIcon icon={faUser} className="w-5 h-5" />
@@ -703,7 +641,7 @@ export function SiteHeader() {
                       </NoScrollLink>
                       <NoScrollLink
                         href="/account/bestellingen"
-                        className="flex items-center gap-4 font-semibold text-base py-3 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
+                        className="flex items-center gap-4 font-semibold text-sm py-3 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
                         <FontAwesomeIcon icon={faShoppingCart} className="w-5 h-5" />
@@ -716,7 +654,7 @@ export function SiteHeader() {
                             handleLogout(e)
                           })
                         }}
-                        className="flex items-center gap-4 font-semibold text-base py-3 px-4 w-full text-red-300 hover:bg-red-500/20 hover:text-red-200 rounded-lg transition-all duration-300"
+                        className="flex items-center gap-4 font-semibold text-sm py-3 px-4 w-full text-red-300 hover:bg-red-500/20 hover:text-red-200 rounded-lg transition-all duration-300"
                       >
                         <FontAwesomeIcon icon={faSignOutAlt} className="w-5 h-5" />
                         <span>Uitloggen</span>
@@ -725,7 +663,7 @@ export function SiteHeader() {
                   ) : (
                     <NoScrollLink
                       href="/login"
-                      className="flex items-center gap-4 font-semibold text-base py-3 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
+                      className="flex items-center gap-4 font-semibold text-sm py-3 px-4 text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <FontAwesomeIcon icon={faUser} className="w-5 h-5" />
@@ -740,7 +678,7 @@ export function SiteHeader() {
                         setIsCartOpen(true)
                       })
                     }}
-                    className="flex items-center gap-4 font-semibold text-base py-3 px-4 w-full text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300 relative"
+                    className="flex items-center gap-4 font-semibold text-sm py-3 px-4 w-full text-white hover:bg-gradient-to-r hover:from-[#C6B07F] hover:to-[#d4c291] hover:text-[#0F3059] rounded-lg transition-all duration-300 relative"
                   >
                     <FontAwesomeIcon icon={faShoppingCart} className="w-5 h-5" />
                     <span>Winkelwagen</span>

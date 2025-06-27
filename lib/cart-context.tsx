@@ -32,9 +32,35 @@ interface CartContextType {
     totalPrice: number
     totalPriceExclVAT: number
   }
+  notification: string | null
+  setNotification: React.Dispatch<React.SetStateAction<string | null>>
+  calculatePriceExclVAT: (price: number, vatRate: string | undefined) => number
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
+
+// Component for the floating notification
+function CartNotification() {
+  const { notification, setNotification } = useCart()
+
+  useEffect(() => {
+    if (!notification) return
+    // Hide notification after 3 seconds
+    const timer = setTimeout(() => {
+      setNotification(null)
+    }, 3000)
+
+    // Clean up on unmount or new notification
+    return () => clearTimeout(timer)
+  }, [notification, setNotification])
+
+  // If there's no notification, render nothing
+  if (!notification) return null
+
+  return (
+    <div className="fixed top-5 right-5 z-50 bg-green-500 text-white py-2 px-4 rounded shadow-md">{notification}</div>
+  )
+}
 
 // Helper function to create a minimal version of the cart
 const createMinimalCart = (cart: CartItem[]) => {
@@ -90,6 +116,7 @@ const safelyStoreCart = (cart: CartItem[]) => {
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([])
   const [storageAvailable, setStorageAvailable] = useState(true)
+  const [notification, setNotification] = useState<string | null>(null)
 
   // Check if storage is available
   useEffect(() => {
@@ -139,36 +166,71 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [cart, storageAvailable])
 
+  // Utility function to calculate price excluding VAT
+  const calculatePriceExclVAT = (price: number, vatRate: string | undefined): number => {
+    // Convert VAT rate from string to number, default to 21 if not provided
+    const vatRateNumber = vatRate ? Number.parseFloat(vatRate) : 21
+    // Convert percentage to decimal (e.g., 21 -> 0.21)
+    const vatRateDecimal = vatRateNumber / 100
+    // Calculate price excluding VAT
+    return price / (1 + vatRateDecimal)
+  }
+
   // Updated addToCart function to work with API structure
   const addToCart = (item: Omit<CartItem, "quantity">) => {
+    // Validate that arcleunik exists - try multiple sources
+    const arcleunik = item.arcleunik || item.volume || item.id || item.productCode
+
+    if (!arcleunik) {
+      console.error("Cart item missing arcleunik from all sources:", {
+        item: item,
+        arcleunik: item.arcleunik,
+        volume: item.volume,
+        id: item.id,
+        productCode: item.productCode,
+      })
+      setNotification("Fout: Product kan niet worden toegevoegd (ontbrekende product ID)")
+      return
+    }
+
+    console.log(`🛒 Adding item to cart: "${item.name}" with arcleunik: ${arcleunik}`)
+
     setCart((prevCart) => {
       const existingItem = prevCart.find((cartItem) => cartItem.id === item.id)
 
       if (existingItem) {
+        // Send notification for existing item
+        setNotification(`Artikel "${item.name}" aantal verhoogd!`)
         return prevCart.map((cartItem) =>
           cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem,
         )
       }
 
-      // For new items, we'll add them immediately and categorize asynchronously
-      const newItem = { ...item, quantity: 1 }
+      // For new items, ensure arcleunik is properly set
+      const newItem = {
+        ...item,
+        quantity: 1,
+        arcleunik: arcleunik, // Ensure arcleunik is set from our validation above
+      }
+
+      // Send notification for new item
+      setNotification(`Artikel "${item.name}" succesvol toegevoegd!`)
 
       // Perform live categorization asynchronously
       const performLiveCategorization = async () => {
         try {
-          const actualArcleunik = item.arcleunik || item.volume
-
           console.log(`🛒 Adding to cart with live categorization: "${item.name}"`)
           console.log(`   ID: ${item.id}`)
           console.log(`   GUID: ${item.guid || "N/A"}`)
           console.log(`   Volume (arcleunik): ${item.volume}`)
+          console.log(`   Final arcleunik: ${arcleunik}`)
           console.log(`   Existing fam2id: ${item.fam2id}`)
 
           // Use live categorization
           const result = await categorizeProduct(
             item.name,
             item.volume,
-            actualArcleunik,
+            arcleunik, // Use our validated arcleunik
             item.fam2id,
             item.guid, // Pass GUID for live API lookup
           )
@@ -183,23 +245,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               cartItem.id === item.id
                 ? {
                     ...cartItem,
-                    arcleunik: actualArcleunik,
+                    arcleunik: arcleunik, // Ensure arcleunik is maintained
                     fam2id: result.fam2id,
                     category: result.categoryName,
-                    matchType: result.matchType as "api_exact" | "id_match" | "api_error" | "fallback" | "existing" | "exact" | "partial",
+                    matchType: result.matchType as
+                      | "api_exact"
+                      | "id_match"
+                      | "api_error"
+                      | "fallback"
+                      | "existing"
+                      | "exact"
+                      | "partial",
                   }
                 : cartItem,
             ),
           )
         } catch (error) {
           console.error("Error in live categorization:", error)
-          // Fallback: update with basic info
+          // Fallback: update with basic info but maintain arcleunik
           setCart((currentCart) =>
             currentCart.map((cartItem) =>
               cartItem.id === item.id
                 ? {
                     ...cartItem,
-                    arcleunik: item.arcleunik || item.volume,
+                    arcleunik: arcleunik, // Ensure arcleunik is maintained even on error
                     category: "NON-FOOD",
                     matchType: "api_error" as const,
                   }
@@ -246,15 +315,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const getCartTotal = () => {
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
-    const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const totalPriceExclVAT = totalPrice / 1.21
+    return cart.reduce(
+      (total, item) => {
+        total.totalItems += item.quantity
+        total.totalPrice += item.price * item.quantity
 
-    return {
-      totalItems,
-      totalPrice,
-      totalPriceExclVAT,
-    }
+        // Calculate price excluding VAT for this item
+        const priceExclVAT = calculatePriceExclVAT(item.price, item.tauxTvaArticleEcommerce)
+        total.totalPriceExclVAT += priceExclVAT * item.quantity
+
+        return total
+      },
+      { totalItems: 0, totalPrice: 0, totalPriceExclVAT: 0 },
+    )
   }
 
   return (
@@ -267,9 +340,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         isInCart,
         getCartTotal,
+        notification,
+        setNotification,
+        calculatePriceExclVAT,
       }}
     >
       {children}
+      {/* Place notification component outside {children} so it's visible everywhere */}
+      <CartNotification />
     </CartContext.Provider>
   )
 }

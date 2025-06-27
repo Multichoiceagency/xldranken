@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "../../auth/[...nextauth]/route"
-import { cleanTestData } from "@/lib/api"
+import { cleanTestData } from "@/lib/api_gisteren"
 export const dynamic = "force-dynamic";
 
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { getCustomerOrderDetails } from "@/lib/api"
+import { getCustomerOrderDetails } from "@/lib/api_gisteren"
 
 export async function GET(request: Request, { params }: { params: { guid: string } }) {
   try {

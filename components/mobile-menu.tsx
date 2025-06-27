@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { X, ChevronDown, ChevronRight, Search, Loader2 } from "lucide-react"
-import { menuItemsList, searchProducts } from "@/lib/api"
+import { menuItemsList, searchProducts } from "@/lib/api_gisteren"
 import type { ProductProps } from "@/types/product"
 import ProductCard from "@/components/product-card"
 

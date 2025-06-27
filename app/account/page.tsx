@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth/next"
 import { redirect } from "next/navigation"
 import { authOptions } from "../api/auth/[...nextauth]/route"
 import AccountDetails from "./account-details"
-import { getCustomerById } from "@/lib/api"
+import { getCustomerById } from "@/lib/api_gisteren"
 
 export default async function AccountPage() {
   const session = await getServerSession(authOptions)

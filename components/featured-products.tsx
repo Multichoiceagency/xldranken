@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { FeaturedProductsCarousel } from "@/components/featured-products-carousel"
-import { getProductsByFam2ID } from "@/lib/api"
+import { getProductsByFam2ID } from "@/lib/api_gisteren"
 import type { ProductProps } from "@/types/product"
 
 export function FeaturedProducts({ fam2ID = "" }: { fam2ID?: string }) {

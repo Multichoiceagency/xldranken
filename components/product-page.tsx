@@ -144,7 +144,7 @@ export function ProductPage({ productId }: ProductPageProps) {
               </Button>
               <Button
                 variant="outline"
-                className="w-full border-[#C6B07F] text-[#C6B07F] hover:bg-[#C6B07F] hover:text-[#0F3059]"
+                className="w-full border-[#C6B07F] text-[#C6B07F] hover:bg-[#C6B07F] hover:text-[#0F3059] bg-transparent"
                 onClick={() => router.back()}
               >
                 Vorige pagina
@@ -166,6 +166,21 @@ export function ProductPage({ productId }: ProductPageProps) {
   const currentPrice = prixPromo ?? prixVente
 
   const handleAddToCart = () => {
+    // Ensure we have arcleunik - this is critical for the API
+    const arcleunik = product.arcleunik || product.volume || product.id_product_mysql || product.productCode
+
+    if (!arcleunik) {
+      console.error("Product missing arcleunik:", product)
+      toast({
+        title: "Fout",
+        description: "Product kan niet worden toegevoegd (ontbrekende product ID)",
+        variant: "destructive",
+      })
+      return
+    }
+
+    console.log(`🛒 Adding product to cart: "${product.title}" with arcleunik: ${arcleunik}`)
+
     if (inCartInfo) {
       // Update quantity if already in cart
       updateQuantity(productId, quantity)
@@ -182,8 +197,9 @@ export function ProductPage({ productId }: ProductPageProps) {
         image: imageSrc,
         volume: product.volume || "",
         productCode: product.productCode || "",
-        arcleunik: product.arcleunik || "",
+        arcleunik: arcleunik, // Use our validated arcleunik
         fam2id: product.fam2id,
+        tauxTvaArticleEcommerce: product.tauxTvaArticleEcommerce || "21", // Default to 21% if not available
       })
 
       // Update quantity if more than 1
@@ -294,14 +310,14 @@ export function ProductPage({ productId }: ProductPageProps) {
             <div className="flex gap-3">
               <Button
                 variant="outline"
-                className="flex-1 border-[#C6B07F]/30 text-[#C6B07F] hover:bg-[#C6B07F] hover:text-[#0F3059] transition-all duration-300"
+                className="flex-1 border-[#C6B07F]/30 text-[#C6B07F] hover:bg-[#C6B07F] hover:text-[#0F3059] transition-all duration-300 bg-transparent"
               >
                 <Heart className="w-4 h-4 mr-2" />
                 Favoriet
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 border-[#C6B07F]/30 text-[#C6B07F] hover:bg-[#C6B07F] hover:text-[#0F3059] transition-all duration-300"
+                className="flex-1 border-[#C6B07F]/30 text-[#C6B07F] hover:bg-[#C6B07F] hover:text-[#0F3059] transition-all duration-300 bg-transparent"
               >
                 <Share2 className="w-4 h-4 mr-2" />
                 Delen
@@ -369,7 +385,7 @@ export function ProductPage({ productId }: ProductPageProps) {
                       </Button>
                       <Button
                         variant="outline"
-                        className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                        className="border-blue-300 text-blue-600 hover:bg-blue-50 bg-transparent"
                         onClick={() => router.push("/zakelijk")}
                       >
                         Account aanmaken
@@ -541,6 +557,12 @@ export function ProductPage({ productId }: ProductPageProps) {
                       <div className="flex justify-between py-3 border-b border-gray-100">
                         <span className="text-gray-600">Volume</span>
                         <span className="font-semibold text-[#0F3059]">{product.volume}</span>
+                      </div>
+                    )}
+                    {product.arcleunik && (
+                      <div className="flex justify-between py-3 border-b border-gray-100">
+                        <span className="text-gray-600">Arcleunik</span>
+                        <span className="font-semibold text-[#0F3059]">{product.arcleunik}</span>
                       </div>
                     )}
                   </div>

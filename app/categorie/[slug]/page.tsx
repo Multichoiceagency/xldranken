@@ -1,4 +1,4 @@
-import { menuItemsList, getProductsByFam2ID, getProductsCount } from "@/lib/api"
+import { menuItemsList, getProductsByFam2ID, getProductsCount } from "@/lib/api_gisteren"
 import ProductsGridClient from "@/components/product-grid-client"
 import Hero from "@/components/Hero"
 

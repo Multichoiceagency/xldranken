@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useCart } from "@/lib/cart-context"
 import { useAuthContext } from "@/context/AuthContext"
 import {
   Clock,
@@ -28,7 +27,8 @@ import Image from "next/image"
 import { Textarea } from "@/components/ui/textarea"
 import { useRouter } from "next/navigation"
 import { FaIdeal } from "react-icons/fa"
-import { processOrderAndSendConfirmation } from "@/actions/order-actions"
+import { handleOrders } from "@/lib/api"
+import { useCart } from "@/lib/cart-context"
 
 const getDeliveryDates = () => {
   const dates = []
@@ -110,43 +110,104 @@ export default function UpdatedCheckoutPage({ customerData }: any) {
             `${customerData?.address || ""}, ${customerData?.zipcode || ""} ${customerData?.city || ""}`.trim()
           : "XL Groothandel B.V., Turfschipper 116, 2292 JB Wateringen"
 
-      // Prepare order data
+      // Prepare order data for Megawin API - simplified without VAT calculations
       const orderData = {
-        cart,
-        customerData,
-        deliveryOption,
-        deliveryDate: `${selectedDate.day} ${selectedDate.date}`,
+        items: cart.map((item) => {
+          // Ensure arcleunik is available - this is critical for the API
+          const arcleunik = item.arcleunik || item.volume || item.id || item.productCode
+
+          if (!arcleunik) {
+            console.error("🔍 CHECKOUT DEBUG: Item missing arcleunik:", item)
+          }
+
+          console.log(`🔍 CHECKOUT DEBUG: Item "${item.name}" - arcleunik: ${arcleunik}`)
+
+          return {
+            ...item,
+            // Ensure arcleunik is included and not empty - this is critical for the API
+            arcleunik: arcleunik,
+            // Use the existing price as-is
+            priceExclVAT: item.price, // Use the cart price directly
+            vatRate: item.tauxTvaArticleEcommerce ? Number.parseFloat(item.tauxTvaArticleEcommerce) : 21,
+            totalExclVAT: item.price * item.quantity,
+          }
+        }),
+        totalItems,
+        subtotalExclVAT: totalPriceExclVAT, // Use the existing calculated value
+        totalVatAmount: totalPrice - totalPriceExclVAT, // Simple difference
+        shippingCost: 0, // No shipping costs
+        totalExclVAT: totalPriceExclVAT,
+        totalInclVAT: totalPrice,
+        deliveryOption: deliveryOption === "delivery" ? "1" : "2", // 1 = delivery, 2 = pickup
+        deliveryDate: `${selectedDate.fullDate.getFullYear()}-${String(selectedDate.fullDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.fullDate.getDate()).padStart(2, "0")}`,
         deliveryAddress: address,
-        deliveryInstructions: deliveryComment,
+        deliveryComment: deliveryComment || "",
       }
 
-      // Process order and send confirmation email
-      const result = await processOrderAndSendConfirmation(orderData)
+      // Add more detailed validation to ensure all items have arcleunik before proceeding
+      const itemsWithoutArcleunik = orderData.items.filter((item) => !item.arcleunik)
+      if (itemsWithoutArcleunik.length > 0) {
+        console.error("🔍 CHECKOUT DEBUG: Items missing arcleunik:", itemsWithoutArcleunik)
+        setOrderStatus({
+          success: false,
+          message: `Fout: ${itemsWithoutArcleunik.length} product(en) missen vereiste productinformatie (arcleunik). Probeer de producten opnieuw toe te voegen aan uw winkelwagen.`,
+        })
+        setIsSubmitting(false)
+        return
+      }
+
+      // Log all items with their arcleunik values for debugging
+      console.log(
+        "🔍 CHECKOUT DEBUG: All items with arcleunik:",
+        orderData.items.map((item) => ({
+          name: item.name,
+          arcleunik: item.arcleunik,
+          id: item.id,
+          volume: item.volume,
+        })),
+      )
+
+      // Prepare customer data
+      const customerDataForOrder = {
+        clcleunik: customerData?.clcleunik || "",
+        firstName: customerData?.firstName || "",
+        lastName: customerData?.lastName || "",
+        email: customerData?.email || "",
+      }
+
+      console.log("🔍 CHECKOUT DEBUG: Placing order with data:", {
+        orderData,
+        customerDataForOrder,
+      })
+
+      // Call the handleOrders function from api.ts
+      const result = await handleOrders(orderData, customerDataForOrder)
+
+      console.log("🔍 CHECKOUT DEBUG: Order result:", result)
 
       if (result.success) {
         // Set success status
         setOrderStatus({
           success: true,
-          message: "Bestelling succesvol geplaatst en bevestiging verzonden!",
+          message: "Bestelling succesvol geplaatst!",
           orderNumber: result.orderNumber,
-          emailSent: result.emailSent,
         })
 
         // Clear the cart after successful order
         clearCart()
 
         // Redirect to thank you page with order details
-        router.push(
-          `/checkout/complete?orderNumber=${result.orderNumber}&total=${result.total}&emailSent=${result.emailSent}`,
-        )
+        setTimeout(() => {
+          router.push(`/thank-you?orderNumber=${result.orderNumber}&total=${total.toFixed(2)}`)
+        }, 2000)
       } else {
         setOrderStatus({
           success: false,
-          message: result.error || "Er is een fout opgetreden bij het plaatsen van de bestelling.",
+          message: result.message || "Er is een fout opgetreden bij het plaatsen van de bestelling.",
         })
       }
     } catch (error) {
-      console.error("Error placing order:", error)
+      console.error("🔍 CHECKOUT DEBUG: Error placing order:", error)
       setOrderStatus({
         success: false,
         message: error instanceof Error ? error.message : "Er is een onverwachte fout opgetreden.",

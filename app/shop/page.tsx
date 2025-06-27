@@ -1,4 +1,4 @@
-import { getProductsByFam2ID } from "@/lib/api"
+import { getProductsByFam2ID } from "@/lib/api_gisteren"
 import type { ProductProps } from "@/types/product"
 import { Suspense } from "react"
 import { Spinner } from "@/components/ui/spinner"

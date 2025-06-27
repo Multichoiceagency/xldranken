@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { handleOrders } from "@/lib/api"
+import { handleOrders } from "@/lib/api_gisteren"
 import type { CartItem } from "@/lib/cart-context"
 import type { OrderConfirmationData } from "@/lib/email-service"
 import { categorizeProduct, getCategoryName } from "@/lib/product-categorizer"
